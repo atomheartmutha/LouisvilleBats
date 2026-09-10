@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Road to the Bats — Louisville Bats Ballpark Game</title>
+  <meta name="description" content="Official Louisville Bats Ballpark browser video game for kids and families. Play batting derby, solve math power-ups, customize your jersey, and chat with Buddy Bat!">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚾</text></svg>">
+</head>
+<body>
+  <!-- Header Bar -->
+  <header class="top-nav">
+    <div class="brand-cluster">
+      <div class="bats-logo-emblem">🦇</div>
+      <div class="brand-titles">
+        <h1 class="main-title">ROAD TO THE BATS</h1>
+        <p class="subtitle">Louisville Bats • Ballpark to Browser</p>
+      </div>
+    </div>
+    <div class="nav-controls">
+      <div class="age-selector-container">
+        <label for="age-select">League Level:</label>
+        <select id="age-select" class="nav-select">
+          <option value="6-8" selected>T-Ball (Ages 5-8)</option>
+          <option value="9-11">Minor League (Ages 9-11)</option>
+          <option value="12-14">Triple-A Pros (Ages 12+)</option>
+        </select>
+      </div>
+      <div class="score-display">
+        <span class="score-label">POINTS:</span>
+        <span id="player-score" class="score-value">0</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="game-tabs">
+    <button class="tab-btn active" data-tab="batting-tab">⚾ Batting Derby</button>
+    <button class="tab-btn" data-tab="locker-tab">👕 Locker Room</button>
+    <button class="tab-btn" data-tab="dugout-tab">🦇 Buddy Bat's Dugout</button>
+    <button class="tab-btn" data-tab="stadium-tab">📱 Ballpark QR & Info</button>
+  </nav>
+
+  <!-- Main Game Container -->
+  <main class="game-viewport">
+    
+    <!-- TAB 1: BATTING DERBY -->
+    <section id="batting-tab" class="tab-content active">
+      <div class="field-container">
+        <!-- Canvas for Baseball Gameplay -->
+        <canvas id="ballpark-canvas" width="800" height="480"></canvas>
+        
+        <!-- Live Play-by-Play & Announcer Banner -->
+        <div class="announcer-box" id="announcer-call">
+          <span class="mic-icon">🎙️</span>
+          <span id="announcer-text">Welcome to Louisville Slugger Field! Step into the batter's box and time your swing!</span>
+        </div>
+
+        <!-- On-Field Controls for Desktop & Mobile -->
+        <div class="game-action-bar">
+          <button id="pitch-btn" class="action-btn primary-btn">⚾ Throw Pitch</button>
+          <button id="swing-btn" class="action-btn swing-btn" disabled>💥 SWING! (Tap/Space)</button>
+          <button id="powerup-btn" class="action-btn powerup-btn">⚡ Math Power-Up (3x Power!)</button>
+        </div>
+
+        <!-- Ballpark Game Stats Strip -->
+        <div class="ballpark-stats-bar">
+          <div class="stat-pill">
+            <span class="stat-name">OUTS:</span>
+            <span id="outs-count" class="stat-val">0 / 3</span>
+          </div>
+          <div class="stat-pill">
+            <span class="stat-name">HITS:</span>
+            <span id="hits-count" class="stat-val">0</span>
+          </div>
+          <div class="stat-pill">
+            <span class="stat-name">HOME RUNS:</span>
+            <span id="hr-count" class="stat-val">0</span>
+          </div>
+          <div class="stat-pill highlight">
+            <span class="stat-name">LONGEST DRIVE:</span>
+            <span id="longest-distance" class="stat-val">0 ft</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: LOCKER ROOM (CUSTOM UNIFORM & ROOKIE CARD) -->
+    <section id="locker-tab" class="tab-content">
+      <div class="locker-layout">
+        <div class="customizer-card">
+          <h2>⚾ Design Your Bats Uniform</h2>
+          <p class="section-desc">Suit up for the Louisville Bats! Customize your jersey, number, and cap to generate your official Rookie Baseball Card.</p>
+          
+          <form id="uniform-form" onsubmit="return false;">
+            <div class="form-row">
+              <label for="player-name-input">Player Name:</label>
+              <input type="text" id="player-name-input" value="Derby Kid" maxlength="15" class="text-input">
+            </div>
+
+            <div class="form-row">
+              <label for="player-number-input">Jersey Number:</label>
+              <input type="number" id="player-number-input" value="24" min="0" max="99" class="text-input num-input">
+            </div>
+
+            <div class="form-row">
+              <label>Jersey Theme:</label>
+              <div class="color-options">
+                <button type="button" class="color-swatch active" data-theme="red" style="background: #BA0C2F;">Bats Red</button>
+                <button type="button" class="color-swatch" data-theme="navy" style="background: #0C2340;">Midnight Navy</button>
+                <button type="button" class="color-swatch" data-theme="white" style="background: #FFFFFF; color: #0C2340; border: 2px solid #BA0C2F;">Home White</button>
+                <button type="button" class="color-swatch" data-theme="gold" style="background: #FFC72C; color: #0C2340;">Slugger Gold</button>
+              </div>
+            </div>
+
+            <button id="generate-card-btn" class="action-btn primary-btn">✨ Generate Gemini Scouting Card</button>
+          </form>
+        </div>
+
+        <!-- Rookie Baseball Card Preview -->
+        <div class="card-preview-container">
+          <div class="rookie-card" id="rookie-card">
+            <div class="card-header">
+              <span class="card-team">LOUISVILLE BATS</span>
+              <span class="card-league">TRIPLE-A REDS AFFILIATE</span>
+            </div>
+            <div class="card-avatar-zone" id="card-avatar-bg">
+              <div class="jersey-preview" id="jersey-display">
+                <div class="jersey-cap">🧢</div>
+                <div class="jersey-torso">
+                  <span id="card-jersey-num">24</span>
+                </div>
+              </div>
+            </div>
+            <div class="card-details">
+              <h3 id="card-player-name">DERBY KID</h3>
+              <p class="card-pos">Position: Power Hitter • Team: Bats</p>
+              <div class="card-scouting-box">
+                <div class="ai-badge">🤖 GEMINI SCOUTING REPORT</div>
+                <p id="card-scouting-text">Scout Report: Exceptional natural bat whip and plate discipline. High potential slugger ready to light up the radar gun at Louisville Slugger Field!</p>
+              </div>
+            </div>
+            <div class="card-footer">
+              <span>BALLPARK TO BROWSER 2026</span>
+              <span>HACKKENTUCKY</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: BUDDY BAT'S DUGOUT & TRIVIA -->
+    <section id="dugout-tab" class="tab-content">
+      <div class="dugout-layout">
+        <div class="mascot-profile-card">
+          <div class="mascot-avatar">🦇</div>
+          <h2>Buddy Bat</h2>
+          <p class="mascot-tagline">Official Louisville Bats Mascot & Head Coach</p>
+          <div class="mascot-speech-bubble" id="mascot-bubble">
+            "Hey batter! Welcome to my dugout! Click below for a quick coaching tip or ask me to test your baseball knowledge!"
+          </div>
+          <button id="coach-tip-btn" class="action-btn secondary-btn">💡 Ask Buddy for a Tip</button>
+        </div>
+
+        <div class="trivia-station">
+          <h2>🧠 Ballpark Trivia Challenge</h2>
+          <p class="section-desc">Answer questions to earn bonus points and level up your Bats ranking!</p>
+          <div id="trivia-card" class="trivia-card">
+            <div class="trivia-question" id="trivia-q">What is the home ballpark of the Louisville Bats?</div>
+            <div class="trivia-options" id="trivia-opts">
+              <button class="trivia-opt-btn" onclick="checkTrivia(0)">Louisville Slugger Field</button>
+              <button class="trivia-opt-btn" onclick="checkTrivia(1)">Churchill Downs</button>
+              <button class="trivia-opt-btn" onclick="checkTrivia(2)">KFC Yum! Center</button>
+              <button class="trivia-opt-btn" onclick="checkTrivia(3)">Great American Ball Park</button>
+            </div>
+            <div class="trivia-feedback" id="trivia-feedback"></div>
+          </div>
+          <button id="next-trivia-btn" class="action-btn primary-btn" style="margin-top: 15px;">Next Trivia Question ⚾</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: STADIUM QR & INFO -->
+    <section id="stadium-tab" class="tab-content">
+      <div class="stadium-info-layout">
+        <div class="qr-station-card">
+          <h2>📱 In-Stadium QR Code Play</h2>
+          <p>Fans at Louisville Slugger Field can scan this QR code directly from game programs, concourse banners, or outfield signs to play instantly in their browser with zero app installation!</p>
+          
+          <div class="qr-code-box">
+            <!-- Dynamic Canvas QR code rendering -->
+            <canvas id="qr-canvas" width="200" height="200"></canvas>
+            <p class="qr-caption">Scan with any mobile camera at Louisville Slugger Field!</p>
+            <p class="live-url-display">URL: <strong>http://localhost:3000</strong></p>
+          </div>
+        </div>
+
+        <div class="challenge-info-card">
+          <h2>🏆 Challenge & Sponsorship Highlights</h2>
+          <div class="info-block">
+            <h3>Louisville Bats: Bring the Ballpark to the Browser</h3>
+            <p><strong>Goal:</strong> Replace declining printed activity books with a fun, modern browser video game that attracts kids and families to batsbaseball.com and provides in-stadium entertainment.</p>
+            <p><strong>Reward:</strong> 10 tickets to a Bats game on September 13 + 5 Bats swag bags.</p>
+          </div>
+
+          <div class="info-block">
+            <h3>🤖 Google Gemini API Integration</h3>
+            <p>Powered by Gemini 1.5 Flash to deliver instant kid-friendly mascot coaching dialogue, dynamic baseball math problems, exciting play-by-play commentary, and AI rookie scouting reports.</p>
+          </div>
+
+          <div class="info-block">
+            <h3>☁️ Vultr High-Performance Cloud</h3>
+            <p>Packaged in a high-efficiency Docker container ready for 1-click deployment on Vultr Cloud Compute for rock-solid reliability during high-traffic game day QR scan spikes.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MATH POWER-UP MODAL -->
+  <div id="math-modal" class="modal-backdrop hidden">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <span class="powerup-badge">⚡ POWER-UP YOUR SWING!</span>
+        <button id="close-modal-btn" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-instruction">Solve this baseball math problem to charge up a <strong>SUPER SLUGGER</strong> 3x power hit!</p>
+        <h3 id="math-question-text" class="math-question">Buddy Bat caught 3 baseballs in the 1st inning and 4 in the 2nd. How many total?</h3>
+        <div id="math-options-container" class="math-options-grid"></div>
+        <div id="math-feedback" class="math-feedback"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="game-footer">
+    <p>© 2026 Louisville Bats Baseball Club • HackKentucky Challenge • Built with Google Gemini & Vultr Cloud</p>
+  </footer>
+
+  <script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{
+  "name": "road-to-the-bats",
+  "version": "1.0.0",
+  "description": "An interactive Louisville Bats ballpark web video game for kids, built for HackKentucky 2026. Features baseball batting gameplay, math power-ups, jersey customizer, Gemini AI mascot coaching, and Vultr cloud hosting.",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test"
+  },
+  "keywords": [
+    "louisville-bats",
+    "baseball",
+    "kids-game",
+    "gemini-api",
+    "vultr",
+    "mlh-hackathon",
+    "hackkentucky"
+  ],
+  "author": "Violet Olds",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@google/genai": "^0.1.1",
+    "dotenv": "^16.4.5"
+  }
+}
