@@ -1,85 +1,124 @@
 # ⚾ Concept Spec: Road to the Bats — Baseball Math Blaster
 
-> **Inspiration:** Classic 90s/2000s edutainment (*Math Blaster*, The Learning Company’s *Zoombinis*, *Treasure Mountain*, *Super Solvers*).  
-> **Mission for Louisville Bats:** Modernize youth fan engagement, replacing declining printed activity books with an addictive, high-energy ballpark math challenge.
+> **Inspiration:** 90s/2000s edutainment classics (*Math Blaster*, The Learning Company's *Zoombinis*, *Treasure Mountain*, *Super Solvers*).  
+> **Challenge Sponsor:** Carter Davis, Louisville Bats ("Bring the ballpark to the browser").  
+> **Mission:** Replace declining printed activity books with an arcade baseball video game where solving math challenges teaches baseball statistics across real-world education standards.
 
 ---
 
-## 1. Core Game Loop
+## 1. The 6-Tier Progression Hierarchy
 
-- **Arcade Momentum:** Fast-paced, responsive, rewarding gameplay. Math problems aren't a chore; they are the power-ups, pitching selections, and lineup management tools.
-- **Immediate Sensory Feedback:** High-contrast retro/modern ballpark visuals, crowd cheers, crack of the bat, Buddy Bat mascot animations, and celebratory badges.
-- **Progression:** Players start in the instructional leagues and advance up the ladder toward Louisville Slugger Field and the Show!
+The game follows a continuous career progression from first swinging a bat to managing an MLB front office analytics department:
+
+```
+[Pre-K]           1. T-Ball League         → Counting, shapes, basic number recognition
+[Lower Elem]      2. Rec League            → Addition, subtraction, early place value (KAS K–2)
+[Middle School]   3. Travel Ball           → Fractions, decimals, ratios, batting average, ERA (KAS 6–8)
+[High School]     4. Varsity               → Algebra, geometry, OBP, SLG, OPS, linear models (KAS 9–12)
+[College]         5. MLB / The Show        → Probability, statistics, calculus, Pythagorean win %, wOBA, FIP
+[Post-Secondary]  6. Front Office          → Sabermetric theory, discrete Markov chains, run expectancy matrices
+```
 
 ---
 
-## 2. Level Progression & Math Standards Mapping
+## 2. Level-by-Level Curriculum & Baseball Stats Mapping
 
-Each tier corresponds to a baseball level and aligns with the **Kentucky Academic Standards (KAS) for Mathematics**, culminating in advanced collegiate/post-secondary sabermetrics:
-
-### Level 1: T-Ball League (Introductory / Ages 5–8)
-* **Baseball Context:** Counting innings, runs scored, strikes, and balls.
-* **KAS Alignment:**
-  - `KY.K.CC` & `KY.K.OA`: Counting, cardinality, and basic addition/subtraction within 10.
-  - `KY.1.OA` & `KY.2.OA`: Addition and subtraction within 20 and 100.
+### Tier 1: T-Ball (Pre-K / Ages 3–5)
+* **Education Stage:** Early Childhood / Pre-K Foundations
+* **Math Focus:** Number recognition (1–10), counting physical items, identifying basic shapes (diamond, circle, home plate pentagon), greater than/less than with visual objects.
+* **Baseball Concepts:** Counting strikes, counting balls, innings, identifying bases.
 * **Sample Problems:**
-  - *"Buddy Bat caught 4 fly balls in the 2nd inning and 3 in the 5th inning. How many total catches?"* ($4 + 3 = 7$)
-  - *"The Bats scored 6 runs, and the opposing team scored 4 runs. By how many runs are the Bats leading?"* ($6 - 4 = 2$)
-  - *"There are 3 outs in an inning. If 2 outs have been recorded, how many outs remain?"* ($3 - 2 = 1$)
+  - *"Count the baseballs in Buddy Bat's bucket: ⚾ ⚾ ⚾ ⚾ (Answer: 4)"*
+  - *"Which team has MORE runs? Bats: 5 | Opponents: 3"*
+  - *"What shape is home plate? (Circle, Triangle, Pentagon)"*
 
 ---
 
-### Level 2: Travel Team (Intermediate / Ages 9–11)
-* **Baseball Context:** Understanding basic statistics, box scores, and averages.
-* **KAS Alignment:**
-  - `KY.3.OA` & `KY.4.OA`: Multi-digit multiplication and division.
-  - `KY.4.NF` & `KY.5.NF`: Understanding fractions as division and converting fractions to decimals.
+### Tier 2: Rec League (Lower Elementary / Grades K–2 / Ages 5–8)
+* **Kentucky Academic Standards Alignment:**
+  - `KY.K.OA`: Understand addition as putting together and subtraction as taking apart.
+  - `KY.1.OA` & `KY.1.NBT`: Operations within 20; place value concepts.
+  - `KY.2.OA` & `KY.2.NBT`: Addition and subtraction within 100; word problems with lengths and time.
+* **Baseball Concepts:** Runs scored per inning, run differentials (leads/deficits), tracking team outs, total hits in a series.
 * **Sample Problems:**
-  - **Batting Average (AVG):** *"A Louisville batter had 10 at-bats and got 3 hits. What is their batting average as a decimal?"* ($3 \div 10 = .300$)
-  - **Total Bases (TB):** *"A player hit 2 singles, 1 double, and 1 home run. Total bases = $(2 \times 1) + (1 \times 2) + (1 \times 4)$."* ($2 + 2 + 4 = 8$)
-  - **Fielding Percentage:** *"A shortstop had 20 fielding chances and made 19 successful plays (1 error). What fraction of plays were made?"* ($19/20 = .950$)
+  - *"The Louisville Bats scored 4 runs in the 1st inning and 3 runs in the 4th inning. How many runs did they score in total?"* ($4 + 3 = 7$)
+  - *"There are 3 outs in an inning. The Bats defense has made 1 out. How many more outs do they need to retire the side?"* ($3 - 1 = 2$)
+  - *"The Bats had 15 hits on Friday and 12 hits on Saturday. How many total hits?"* ($15 + 12 = 27$)
 
 ---
 
-### Level 3: Louisville Bats / Minor Leagues (Advanced / Ages 12–14)
-* **Baseball Context:** Professional Triple-A statistics, player evaluation, and run production.
-* **KAS Alignment:**
-  - `KY.6.RP` & `KY.7.RP`: Ratios, rates, percentages, and proportional reasoning.
-  - `KY.8.EE` & `KY.8.SP`: Linear equations, scatter plots, bivariate data, and rates of change.
+### Tier 3: Travel Ball (Middle School / Grades 6–8 / Ages 11–14)
+* **Kentucky Academic Standards Alignment:**
+  - `KY.6.RP` & `KY.7.RP`: Ratio and proportional relationships, unit rates, percentages.
+  - `KY.7.NS` & `KY.8.NS`: Rational numbers, fraction-to-decimal conversions rounded to thousandths.
+  - `KY.8.EE`: Linear equations and proportional relationships.
+* **Baseball Concepts:** Batting Average (AVG), Slugging Basics, Earned Run Average (ERA), Strikeout-to-Walk Ratio ($K/\text{BB}$).
 * **Sample Problems:**
+  - **Batting Average (AVG):** $\text{AVG} = \frac{\text{Hits}}{\text{At-Bats}}$.  
+    *"A Louisville Bats hitter has 9 hits in 30 at-bats. Calculate their batting average as a 3-decimal number."* ($9 \div 30 = .300$)
   - **Earned Run Average (ERA):** $\text{ERA} = \frac{\text{Earned Runs} \times 9}{\text{Innings Pitched}}$.  
-    *"If a Bats pitcher allows 6 earned runs over 18 innings, what is their ERA?"* ($\frac{6 \times 9}{18} = 3.00$)
-  - **On-Base Percentage (OBP) & Slugging (SLG) $\rightarrow$ OPS:**  
-    *"If Elly De La Cruz has an OBP of .360 and a Slugging Percentage of .520, calculate his OPS."* ($.360 + .520 = .880$)
-  - **Strikeout-to-Walk Ratio (K/BB):** *"Pitcher strikes out 84 batters and walks 21. What is the ratio in simplest form?"* ($4:1$)
+    *"A pitcher allows 4 earned runs over 12 innings. What is their ERA?"* ($\frac{4 \times 9}{12} = 3.00$)
+  - **Stolen Base Success Rate:** *"A runner attempted 25 stolen bases and was safe 20 times. What percentage of stolen bases were successful?"* ($\frac{20}{25} = 80\%$)
 
 ---
 
-### Level 4: The Show / MLB (Post-Secondary & Sabermetrics)
-* **Baseball Context:** Modern front-office analytics, probabilistic modeling, and advanced metrics.
-* **Post-Secondary / Collegiate Math Topics:** Calculus, Linear Algebra, Probability & Statistics, Non-linear regression.
+### Tier 4: Varsity (High School / Grades 9–12 / Ages 14–18)
+* **Kentucky Academic Standards Alignment:**
+  - `KY.HS.A-CED` & `KY.HS.A-REI`: Creating equations, reasoning with inequalities, systems of equations.
+  - `KY.HS.F-IF`: Interpreting functions, rates of change, graphing quadratic trajectory.
+  - `KY.HS.S-ID` & `KY.HS.S-IC`: Summarizing bivariate data, correlation vs. causation, normal distributions.
+* **Baseball Concepts:** On-Base Percentage (OBP), Slugging Percentage (SLG), On-Base Plus Slugging (OPS), Launch Angle & Exit Velocity (projectile motion / quadratic kinematics).
 * **Sample Problems:**
-  - **Bill James' Pythagorean Expectation:**
-    $$\text{Expected Win \%} = \frac{\text{Runs Scored}^{1.83}}{\text{Runs Scored}^{1.83} + \text{Runs Allowed}^{1.83}}$$
-    *"Calculate the expected winning percentage of a team that scores 750 runs and allows 680 runs."*
-  - **wOBA (Weighted On-Base Average):**
+  - **On-Base Percentage (OBP):**  
+    $$\text{OBP} = \frac{\text{H} + \text{BB} + \text{HBP}}{\text{AB} + \text{BB} + \text{HBP} + \text{SF}}$$
+    *"Given: 45 Hits, 15 Walks, 2 Hit-by-Pitch, 140 At-Bats, 3 Sacrifice Flies. Calculate OBP."* ($\frac{62}{160} = .3875 \rightarrow .388$)
+  - **Slugging Percentage (SLG):**  
+    $$\text{SLG} = \frac{1\text{B} + (2 \times 2\text{B}) + (3 \times 3\text{B}) + (4 \times \text{HR})}{\text{AB}}$$
+  - **Quadratic Trajectory & Exit Velocity:** *"A baseball hit with exit velocity $v_0 = 105\text{ mph}$ ($154\text{ ft/s}$) at launch angle $28^\circ$. Using $y(t) = y_0 + v_{0y}t - 16t^2$, will it clear the 10-foot outfield wall at 400 feet?"*
+
+---
+
+### Tier 5: MLB / The Show (College Level / Undergraduate Math)
+* **Undergraduate Mathematics:** Differential & Integral Calculus, Multivariable Statistics, Linear Regression, Non-Linear Parameter Estimation.
+* **Baseball Concepts:** Bill James' Pythagorean Expectation, wOBA (Weighted On-Base Average) linear weights, FIP (Fielding Independent Pitching), Park Factor adjustments.
+* **Sample Problems:**
+  - **Pythagorean Win Expectation (Non-linear exponent estimation):**  
+    $$\text{Win \%} = \frac{\text{Runs Scored}^\gamma}{\text{Runs Scored}^\gamma + \text{Runs Allowed}^\gamma} \quad (\gamma \approx 1.83)$$
+    *"Derive the sensitivity $\frac{d(\text{Win \%})}{d(\text{RS})}$ to estimate the marginal value of 1 additional run scored."*
+  - **wOBA (Empirical Linear Weights Derivation):**  
     $$\text{wOBA} = \frac{0.69 \cdot \text{uBB} + 0.72 \cdot \text{HBP} + 0.89 \cdot 1\text{B} + 1.27 \cdot 2\text{B} + 1.62 \cdot 3\text{B} + 2.10 \cdot \text{HR}}{\text{AB} + \text{BB} - \text{IBB} + \text{SF} + \text{HBP}}$$
-    *"Explain why linear weights assign more than double the run value to a home run compared to a walk."*
-  - **Fielding Independent Pitching (FIP):**
-    $$\text{FIP} = \frac{(13 \times \text{HR}) + (3 \times (\text{BB} + \text{HBP})) - (2 \times \text{K})}{\text{IP}} + C$$
-  - **Run Expectancy (24 Base-Out States):** Discrete Markov chain transitions between inning states $(0, 1, 2 \text{ outs} \times 8 \text{ base configurations})$.
+  - **Fielding Independent Pitching (FIP):**  
+    $$\text{FIP} = \frac{(13 \times \text{HR}) + (3 \times (\text{BB} + \text{HBP})) - (2 \times \text{K})}{\text{IP}} + C_{\text{FIP}}$$
 
 ---
 
-## 3. How Gemini API Integrates
-
-- **Curriculum-Grounded Question Generation:** Rather than static hardcoded questions, Gemini can generate infinite variations for any grade level on demand, ensuring players never see the same problem twice.
-- **Buddy Bat Socratic Tutor:** When a player gets stuck or answers incorrectly, Buddy Bat breaks down the problem step-by-step using baseball analogies rather than just giving the answer.
-- **Dynamic Post-Secondary Scenarios:** Generates front-office scouting puzzles (e.g. *"Evaluate these three Triple-A prospects using their wRC+ and FIP; who should the Bats promote to Cincinnati?"*).
+### Tier 6: Front Office (Advanced Stats, Math & Sabermetric Theory)
+* **Post-Secondary / Graduate Topics:** Stochastic Processes, Discrete Markov Chains, Matrix Algebra, Bayesian Inference, Machine Learning Expectation-Maximization.
+* **Sabermetric Theory Concepts:** 24 Base-Out State Run Expectancy Matrix (RE24), Win Probability Added (WPA), WAR (Wins Above Replacement) structural decomposition, Leverage Index ($LI$).
+* **Sample Problems:**
+  - **Discrete Markov Transition Matrices for Inning States:**  
+    Model the transition probability matrix $P$ across the 24 discrete states (runners on base $\times$ outs: $\{0, 1, 2\} \times \{\emptyset, 1\text{B}, 2\text{B}, 3\text{B}, 12, 13, 23, 123\}$ plus absorbing state 3 outs) and compute the expected runs to end of inning from any state $s$:
+    $$R(s) = \sum_{s'} P(s, s') [r(s, s') + R(s')]$$
+  - **Bayesian Player Projection (Marcel / PECOTA style):**  
+    Update prior batting distribution $Beta(\alpha, \beta)$ with observed minor league plate appearances using shrinkage estimation toward league mean:
+    $$\hat{\theta} = \frac{\text{Hits} + \alpha_0}{\text{AB} + \alpha_0 + \beta_0}$$
+  - **Win Probability Added (WPA):** Evaluate the change in game win expectancy $\Delta WE = WE_{t+1} - WE_t$ for high-leverage bullpen relief appearances.
 
 ---
 
-## 4. How Vultr Cloud Integrates
+## 3. Gemini API Integration Architecture
 
-- **High-Throughput In-Stadium Access:** During 7th-inning stretches or rain delays at Louisville Slugger Field, thousands of kids and parents may scan the QR code concurrently. Hosting containerized on Vultr Cloud Compute guarantees low-latency response times.
-- **Automated Deploy Pipeline:** Ready to push with `./scripts/deploy-vultr.sh`.
+- **Tier-Specific Dynamic Generation:**  
+  When requesting a challenge, the frontend sends `{ tier: 1..6 }`. The backend constructs a system prompt mapped strictly to that educational level (from preschool counting objects to collegiate stochastic modeling).
+- **Buddy Bat Socratic Tutor:**  
+  Buddy Bat adjusts his tone and vocabulary automatically:
+  - *Tier 1–2:* Friendly, enthusiastic, high-fives, emojis, visual counting cues.
+  - *Tier 3–4:* Coach-style advice, practical real-game baseball arithmetic tips.
+  - *Tier 5–6:* Analytical, data-driven front-office assistant reviewing statistical rigor and assumptions.
+
+---
+
+## 4. Vultr Cloud Deployment Architecture
+
+- Low-latency delivery of the web application and API proxy on Vultr Cloud Compute.
+- High-concurrency readiness for stadium QR code scans during game-day events at Louisville Slugger Field.
