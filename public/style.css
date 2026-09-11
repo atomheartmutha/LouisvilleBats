@@ -2,10 +2,12 @@
   --bats-red: #BA0C2F;
   --bats-navy: #0C2340;
   --bats-gold: #FFC72C;
-  --bg-dark: #0A192F;
-  --card-bg: #112240;
-  --text-main: #CCD6F6;
-  --text-muted: #8892B0;
+  --sandlot-dirt: #DDA15E;
+  --grass-green: #2D6A4F;
+  --bg-dark: #071324;
+  --card-bg: #0F213A;
+  --text-main: #E2E8F0;
+  --text-muted: #94A3B8;
 }
 
 * {
@@ -25,7 +27,7 @@ body {
 
 .header {
   background: var(--bats-navy);
-  border-bottom: 3px solid var(--bats-red);
+  border-bottom: 4px solid var(--bats-red);
   padding: 16px 24px;
   display: flex;
   align-items: center;
@@ -37,16 +39,17 @@ body {
   background: var(--bats-red);
   border: 2px solid var(--bats-gold);
   border-radius: 50%;
-  width: 50px;
-  height: 50px;
+  width: 52px;
+  height: 52px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .header h1 {
-  font-size: 1.3rem;
+  font-size: 1.4rem;
   color: #FFFFFF;
+  font-weight: 800;
 }
 
 .tagline {
@@ -55,7 +58,7 @@ body {
 }
 
 .container {
-  max-width: 800px;
+  max-width: 900px;
   width: 100%;
   margin: 24px auto;
   padding: 0 16px;
@@ -66,30 +69,36 @@ body {
 
 .card {
   background: var(--card-bg);
-  border: 1px solid #233554;
-  border-radius: 12px;
+  border: 1px solid #1E3A5F;
+  border-radius: 14px;
   padding: 24px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
 }
 
 .card h2 {
-  color: #FFFFFF;
-  font-size: 1.2rem;
-  margin-bottom: 16px;
-  border-bottom: 1px solid #233554;
+  color: var(--bats-gold);
+  font-size: 1.25rem;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #1E3A5F;
   padding-bottom: 8px;
+}
+
+.desc {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+  margin-bottom: 16px;
 }
 
 .status-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 12px;
-  margin-bottom: 20px;
 }
 
 .status-item {
-  background: #0A192F;
-  border: 1px solid #233554;
+  background: #081729;
+  border: 1px solid #1E3A5F;
   padding: 12px;
   border-radius: 8px;
   display: flex;
@@ -98,12 +107,12 @@ body {
 }
 
 .status-item .label {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
 }
 
 .badge {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 700;
   padding: 4px 8px;
   border-radius: 6px;
@@ -127,25 +136,89 @@ body {
   color: #F87171;
 }
 
-.test-api-box {
-  background: #0A192F;
-  border: 1px solid #233554;
-  border-radius: 8px;
-  padding: 16px;
+/* Backyard Baseball Character Grid */
+.roster-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
 }
 
-.test-api-box h3 {
-  font-size: 1rem;
+.backyard-card {
+  background: #081729;
+  border: 2px solid var(--bats-gold);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.card-cap {
+  font-size: 1.1rem;
+  font-weight: 800;
   color: var(--bats-gold);
   margin-bottom: 4px;
 }
 
-.test-api-box p {
-  font-size: 0.85rem;
+.player-name {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #FFFFFF;
+}
+
+.pos-badge {
+  font-size: 0.75rem;
   color: var(--text-muted);
   margin-bottom: 12px;
 }
 
+.skill-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.skill-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.bar-container {
+  flex: 1;
+  height: 8px;
+  background: #1E293B;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  background: var(--bats-red);
+  border-radius: 4px;
+}
+
+.bar-fill.run { background: #38BDF8; }
+.bar-fill.pitch { background: #F59E0B; }
+.bar-fill.field { background: #10B981; }
+
+.raw-stat-pill {
+  font-size: 0.7rem;
+  color: #CBD5E1;
+  background: #1E293B;
+  padding: 6px 8px;
+  border-radius: 6px;
+  text-align: center;
+  margin-top: auto;
+}
+
+/* Inputs & Buttons */
 .input-group {
   display: flex;
   gap: 8px;
@@ -153,12 +226,12 @@ body {
 
 .input {
   flex: 1;
-  background: #112240;
-  border: 1px solid #233554;
+  background: #081729;
+  border: 1px solid #1E3A5F;
   border-radius: 6px;
-  padding: 8px 12px;
+  padding: 10px 14px;
   color: #FFFFFF;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
 }
 
 .btn {
@@ -166,10 +239,15 @@ body {
   color: #FFFFFF;
   border: none;
   border-radius: 6px;
-  padding: 8px 16px;
-  font-size: 0.9rem;
+  padding: 10px 18px;
+  font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn:hover {
+  background: #D9143B;
 }
 
 .btn:disabled {
@@ -178,24 +256,20 @@ body {
 }
 
 .result-box {
-  margin-top: 12px;
-  padding: 10px 14px;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  line-height: 1.4;
-  background: #112240;
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  background: #081729;
 }
 
 .result-box.success {
-  border-left: 3px solid #4ADE80;
-}
-
-.result-box.warning {
-  border-left: 3px solid #FBBF24;
+  border-left: 4px solid #4ADE80;
 }
 
 .result-box.error {
-  border-left: 3px solid #F87171;
+  border-left: 4px solid #F87171;
 }
 
 .resource-list {
@@ -213,16 +287,4 @@ body {
 
 .resource-list a:hover {
   text-decoration: underline;
-}
-
-.placeholder-card {
-  border: 2px dashed #233554;
-  text-align: center;
-  padding: 32px 20px;
-}
-
-.placeholder-card .hint {
-  color: var(--bats-gold);
-  font-size: 0.85rem;
-  margin-top: 8px;
 }

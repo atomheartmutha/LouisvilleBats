@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Louisville Bats Challenge — Development Environment</title>
+  <title>Louisville Bats: Backyard Baseball Edition — Dev Environment</title>
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚾</text></svg>">
 </head>
@@ -11,18 +11,23 @@
   <header class="header">
     <div class="logo">🦇</div>
     <div>
-      <h1>Louisville Bats Challenge: Environment Ready</h1>
-      <p class="tagline">Ballpark to the Browser • HackKentucky Fall 2026</p>
+      <h1>Louisville Bats: Backyard Baseball Edition</h1>
+      <p class="tagline">Ballpark to the Browser • Powered by MLB Stats API & Google Gemini</p>
     </div>
   </header>
 
   <main class="container">
+    <!-- Status Card -->
     <section class="card">
-      <h2>🛠️ Environment & System Status</h2>
+      <h2>🛠️ System & API Integration Status</h2>
       <div class="status-grid">
         <div class="status-item">
           <span class="label">Local Server:</span>
           <span id="server-status" class="badge ready">Ready (Port 3000)</span>
+        </div>
+        <div class="status-item">
+          <span class="label">MLB Stats API (sportId=11):</span>
+          <span id="mlb-status" class="badge ready">Connected (/api/bats/*)</span>
         </div>
         <div class="status-item">
           <span class="label">Google Gemini API:</span>
@@ -30,36 +35,45 @@
         </div>
         <div class="status-item">
           <span class="label">Vultr Cloud Deploy:</span>
-          <span id="vultr-status" class="badge ready">Dockerfile & Scripts Ready</span>
+          <span id="vultr-status" class="badge ready">Docker Ready</span>
         </div>
-      </div>
-
-      <div class="test-api-box">
-        <h3>Test Gemini API Connection</h3>
-        <p>Send a quick test prompt to verify your <code>GEMINI_API_KEY</code>.</p>
-        <div class="input-group">
-          <input type="text" id="test-prompt" value="Give a 1-sentence baseball greeting from Buddy Bat, mascot of the Louisville Bats!" class="input">
-          <button id="test-btn" class="btn">Send Test Prompt</button>
-        </div>
-        <div id="test-result" class="result-box hidden"></div>
       </div>
     </section>
 
+    <!-- Backyard Baseball Roster Generator from MLB Stats API -->
     <section class="card">
-      <h2>📋 Challenge Details & Resources</h2>
-      <ul class="resource-list">
-        <li><strong>Sponsor Challenge:</strong> Louisville Bats ("Bring the ballpark to the browser")</li>
-        <li><strong>Sponsor Contact:</strong> Carter Davis, Louisville Bats</li>
-        <li><strong>Reward:</strong> 10 tickets to a Bats game on September 13 + 5 Bats swag bags</li>
-        <li><strong>Partner Track 1:</strong> <a href="https://www.mlh.com/partners/gemini?utm_source=mlh&utm_medium=referral&utm_content=Best+Use+of+Gemini+API" target="_blank">Best Use of Gemini API</a> (See <code>gemini-setup-guide.md</code>)</li>
-        <li><strong>Partner Track 2:</strong> <a href="https://www.mlh.com/partners/vultr?utm_source=mlh&utm_medium=referral&utm_content=Best+Use+of+Vultr" target="_blank">Best Use of Vultr</a> (See <code>vultr-deploy-guide.md</code>)</li>
-      </ul>
+      <h2>🧢 Backyard Baseball Roster Generator (Real Bats Stats)</h2>
+      <p class="desc">Transforms live Triple-A stats from <code>statsapi.mlb.com/api/v1/schedule/games/?sportId=11</code> into <em>Backyard Baseball</em> kid ratings (1–10 scale) and uses Gemini to generate nostalgic kid personas!</p>
+      
+      <div class="action-row">
+        <button id="load-roster-btn" class="btn">⚾ Load Bats Characters</button>
+      </div>
+
+      <div id="roster-grid" class="roster-grid">
+        <!-- Dynamic Player Cards Loaded Here -->
+      </div>
     </section>
 
-    <section class="card placeholder-card">
-      <h2>⚾ Ready for Game Development</h2>
-      <p>Your environment, API helpers, and cloud deployment pipeline are configured and waiting for your game concept.</p>
-      <p class="hint">When you are ready to build, start developing in <code>public/</code> and <code>server.js</code>!</p>
+    <!-- Gemini Test Connection -->
+    <section class="card">
+      <h2>🤖 Test Gemini Backyard Persona Generator</h2>
+      <p class="desc">Generate a custom Backyard Baseball kid profile and superpower for any player:</p>
+      <div class="input-group">
+        <input type="text" id="test-player-name" value="Buddy Bat" placeholder="Player Name" class="input">
+        <button id="generate-persona-btn" class="btn">✨ Generate Backyard Persona</button>
+      </div>
+      <div id="persona-result" class="result-box hidden"></div>
+    </section>
+
+    <!-- Architecture & Links -->
+    <section class="card">
+      <h2>📋 Project Resources & Docs</h2>
+      <ul class="resource-list">
+        <li><strong>MLB Stats API Endpoint:</strong> <a href="https://statsapi.mlb.com/api/v1/schedule/games/?sportId=11" target="_blank">statsapi.mlb.com/api/v1/schedule/games/?sportId=11</a> (Triple-A)</li>
+        <li><strong>Concept & Curriculum Spec:</strong> <code>CONCEPT_SPEC.md</code> (7-tier progression from T-Ball to Front Office)</li>
+        <li><strong>Sponsor Challenge:</strong> Carter Davis, Louisville Bats ("Bring the ballpark to the browser")</li>
+        <li><strong>Partner Tracks:</strong> <a href="https://www.mlh.com/partners/gemini" target="_blank">Best Use of Gemini API</a> &bull; <a href="https://www.mlh.com/partners/vultr" target="_blank">Best Use of Vultr</a></li>
+      </ul>
     </section>
   </main>
 
