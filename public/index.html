@@ -2,80 +2,278 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Louisville Bats: Backyard Baseball Edition — Dev Environment</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Batyard Slugger — Louisville Bats Ballpark Video Game</title>
+  <meta name="description" content="Batyard Slugger: A 90s Backyard Baseball inspired game for the Louisville Bats. Features Pre-K Coloring Book, 3-5th Grade Math/Science Batting Derby, and Post-Secondary Sabermetrics.">
   <link rel="stylesheet" href="style.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚾</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦇</text></svg>">
 </head>
 <body>
-  <header class="header">
-    <div class="logo">🦇</div>
-    <div>
-      <h1>Louisville Bats: Backyard Baseball Edition</h1>
-      <p class="tagline">Ballpark to the Browser • Powered by MLB Stats API & Google Gemini</p>
+  <!-- Backyard Style Top Header -->
+  <header class="sandlot-header">
+    <div class="header-content">
+      <div class="mascot-badge">
+        <span class="bat-icon">🦇</span>
+      </div>
+      <div class="title-group">
+        <h1 class="game-title">BATYARD SLUGGER</h1>
+        <p class="tagline">Ballpark to the Browser &bull; Louisville Bats &bull; Triple-A Cincinnati Reds</p>
+      </div>
+    </div>
+    <div class="header-status">
+      <div class="score-wood-box">
+        <span class="wood-label">JUICE BOX POINTS:</span>
+        <span id="global-points" class="wood-val">0</span>
+      </div>
     </div>
   </header>
 
-  <main class="container">
-    <!-- Status Card -->
-    <section class="card">
-      <h2>🛠️ System & API Integration Status</h2>
-      <div class="status-grid">
-        <div class="status-item">
-          <span class="label">Local Server:</span>
-          <span id="server-status" class="badge ready">Ready (Port 3000)</span>
+  <!-- Level Navigation Bar (Wooden Planks Style) -->
+  <nav class="plank-nav">
+    <button class="plank-btn active" data-tab="tab-prek">
+      <span class="plank-icon">🎨</span>
+      <span class="plank-text">Level 1: Pre-K Coloring Dugout</span>
+    </button>
+    <button class="plank-btn" data-tab="tab-elem">
+      <span class="plank-icon">⚾</span>
+      <span class="plank-text">Level 2: 3rd–5th Grade Batyard Derby</span>
+    </button>
+    <button class="plank-btn" data-tab="tab-postsec">
+      <span class="plank-icon">📊</span>
+      <span class="plank-text">Level 3: Post-Secondary Sabermetrics</span>
+    </button>
+    <button class="plank-btn" data-tab="tab-roster">
+      <span class="plank-icon">🧢</span>
+      <span class="plank-text">Bats Kid Roster (MLB API)</span>
+    </button>
+  </nav>
+
+  <main class="main-viewport">
+
+    <!-- ============================================================ -->
+    <!-- LEVEL 1: PRE-K COLORING DUGOUT (ELC, SHAPES, COUNTING, BATS) -->
+    <!-- ============================================================ -->
+    <section id="tab-prek" class="level-section active">
+      <div class="level-intro-card">
+        <h2>🎨 Buddy Bat's Pre-K Coloring Dugout</h2>
+        <p class="subtext">Designed for early learners (Pre-K & Kindergarten). Modernizing printed activity books with digital coloring and Kentucky Early Childhood Standards (counting, shapes, and bat biology)!</p>
+      </div>
+
+      <div class="coloring-workspace">
+        <!-- Coloring Tools Sidebar -->
+        <div class="coloring-toolbox">
+          <h3>🖍️ Pick a Color</h3>
+          <div class="crayon-palette">
+            <button class="crayon-btn active" data-color="#BA0C2F" style="background: #BA0C2F;" title="Bats Red"></button>
+            <button class="crayon-btn" data-color="#0C2340" style="background: #0C2340;" title="Midnight Navy"></button>
+            <button class="crayon-btn" data-color="#FFC72C" style="background: #FFC72C;" title="Slugger Gold"></button>
+            <button class="crayon-btn" data-color="#2D6A4F" style="background: #2D6A4F;" title="Grass Green"></button>
+            <button class="crayon-btn" data-color="#2563EB" style="background: #2563EB;" title="Ohio River Blue"></button>
+            <button class="crayon-btn" data-color="#DDA15E" style="background: #DDA15E;" title="Sandlot Clay"></button>
+            <button class="crayon-btn" data-color="#000000" style="background: #000000;" title="Black"></button>
+            <button class="crayon-btn eraser" data-color="#FFFFFF" style="background: #FFFFFF; border: 2px dashed #BA0C2F;" title="Eraser">🧽</button>
+          </div>
+
+          <h3>📏 Brush Size</h3>
+          <div class="brush-sizes">
+            <button class="size-btn" data-size="4">Small</button>
+            <button class="size-btn active" data-size="10">Medium</button>
+            <button class="size-btn" data-size="22">Thick</button>
+          </div>
+
+          <h3>📄 Choose Template</h3>
+          <div class="template-picker">
+            <button class="tmpl-btn active" data-tmpl="buddy">🦇 Buddy Bat</button>
+            <button class="tmpl-btn" data-tmpl="diamond">⚾ Ballpark Diamond</button>
+            <button class="tmpl-btn" data-tmpl="cap">🧢 Bats Cap & Ball</button>
+          </div>
+
+          <div class="tool-actions">
+            <button id="clear-canvas-btn" class="tool-btn secondary">🗑️ Reset Page</button>
+            <button id="download-art-btn" class="tool-btn primary">💾 Save My Art</button>
+          </div>
         </div>
-        <div class="status-item">
-          <span class="label">MLB Stats API (sportId=11):</span>
-          <span id="mlb-status" class="badge ready">Connected (/api/bats/*)</span>
+
+        <!-- Main Interactive Coloring Canvas -->
+        <div class="canvas-panel">
+          <canvas id="coloring-canvas" width="600" height="460"></canvas>
+          <p class="canvas-hint">Touch, tap, or drag your mouse to color Buddy Bat!</p>
         </div>
-        <div class="status-item">
-          <span class="label">Google Gemini API:</span>
-          <span id="gemini-status" class="badge">Checking...</span>
+      </div>
+
+      <!-- Pre-K ELC Quiz Station -->
+      <div class="quiz-card-container">
+        <div class="quiz-header-banner">
+          <span class="quiz-badge">⭐ EARLY LEARNER QUIZ</span>
+          <span class="quiz-standard" id="prek-standard">KY Early Childhood Standards</span>
         </div>
-        <div class="status-item">
-          <span class="label">Vultr Cloud Deploy:</span>
-          <span id="vultr-status" class="badge ready">Docker Ready</span>
+        <h3 id="prek-question-text" class="quiz-prompt">Count Buddy Bat's baseballs: ⚾ ⚾ ⚾ ⚾. How many are there?</h3>
+        <div id="prek-options-grid" class="quiz-options-grid"></div>
+        <div id="prek-feedback" class="quiz-feedback hidden"></div>
+        <button id="next-prek-q" class="quiz-next-btn">Next Fun Question 🌟</button>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- LEVEL 2: 3RD–5TH GRADE BATYARD DERBY (KAS MATH & SCIENCE)     -->
+    <!-- ============================================================ -->
+    <section id="tab-elem" class="level-section">
+      <div class="level-intro-card">
+        <h2>⚾ 3rd–5th Grade Batyard Derby</h2>
+        <p class="subtext">Step up to the plate at the sandlot! Solve Kentucky 3rd–5th grade math (batting average decimals, fractions, total bases) and science (contact forces, gravity, energy transfer) to power up a 3x home run over the Ohio River!</p>
+      </div>
+
+      <div class="game-arcade-layout">
+        <!-- Canvas Baseball Arena -->
+        <div class="arcade-viewport">
+          <canvas id="derby-canvas" width="700" height="420"></canvas>
+          
+          <div class="announcer-call-box">
+            <span class="announcer-icon">🎙️</span>
+            <span id="derby-announcer">Step into the batter's box! Answer the Kentucky Math & Science challenge to unlock your 3X Super Slugger power!</span>
+          </div>
+
+          <div class="arcade-controls">
+            <button id="derby-pitch-btn" class="arcade-btn pitch">⚾ Throw Pitch</button>
+            <button id="derby-swing-btn" class="arcade-btn swing" disabled>💥 SWING! (Tap/Space)</button>
+            <button id="derby-power-btn" class="arcade-btn power">⚡ Math & Science Power-Up</button>
+          </div>
+
+          <div class="scoreboard-strip">
+            <div class="strip-item"><span>OUTS:</span> <strong id="derby-outs">0 / 3</strong></div>
+            <div class="strip-item"><span>HITS:</span> <strong id="derby-hits">0</strong></div>
+            <div class="strip-item"><span>HOME RUNS:</span> <strong id="derby-hr">0</strong></div>
+            <div class="strip-item gold"><span>LONGEST BLAST:</span> <strong id="derby-dist">0 FT</strong></div>
+          </div>
+        </div>
+
+        <!-- Grade 3-5 Quiz & Stats Educational Station -->
+        <div class="elem-edu-sidebar">
+          <div class="edu-card">
+            <div class="edu-header">
+              <span class="edu-tag">KENTUCKY ACADEMIC STANDARDS</span>
+              <span class="edu-grade">Grades 3–5</span>
+            </div>
+            <h3 id="elem-q-text" class="edu-question">A Louisville Bats hitter gets 3 hits in 10 at-bats (3/10). What is their batting average expressed as a three-place decimal?</h3>
+            <div id="elem-opts-container" class="edu-options-list"></div>
+            <div id="elem-feedback" class="edu-feedback hidden"></div>
+            <button id="next-elem-q" class="edu-next-btn">Next Math/Science Challenge ⚾</button>
+          </div>
+
+          <!-- Did You Know Bats Science Box -->
+          <div class="bats-fact-box">
+            <h4>🦇 Bats Ballpark Science & History</h4>
+            <p id="dynamic-fact-text">Did you know? Louisville Slugger bats are made from northern white ash and maple. When the bat strikes an 85 mph ball, the collision lasts only 1/1000th of a second, exerting thousands of pounds of force!</p>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- Backyard Baseball Roster Generator from MLB Stats API -->
-    <section class="card">
-      <h2>🧢 Backyard Baseball Roster Generator (Real Bats Stats)</h2>
-      <p class="desc">Transforms live Triple-A stats from <code>statsapi.mlb.com/api/v1/schedule/games/?sportId=11</code> into <em>Backyard Baseball</em> kid ratings (1–10 scale) and uses Gemini to generate nostalgic kid personas!</p>
-      
-      <div class="action-row">
-        <button id="load-roster-btn" class="btn">⚾ Load Bats Characters</button>
+    <!-- ============================================================ -->
+    <!-- LEVEL 3: POST-SECONDARY SABERMETRICS & FRONT OFFICE WAR ROOM -->
+    <!-- ============================================================ -->
+    <section id="tab-postsec" class="level-section">
+      <div class="level-intro-card">
+        <h2>📊 Post-Secondary Front Office Sabermetrics</h2>
+        <p class="subtext">Undergraduate and graduate level analytics: Pythagorean win expectations, linear-weight run values (wOBA), Defense-Independent Pitching (FIP), and 24-state Markov Chain run expectancy models.</p>
       </div>
 
-      <div id="roster-grid" class="roster-grid">
-        <!-- Dynamic Player Cards Loaded Here -->
+      <div class="sabermetric-dashboard">
+        <!-- Sabermetric Interactive Calculators -->
+        <div class="saber-calc-column">
+          <div class="calculator-card">
+            <h3>📈 1. Bill James Pythagorean Win Expectation</h3>
+            <p class="calc-desc">Models a team's true-talent winning percentage using non-linear run differentials ($\gamma = 1.83$).</p>
+            <div class="calc-inputs-grid">
+              <div class="calc-field">
+                <label>Runs Scored (RS):</label>
+                <input type="number" id="pyth-rs" value="680" class="num-box">
+              </div>
+              <div class="calc-field">
+                <label>Runs Allowed (RA):</label>
+                <input type="number" id="pyth-ra" value="610" class="num-box">
+              </div>
+            </div>
+            <button id="calc-pyth-btn" class="calc-btn">Calculate Win Expectancy</button>
+            <div id="pyth-result" class="calc-output">Expected Win%: <strong>.548 (89 Wins / 162 G)</strong></div>
+          </div>
+
+          <div class="calculator-card">
+            <h3>⚡ 2. Weighted On-Base Average (wOBA)</h3>
+            <p class="calc-desc">Calculates linear weights for offensive event run expectancies instead of arbitrary slugging weights.</p>
+            <div class="calc-inputs-grid four-col">
+              <div class="calc-field"><label>1B (×0.89):</label><input type="number" id="woba-1b" value="95" class="num-box"></div>
+              <div class="calc-field"><label>2B (×1.27):</label><input type="number" id="woba-2b" value="28" class="num-box"></div>
+              <div class="calc-field"><label>3B (×1.62):</label><input type="number" id="woba-3b" value="4" class="num-box"></div>
+              <div class="calc-field"><label>HR (×2.10):</label><input type="number" id="woba-hr" value="22" class="num-box"></div>
+              <div class="calc-field"><label>BB (×0.69):</label><input type="number" id="woba-bb" value="55" class="num-box"></div>
+              <div class="calc-field"><label>AB:</label><input type="number" id="woba-ab" value="480" class="num-box"></div>
+            </div>
+            <button id="calc-woba-btn" class="calc-btn">Compute wOBA</button>
+            <div id="woba-result" class="calc-output">Calculated wOBA: <strong>.362 (All-Star Tier)</strong></div>
+          </div>
+        </div>
+
+        <!-- Collegiate Question & Scenario Solver -->
+        <div class="saber-quiz-column">
+          <div class="calculator-card">
+            <div class="edu-header">
+              <span class="edu-tag">COLLEGIATE SABERMETRICS</span>
+              <span class="edu-grade">Post-Secondary</span>
+            </div>
+            <h3 id="postsec-q-text" class="edu-question">Bill James' Pythagorean Expectation formula models a team's true talent win percentage. Using the empirical exponent γ = 1.83, what is the formula?</h3>
+            <div id="postsec-opts-container" class="edu-options-list"></div>
+            <div id="postsec-feedback" class="edu-feedback hidden"></div>
+            <button id="next-postsec-q" class="edu-next-btn">Next Front Office Scenario 📊</button>
+          </div>
+
+          <!-- RE24 Markov State Explorer -->
+          <div class="calculator-card">
+            <h3>⚾ 24 Base-Out State Run Expectancy Matrix (RE24)</h3>
+            <p class="calc-desc">Explore expected runs to end of inning based on historical Markov transition probabilities:</p>
+            <div class="re24-interactive">
+              <select id="re24-outs" class="saber-select">
+                <option value="0">0 Outs</option>
+                <option value="1" selected>1 Out</option>
+                <option value="2">2 Outs</option>
+              </select>
+              <select id="re24-bases" class="saber-select">
+                <option value="empty">Bases Empty</option>
+                <option value="first">Runner on 1st</option>
+                <option value="scoring">Runners on 2nd & 3rd</option>
+                <option value="loaded" selected>Bases Loaded</option>
+              </select>
+              <div id="re24-output" class="re24-badge">Expected Runs to End of Inning: <strong>1.54 Runs</strong></div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- Gemini Test Connection -->
-    <section class="card">
-      <h2>🤖 Test Gemini Backyard Persona Generator</h2>
-      <p class="desc">Generate a custom Backyard Baseball kid profile and superpower for any player:</p>
-      <div class="input-group">
-        <input type="text" id="test-player-name" value="Buddy Bat" placeholder="Player Name" class="input">
-        <button id="generate-persona-btn" class="btn">✨ Generate Backyard Persona</button>
+    <!-- ============================================================ -->
+    <!-- TAB 4: BATS KID ROSTER (MLB STATS API)                        -->
+    <!-- ============================================================ -->
+    <section id="tab-roster" class="level-section">
+      <div class="level-intro-card">
+        <h2>🧢 Louisville Bats Backyard Roster</h2>
+        <p class="subtext">Directly sourced from the MLB Stats API (<a href="https://statsapi.mlb.com/api/v1/schedule/games/?sportId=11" target="_blank">sportId=11</a>). Real Triple-A players translated into 1–10 Backyard Baseball kid ratings with Gemini-generated sandlot personas!</p>
       </div>
-      <div id="persona-result" class="result-box hidden"></div>
+
+      <div class="roster-toolbar">
+        <button id="refresh-roster-btn" class="tool-btn primary">🔄 Refresh MLB Stats API Data</button>
+      </div>
+
+      <div id="batyard-roster-grid" class="roster-grid-layout">
+        <!-- Loaded dynamically from /api/bats/characters -->
+      </div>
     </section>
 
-    <!-- Architecture & Links -->
-    <section class="card">
-      <h2>📋 Project Resources & Docs</h2>
-      <ul class="resource-list">
-        <li><strong>MLB Stats API Endpoint:</strong> <a href="https://statsapi.mlb.com/api/v1/schedule/games/?sportId=11" target="_blank">statsapi.mlb.com/api/v1/schedule/games/?sportId=11</a> (Triple-A)</li>
-        <li><strong>Concept & Curriculum Spec:</strong> <code>CONCEPT_SPEC.md</code> (7-tier progression from T-Ball to Front Office)</li>
-        <li><strong>Sponsor Challenge:</strong> Carter Davis, Louisville Bats ("Bring the ballpark to the browser")</li>
-        <li><strong>Partner Tracks:</strong> <a href="https://www.mlh.com/partners/gemini" target="_blank">Best Use of Gemini API</a> &bull; <a href="https://www.mlh.com/partners/vultr" target="_blank">Best Use of Vultr</a></li>
-      </ul>
-    </section>
   </main>
+
+  <footer class="sandlot-footer">
+    <p>⚾ <strong>Batyard Slugger</strong> &bull; Louisville Bats Ballpark Video Game &bull; Built for HackKentucky 2026</p>
+    <p>Powered by Google Gemini 1.5 Flash, Vultr Cloud Compute, and the MLB Stats API &bull; Sourced for Carter Davis, Louisville Bats</p>
+  </footer>
 
   <script src="app.js"></script>
 </body>
