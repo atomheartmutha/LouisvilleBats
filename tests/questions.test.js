@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { baseballMathFacts, localFacts, validateQuestion, createFallbackQuestion, getAdaptiveQuestion, questionFacts } from '../src/questions.js';
+import { baseballMathFacts, localFacts, validateQuestion, createFallbackQuestion, overflowMathQuestion, resolveAdaptiveTier, getAdaptiveQuestion, questionFacts } from '../src/questions.js';
 import { getBatsCharacters } from '../src/mlbApi.js';
 
 test('rejects invalid answer keys, duplicate choices and school jargon', () => {
@@ -24,6 +24,22 @@ test('every fallback question points at its factual answer', () => {
     const question = createFallbackQuestion(fact);
     assert.equal(question.factId, fact.id);
     assert.equal(question.options[question.ans], fact.answer, fact.q);
+  }
+});
+
+test('grade bands anchor adaptive difficulty and overflow questions stay age-appropriate', () => {
+  assert.equal(resolveAdaptiveTier({ currentTier: 1, gradeTier: 1, streak: 1, lastResult: true }), 1);
+  assert.equal(resolveAdaptiveTier({ currentTier: 1, gradeTier: 1, streak: 2, lastResult: true }), 2);
+  assert.equal(resolveAdaptiveTier({ currentTier: 5, gradeTier: 1 }), 2);
+  assert.equal(resolveAdaptiveTier({ currentTier: 1, gradeTier: 5 }), 4);
+  assert.equal(resolveAdaptiveTier({ currentTier: 3, gradeTier: 3, lastResult: false }), 2);
+
+  const expectedTopics = [/Buddy has/, /players each carry/, /batting average/, /What is the OPS/, /expected runs/];
+  for (let tier = 1; tier <= 5; tier++) {
+    const question = overflowMathQuestion(tier, 7);
+    assert.match(question.q, expectedTopics[tier - 1]);
+    assert.equal(question.options[question.ans], question.options[0]);
+    assert.equal(new Set(question.options).size, 4);
   }
 });
 

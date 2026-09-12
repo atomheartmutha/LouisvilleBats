@@ -69,6 +69,18 @@
             <span>⚡ Solve a challenge. Power up your bat.</span>
           </div>
 
+          <section class="grade-band-picker" aria-labelledby="grade-band-heading">
+            <p class="grade-band-heading" id="grade-band-heading">CHOOSE YOUR AGE / GRADE</p>
+            <div class="grade-band-grid" role="group" aria-label="School grade question level">
+              <button type="button" class="grade-band-btn" data-grade-band="prek-k" data-tier="1" aria-pressed="false"><strong>Pre-K–K</strong><small>Ages 4–6 · Count & shapes</small></button>
+              <button type="button" class="grade-band-btn" data-grade-band="grades-1-2" data-tier="2" aria-pressed="false"><strong>Grades 1–2</strong><small>Ages 6–8 · Add & subtract</small></button>
+              <button type="button" class="grade-band-btn active" data-grade-band="grades-3-5" data-tier="3" aria-pressed="true"><strong>Grades 3–5</strong><small>Ages 8–11 · Baseball math</small></button>
+              <button type="button" class="grade-band-btn" data-grade-band="grades-6-8" data-tier="4" aria-pressed="false"><strong>Grades 6–8</strong><small>Ages 11–14 · Rates & stats</small></button>
+              <button type="button" class="grade-band-btn" data-grade-band="grades-9-plus" data-tier="5" aria-pressed="false"><strong>Grades 9+</strong><small>Ages 14+ · Sabermetrics</small></button>
+            </div>
+            <p class="grade-band-help" id="grade-band-help">Fractions, decimals, batting averages, and total bases.</p>
+          </section>
+
           <div class="start-prompt-box">
             <button id="start-game-btn" class="arcade-start-btn">
               PLAY BALL <span aria-hidden="true">↗</span>
@@ -203,7 +215,7 @@
           <div class="chalkboard-header">
             <div class="jcps-cat-meter">
               <span class="cat-pill">⚾ ANSWER TO EARN YOUR SWING</span>
-              <span class="tier-indicator" id="cat-tier-badge">SLUGGER</span>
+              <span class="tier-indicator" id="cat-tier-badge">GRADES 3–5</span>
               <span class="streak-indicator" id="cat-streak-badge">🔥 STREAK: 0</span>
             </div>
             <button id="close-timeout-btn" class="chalkboard-close-btn" title="Back to title">✕ TITLE</button>

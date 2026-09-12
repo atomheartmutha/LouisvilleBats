@@ -7,6 +7,16 @@ document.addEventListener('DOMContentLoaded', () => {
   let globalPoints = parseInt(localStorage.getItem('batyard_points') || '0', 10);
   let soundEnabled = localStorage.getItem('batyard_sound') !== 'false';
   let activeScreen = 'screen-title';
+  const gradeStorageKey = 'batyard_grade_band';
+  const gradeBands = {
+    'prek-k': { tier: 1, label: 'PRE-K–K', help: 'Counting, shapes, and adding within 10.' },
+    'grades-1-2': { tier: 2, label: 'GRADES 1–2', help: 'Addition, subtraction, and early multiplication.' },
+    'grades-3-5': { tier: 3, label: 'GRADES 3–5', help: 'Fractions, decimals, batting averages, and total bases.' },
+    'grades-6-8': { tier: 4, label: 'GRADES 6–8', help: 'Rates, percentages, ERA, and OPS.' },
+    'grades-9-plus': { tier: 5, label: 'GRADES 9+', help: 'Multi-step sabermetrics and run expectancy.' }
+  };
+  let selectedGradeBand = localStorage.getItem(gradeStorageKey) || 'grades-3-5';
+  if (!gradeBands[selectedGradeBand]) selectedGradeBand = 'grades-3-5';
 
   const gamePointsEl = document.getElementById('game-points');
   const rankIconEl = document.getElementById('rank-icon');
@@ -371,7 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ============================================================
   // 3. JCPS-STYLE COMPUTER-ADAPTIVE TESTING (CAT) ENGINE
   // ============================================================
-  let catTier = 3; // Starts at Tier 3 (Proficient)
+  let catTier = gradeBands[selectedGradeBand].tier;
   let catStreak = 0;
   let catLastResult = null;
   let catLastQId = '';
@@ -414,6 +424,33 @@ document.addEventListener('DOMContentLoaded', () => {
   const returnToAtBatBtn = document.getElementById('return-to-atbat-btn');
   const closeTimeoutBtn = document.getElementById('close-timeout-btn');
   const powerActiveTag = document.getElementById('power-active-tag');
+  const gradeBandHelp = document.getElementById('grade-band-help');
+  const gradeBandButtons = [...document.querySelectorAll('.grade-band-btn')];
+
+  function chooseGradeBand(band, persist = true) {
+    const grade = gradeBands[band];
+    if (!grade) return;
+    selectedGradeBand = band;
+    catTier = grade.tier;
+    catStreak = 0;
+    catLastResult = null;
+    catLastQId = '';
+    activeAdaptiveQuestion = null;
+    attemptPhase = 'question';
+    gradeBandButtons.forEach(button => {
+      const selected = button.getAttribute('data-grade-band') === band;
+      button.classList.toggle('active', selected);
+      button.setAttribute('aria-pressed', String(selected));
+    });
+    if (gradeBandHelp) gradeBandHelp.textContent = grade.help;
+    if (catTierBadge) catTierBadge.textContent = grade.label;
+    if (persist) localStorage.setItem(gradeStorageKey, band);
+  }
+
+  gradeBandButtons.forEach(button => {
+    button.addEventListener('click', () => chooseGradeBand(button.getAttribute('data-grade-band')));
+  });
+  chooseGradeBand(selectedGradeBand, false);
 
   async function loadAdaptiveQuestion() {
     if (questionPending) return;
@@ -430,6 +467,7 @@ document.addEventListener('DOMContentLoaded', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           currentTier: catTier,
+          gradeTier: gradeBands[selectedGradeBand].tier,
           streak: catStreak,
           lastResult: catLastResult,
           excludeId: catLastQId,
@@ -446,7 +484,7 @@ document.addEventListener('DOMContentLoaded', () => {
       catLastQId = activeAdaptiveQuestion.id || '';
       catTier = activeAdaptiveQuestion.difficulty || catTier;
 
-      if (catTierBadge) catTierBadge.textContent = ['Rookie', 'Rising Star', 'Slugger', 'All-Star', 'Legend'][catTier - 1];
+      if (catTierBadge) catTierBadge.textContent = gradeBands[selectedGradeBand].label;
       if (catStreakBadge) catStreakBadge.textContent = `🔥 STREAK: ${catStreak}`;
       catQText.textContent = activeAdaptiveQuestion.q;
 

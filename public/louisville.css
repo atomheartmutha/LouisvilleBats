@@ -19,6 +19,15 @@ body.arcade-body { background: #e5d9bc; background-image: repeating-linear-gradi
 .retro-title .highlight-gold { color: #173e35; font-family: inherit; }
 .title-tagline { margin-top: 22px; font-family: Georgia, serif; font-size: 1.15rem; font-style: italic; color: #233f35; }
 .jcps-badge-pill { position: relative; z-index: 1; background: #f9edcf; color: #3d4b36; border: 1px solid #b1ab81; border-radius: 3px; font-size: .74rem; padding: 6px 12px; }
+.grade-band-picker { position: relative; z-index: 1; width: min(880px, 100%); padding: 10px; background: #f9edcfeb; border: 1px solid #8c8b6e; border-radius: 5px; }
+.grade-band-heading { margin-bottom: 7px; color: #7f2632; font: 900 9px monospace; letter-spacing: 1.6px; }
+.grade-band-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; }
+.grade-band-btn { display: flex; min-height: 48px; flex-direction: column; justify-content: center; gap: 3px; padding: 7px 5px; color: #173e35; background: #fff8e8; border: 1px solid #66796b; border-radius: 4px; cursor: pointer; }
+.grade-band-btn strong { font: 800 .75rem Georgia, serif; }
+.grade-band-btn small { font-size: .58rem; }
+.grade-band-btn:hover { border-color: #ad2838; background: #fff; }
+.grade-band-btn.active { color: #fff7df; background: #ad2838; border-color: #692331; box-shadow: inset 0 -3px 0 #692331; }
+.grade-band-help { margin-top: 7px; color: #3d4b36; font-size: .66rem; }
 .start-prompt-box { position: relative; z-index: 1; }
 .arcade-start-btn { background: #b52e3e; color: #fff2d7; border: 2px solid #692331; border-radius: 5px; padding: 14px 44px; font-size: 1.15rem; letter-spacing: 2px; box-shadow: 0 5px 0 #692331; animation: none; }
 .arcade-start-btn:hover { background: #962333; transform: translateY(-2px); }
@@ -71,6 +80,11 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
   .hometown-eyebrow { font-size: 8px; letter-spacing: 1px; margin: 6px 0 12px; }
   .retro-title { font-size: 3.9rem; letter-spacing: -3px; }
   .title-tagline { font-size: 1rem; margin-top: 16px; }
+  .grade-band-picker { padding: 8px; }
+  .grade-band-grid { grid-template-columns: repeat(2, 1fr); gap: 5px; }
+  .grade-band-btn { min-height: 42px; padding: 5px; }
+  .grade-band-btn:last-child { grid-column: 1 / -1; }
+  .grade-band-help { font-size: .6rem; }
   .title-mode-selector { grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px; }
   .mode-shortcut-btn { padding: 11px; gap: 6px; }
   .mode-shortcut-btn strong { font-size: .9rem; }

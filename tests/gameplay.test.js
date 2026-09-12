@@ -4,11 +4,11 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 // Run the actual frontend event handlers with deterministic frames, timers and requests.
-function game({ offline = false, sessionStore = new Map() } = {}) {
+function game({ offline = false, sessionStore = new Map(), localStore = new Map() } = {}) {
   const elements = new Map(), timers = [], requests = [];
   let frame, init;
   class Element {
-    constructor() { this.className = ''; this.children = []; this.events = {}; this.disabled = false; this.textContent = ''; }
+    constructor() { this.className = ''; this.children = []; this.events = {}; this.attributes = {}; this.disabled = false; this.textContent = ''; }
     classList = {
       contains: name => this.className.split(' ').includes(name),
       add: name => { if (!this.classList.contains(name)) this.className += ` ${name}`; },
@@ -18,6 +18,8 @@ function game({ offline = false, sessionStore = new Map() } = {}) {
     set innerHTML(value) { this.html = value; this.children = []; }
     get innerHTML() { return this.html || ''; }
     addEventListener(name, cb) { this.events[name] = cb; }
+    getAttribute(name) { return this.attributes[name] ?? null; }
+    setAttribute(name, value) { this.attributes[name] = String(value); }
     click() { if (!this.disabled) this.events.click?.(); }
     appendChild(child) { this.children.push(child); }
     querySelectorAll() { return this.children; }
@@ -36,15 +38,23 @@ function game({ offline = false, sessionStore = new Map() } = {}) {
   el('modal-adaptive-timeout').className = 'hidden';
   el('arcade-pitch-btn').disabled = el('arcade-swing-btn').disabled = true;
   const dots = [new Element(), new Element()];
+  const gradeButtons = ['prek-k', 'grades-1-2', 'grades-3-5', 'grades-6-8', 'grades-9-plus'].map(band => {
+    const button = new Element();
+    button.setAttribute('data-grade-band', band);
+    return button;
+  });
   const document = {
     getElementById: el,
     createElement: () => new Element(),
-    querySelectorAll: selector => selector === '#hud-strikes-dots .hud-dot' ? dots : [],
+    querySelectorAll: selector => selector === '#hud-strikes-dots .hud-dot' ? dots : selector === '.grade-band-btn' ? gradeButtons : [],
     addEventListener: (_, callback) => { init = callback; }
   };
   vm.runInNewContext(fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8'), {
     document, window: { addEventListener() {}, sessionStorage: { getItem: key => sessionStore.get(key) || null, setItem: (key, value) => sessionStore.set(key, value) } }, console,
-    localStorage: { getItem: key => key === 'batyard_sound' ? 'false' : '0', setItem() {} },
+    localStorage: {
+      getItem: key => key === 'batyard_sound' ? 'false' : key === 'batyard_points' ? '0' : localStore.get(key) || null,
+      setItem: (key, value) => localStore.set(key, value)
+    },
     requestAnimationFrame: callback => { frame = callback; },
     setTimeout: callback => { timers.push(callback); },
     fetch: async (_, options) => {
@@ -58,6 +68,7 @@ function game({ offline = false, sessionStore = new Map() } = {}) {
   return {
     el, dots, timers, requests, flush,
     start: async () => { el('start-game-btn').click(); await flush(); },
+    chooseGrade: band => gradeButtons.find(button => button.getAttribute('data-grade-band') === band).click(),
     answer: index => el('cat-options-grid').children[index].click(),
     frames: count => { for (let i = 0; i < count; i++) frame(); },
     nextTimer: async () => { assert.ok(timers.length); timers.shift()(); await flush(); }
@@ -138,4 +149,19 @@ test('answered questions remain excluded after a new game starts in the same bro
   const secondGame = game({ sessionStore }); await secondGame.start();
   assert.deepEqual(secondGame.requests[0].recentIds, ['q-1']);
   assert.deepEqual(secondGame.requests[0].recentFactIds, ['fact-1']);
+});
+
+test('selected grade band sets the first question level and persists for the next game', async () => {
+  const localStore = new Map();
+  const firstGame = game({ localStore });
+  firstGame.chooseGrade('prek-k');
+  await firstGame.start();
+  assert.equal(firstGame.requests[0].currentTier, 1);
+  assert.equal(firstGame.requests[0].gradeTier, 1);
+  assert.equal(localStore.get('batyard_grade_band'), 'prek-k');
+
+  const nextGame = game({ localStore });
+  await nextGame.start();
+  assert.equal(nextGame.requests[0].currentTier, 1);
+  assert.equal(nextGame.requests[0].gradeTier, 1);
 });

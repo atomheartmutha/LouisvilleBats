@@ -124,22 +124,58 @@ function startGeneration(tier, rosterPromise, recent) {
   pending.set(tier, request);
 }
 
-function overflowMathQuestion(tier, sequence) {
-  const first = 2 + sequence;
-  const second = Math.max(1, tier);
-  const answer = first + second;
-  const q = `The Bats have ${first} hits and add ${second} more. How many hits do they have now?`;
+export function overflowMathQuestion(tier, sequence) {
+  let q;
+  let answer;
+  let distractors;
+  if (tier === 1) {
+    const first = 1 + (sequence % 4);
+    const second = 1 + (sequence % 3);
+    answer = first + second;
+    q = `Buddy has ${first} baseballs and finds ${second} more. How many baseballs does he have?`;
+    distractors = [answer + 1, Math.max(1, answer - 1), answer + 2];
+  } else if (tier === 2) {
+    const groups = 2 + (sequence % 4);
+    const perGroup = 2 + (sequence % 3);
+    answer = groups * perGroup;
+    q = `${groups} players each carry ${perGroup} baseballs. How many baseballs do they carry altogether?`;
+    distractors = [answer + groups, answer + perGroup, Math.max(1, answer - groups)];
+  } else if (tier === 3) {
+    const hits = 2 + (sequence % 6);
+    answer = `.${String(hits * 100).padStart(3, '0')}`;
+    q = `A Bats hitter gets ${hits} hits in 10 at-bats. What is the batting average?`;
+    distractors = [`.0${hits}0`, `.${String((hits + 1) * 100).padStart(3, '0')}`, `.${String(Math.max(1, hits - 1) * 100).padStart(3, '0')}`];
+  } else if (tier === 4) {
+    const onBase = 300 + (sequence % 5) * 10;
+    const slugging = 400 + (sequence % 4) * 25;
+    answer = `.${onBase + slugging}`;
+    q = `A hitter has a .${onBase} on-base percentage and a .${slugging} slugging percentage. What is the OPS?`;
+    distractors = [`.${slugging}`, `.${onBase}`, `.${onBase + slugging - 50}`];
+  } else {
+    const start = 125 + (sequence % 5) * 10;
+    const end = 35 + (sequence % 4) * 5;
+    answer = ((start - end) / 100).toFixed(2);
+    q = `A base-out state starts at ${(start / 100).toFixed(2)} expected runs and ends at ${(end / 100).toFixed(2)}. What is the change in expected runs?`;
+    distractors = [((start + end) / 100).toFixed(2), ((start - end + 10) / 100).toFixed(2), ((start - end - 10) / 100).toFixed(2)];
+  }
+  const options = [String(answer), ...distractors.map(String)];
   return {
     id: idFor(q), factId: `overflow-${tier}-${sequence}`, q,
-    options: [answer, answer + 1, answer + 2, answer + 3].map(String), ans: 0,
-    explanation: `${first} + ${second} = ${answer} hits.`, source: 'https://www.mlb.com/glossary/standard-stats/hit'
+    options, ans: 0,
+    explanation: `Work through the baseball numbers to get ${answer}.`, source: 'https://www.mlb.com/glossary/standard-stats'
   };
 }
 
-export async function getAdaptiveQuestion({ currentTier = 3, streak = 0, lastResult = null, excludeId = '', recentIds = [], recentFactIds = [], recentQuestions = [] } = {}) {
-  let tier = Math.max(1, Math.min(5, Number.parseInt(currentTier, 10) || 3));
-  if (lastResult === true && Number(streak) >= 1) tier = Math.min(5, tier + 1);
-  if (lastResult === false) tier = Math.max(1, tier - 1);
+export function resolveAdaptiveTier({ currentTier = 3, gradeTier = currentTier, streak = 0, lastResult = null } = {}) {
+  const anchorTier = Math.max(1, Math.min(5, Number.parseInt(gradeTier, 10) || 3));
+  let tier = Math.max(1, Math.min(5, Number.parseInt(currentTier, 10) || anchorTier));
+  if (lastResult === true && Number(streak) >= 2) tier++;
+  if (lastResult === false) tier--;
+  return Math.max(Math.max(1, anchorTier - 1), Math.min(Math.min(5, anchorTier + 1), tier));
+}
+
+export async function getAdaptiveQuestion({ currentTier = 3, gradeTier = currentTier, streak = 0, lastResult = null, excludeId = '', recentIds = [], recentFactIds = [], recentQuestions = [] } = {}) {
+  const tier = resolveAdaptiveTier({ currentTier, gradeTier, streak, lastResult });
   // Start roster and Gemini work without putting either network on the critical path.
   const rosterPromise = getBatsCharacters();
   const facts = questionFacts([], tier);
@@ -156,7 +192,7 @@ export async function getAdaptiveQuestion({ currentTier = 3, streak = 0, lastRes
   let generated = true;
   if (!candidates.length) {
     generated = false;
-    const fallback = facts.map(createFallbackQuestion);
+    const fallback = facts.filter(fact => /math/i.test(fact.topic)).map(createFallbackQuestion);
     candidates = fallback.filter(isAvailable);
     if (!candidates.length) candidates = [overflowMathQuestion(tier, excluded.size)];
   }
