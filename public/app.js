@@ -95,8 +95,41 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ============================================================
-  // 2. BALLPARK ORGAN & SOUND SYNTHESIZER (Web Audio API)
+  // 2. ELEVENLABS GAME SOUNDS & WEB AUDIO FALLBACK
   // ============================================================
+  const generatedSfx = {
+    organ: { src: 'assets/audio/ballpark-organ-charge.mp3', volume: 0.82 },
+    batCrack: { src: 'assets/audio/bat-crack.mp3', volume: 0.92 },
+    crowd: { src: 'assets/audio/crowd-home-run.mp3', volume: 0.78 },
+    celebration: { src: 'assets/audio/power-up-chime.mp3', volume: 0.74 }
+  };
+  const activeSfx = new Set();
+
+  function playGeneratedSfx(name, fallback) {
+    const effect = generatedSfx[name];
+    if (!effect || typeof Audio !== 'function') {
+      fallback();
+      return;
+    }
+
+    try {
+      const audio = new Audio(effect.src);
+      audio.preload = 'auto';
+      audio.volume = effect.volume;
+      activeSfx.add(audio);
+      const cleanup = () => activeSfx.delete(audio);
+      audio.addEventListener('ended', cleanup, { once: true });
+      audio.addEventListener('error', cleanup, { once: true });
+      const playback = audio.play();
+      if (playback?.catch) playback.catch(() => {
+        cleanup();
+        fallback();
+      });
+    } catch {
+      fallback();
+    }
+  }
+
   let audioCtx = null;
   function getAudioContext() {
     if (!audioCtx) {
@@ -109,8 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return audioCtx;
   }
 
-  function playBallparkOrganCharge() {
-    if (!soundEnabled) return;
+  function synthesizeBallparkOrganCharge() {
     const ctx = getAudioContext();
     if (!ctx) return;
 
@@ -143,11 +175,15 @@ document.addEventListener('DOMContentLoaded', () => {
       start += note.d + 0.04;
     });
 
+  }
+
+  function playBallparkOrganCharge() {
+    if (!soundEnabled) return;
+    playGeneratedSfx('organ', synthesizeBallparkOrganCharge);
     speakAnnouncer("CHARGE!");
   }
 
-  function playBatCrack() {
-    if (!soundEnabled) return;
+  function synthesizeBatCrack() {
     const ctx = getAudioContext();
     if (!ctx) return;
 
@@ -166,8 +202,12 @@ document.addEventListener('DOMContentLoaded', () => {
     osc.stop(ctx.currentTime + 0.12);
   }
 
-  function playCelebrationChime() {
+  function playBatCrack() {
     if (!soundEnabled) return;
+    playGeneratedSfx('batCrack', synthesizeBatCrack);
+  }
+
+  function synthesizeCelebrationChime() {
     const ctx = getAudioContext();
     if (!ctx) return;
 
@@ -186,8 +226,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function playCrowdCheer() {
+  function playCelebrationChime() {
     if (!soundEnabled) return;
+    playGeneratedSfx('celebration', synthesizeCelebrationChime);
+  }
+
+  function synthesizeCrowdCheer() {
     const ctx = getAudioContext();
     if (!ctx) return;
 
@@ -214,6 +258,11 @@ document.addEventListener('DOMContentLoaded', () => {
     filter.connect(gain);
     gain.connect(ctx.destination);
     noise.start();
+  }
+
+  function playCrowdCheer() {
+    if (!soundEnabled) return;
+    playGeneratedSfx('crowd', synthesizeCrowdCheer);
   }
 
   let announcerRequest = null;

@@ -45,6 +45,7 @@ requiring checks are separate settings and have not been changed.
 | Louisville riverfront landmarks and sandlot field texture stay present | animations.test.js |
 | Cold questions return immediately, emphasize baseball math, and never repeat within a session | questions.test.js, gameplay.test.js |
 | Win expectancy uses readable semantic math and fixed three-decimal output | sabermetrics.test.js |
+| ElevenLabs game sounds effects assets are valid, routed to game events, and retain offline synthesis fallbacks | sfx.test.js |
 
 ## Continuous deployment
 

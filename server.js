@@ -285,6 +285,7 @@ const MIME_TYPES = {
   '.json': 'application/json; charset=utf-8',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
+  '.mp3': 'audio/mpeg',
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon'
 };
