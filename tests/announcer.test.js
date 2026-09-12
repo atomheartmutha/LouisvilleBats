@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import { Readable } from 'node:stream';
 import {
   createAnnouncerVoiceHandler,
@@ -7,6 +8,8 @@ import {
   DEFAULT_VOICE_ID,
   validateAnnouncerText
 } from '../src/announcer.js';
+
+const clientSource = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
 
 function callHandler(handler, payload) {
   return new Promise((resolve, reject) => {
@@ -74,4 +77,15 @@ test('unconfigured or failed ElevenLabs calls request browser fallback without l
   assert.equal(result.status, 502);
   assert.equal(JSON.parse(result.body).fallback, true);
   assert.doesNotMatch(result.body.toString(), /do-not-leak|provider details/);
+});
+
+test('client discovers voice capability and uses synchronous browser speech when unconfigured', () => {
+  assert.match(clientSource, /fetch\('\/api\/health'\)/);
+  assert.match(clientSource, /elevenLabsConfigured = health\?\.elevenLabsConfigured === true/);
+
+  const speakStart = clientSource.indexOf('async function speakAnnouncer(text)');
+  const immediateFallback = clientSource.indexOf('speakWithBrowserVoice(text);', speakStart);
+  const voiceRequest = clientSource.indexOf("fetch('/api/voice/announcer'", speakStart);
+  assert.ok(speakStart >= 0 && immediateFallback > speakStart);
+  assert.ok(immediateFallback < voiceRequest, 'fallback speech must start before any unavailable voice request');
 });

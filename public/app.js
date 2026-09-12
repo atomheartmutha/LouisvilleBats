@@ -219,6 +219,19 @@ document.addEventListener('DOMContentLoaded', () => {
   let announcerRequest = null;
   let announcerAudio = null;
   let announcerAudioUrl = null;
+  let elevenLabsConfigured = false;
+
+  // Learn the server capability before the player reaches the first at-bat.
+  // When the paid voice is unavailable we speak synchronously inside the
+  // user's tap/click, which mobile browsers are much less likely to block.
+  fetch('/api/health')
+    .then(response => response.ok ? response.json() : null)
+    .then(health => {
+      elevenLabsConfigured = health?.elevenLabsConfigured === true;
+    })
+    .catch(() => {
+      elevenLabsConfigured = false;
+    });
 
   function clearAnnouncerAudio() {
     if (announcerAudio) announcerAudio.pause();
@@ -248,6 +261,12 @@ document.addEventListener('DOMContentLoaded', () => {
   async function speakAnnouncer(text) {
     if (!soundEnabled) return;
     stopAnnouncer();
+
+    if (!elevenLabsConfigured) {
+      speakWithBrowserVoice(text);
+      return;
+    }
+
     const request = new AbortController();
     announcerRequest = request;
 

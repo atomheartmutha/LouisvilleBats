@@ -39,7 +39,7 @@ requiring checks are separate settings and have not been changed.
 | Question exclusions, distinct choices, valid answer index and no school jargon | questions.test.js |
 | A failing suite blocks a real fixture commit; a passing suite permits it | pre-commit.test.js |
 | Vultr deploy waits for passing main tests, pins the exact commit and verifies health | deploy.test.js |
-| ElevenLabs keys remain server-side; approved lines are cached and safely fall back | announcer.test.js |
+| ElevenLabs keys remain server-side; approved lines cache and mobile browser speech falls back synchronously | announcer.test.js |
 | Slugger/Hot Rod pitcher wind-ups and base-running assets stay named, local and gameplay-driven | animations.test.js |
 | Louisville riverfront landmarks and sandlot field texture stay present | animations.test.js |
 
