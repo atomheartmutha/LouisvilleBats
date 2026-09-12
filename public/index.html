@@ -137,7 +137,10 @@
 
         <!-- The Backyard Baseball '97 Canvas Viewport -->
         <div class="canvas-game-frame">
-          <canvas id="derby-canvas" width="720" height="420" role="img" aria-label="Louisville Slugger Field viewed from behind home plate with animated baseball players"></canvas>
+          <div class="derby-canvas-stage">
+            <canvas id="derby-canvas" width="720" height="420" role="img" aria-label="Louisville Slugger Field viewed from behind home plate with animated baseball players"></canvas>
+            <canvas id="derby-character-canvas" width="720" height="420" aria-hidden="true"></canvas>
+          </div>
 
           <!-- Announcer Box Overlay -->
           <div class="announcer-speech-bar">
@@ -384,6 +387,10 @@
 
   </div>
 
+  <script type="importmap">
+    { "imports": { "three": "./assets/vendor/three/three.module.js" } }
+  </script>
+  <script type="module" src="assets/three-characters.js"></script>
   <script src="assets/character-animations.js"></script>
   <script src="app.js"></script>
 </body>

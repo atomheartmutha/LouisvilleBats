@@ -633,6 +633,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (activeScreen === 'screen-derby') renderDerbyField();
     }, { once: true });
   }
+  window.addEventListener('batyard-three-ready', () => {
+    if (activeScreen === 'screen-derby') renderDerbyField();
+  });
 
   // Pitch selector pills
   document.querySelectorAll('.pitch-pill').forEach(pill => {
@@ -653,13 +656,25 @@ document.addEventListener('DOMContentLoaded', () => {
     drawFielder(130, 260, '#0C2340');
     drawFielder(590, 260, '#0C2340');
 
-    // Pitcher — animated from the Slugger_Pitcher pose asset when available.
-    drawPitcher(360, 250);
+    // Three.js owns these character pixels once its FBX models are ready.
+    // Until then, the existing Canvas characters remain a zero-delay fallback.
+    const usingThreeCharacters = renderThreeCharacters();
+    if (!usingThreeCharacters) drawPitcher(360, 250);
 
     // Batter (Pablo Sanchez / Kid Slugger)
     // Finish the visible bat arc before the same character leaves home plate.
-    if (!runnerAnimation || batterSwingFrame !== null) drawBatter(batter.x, batter.y);
-    if (batterSwingFrame === null) drawHotRodsRunner();
+    if (!usingThreeCharacters) {
+      if (!runnerAnimation || batterSwingFrame !== null) drawBatter(batter.x, batter.y);
+      if (batterSwingFrame === null) drawHotRodsRunner();
+    } else {
+      drawCharacterTag('HOT ROD', 360, 272, '#0C2340');
+      if (!runnerAnimation || batterSwingFrame !== null) {
+        drawCharacterTag(getSelectedBatterTag(), batter.x, batter.y + 24, getSelectedBatterAppearance().cap);
+      } else {
+        const runnerPosition = getRunnerPosition();
+        if (runnerPosition) drawCharacterTag(getSelectedBatterTag(), runnerPosition.x, runnerPosition.y + 24, getSelectedBatterAppearance().cap);
+      }
+    }
 
     // Mini-radar and mound HUD
     drawMiniRadar(18, 12);
@@ -680,6 +695,37 @@ document.addEventListener('DOMContentLoaded', () => {
       dctx.lineWidth = 1.5;
       dctx.stroke();
       dctx.restore();
+    }
+  }
+
+  function renderThreeCharacters() {
+    const characterLayer = window.BatyardThreeCharacters;
+    if (!characterLayer?.ready) return false;
+
+    const runnerPosition = batterSwingFrame === null ? getRunnerPosition() : null;
+    try {
+      characterLayer.render({
+        visible: activeScreen === 'screen-derby',
+        paused: derbyPaused || !adaptiveModal.classList.contains('hidden'),
+        reducedMotion: prefersReducedMotion,
+        pitcher: {
+          x: 360,
+          y: 250,
+          throwing: pitcherAnimationFrame !== null
+        },
+        batter: {
+          x: batter.x,
+          y: batter.y,
+          visible: !runnerAnimation || batterSwingFrame !== null,
+          swinging: batterSwingFrame !== null
+        },
+        runner: runnerPosition ? { ...runnerPosition, visible: true } : null
+      });
+      return true;
+    } catch (error) {
+      characterLayer.ready = false;
+      console.warn('Three.js character render failed; restoring Canvas fallback.', error);
+      return false;
     }
   }
 
@@ -1023,6 +1069,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const animation = characterAnimations.HotRods_Run;
     if (!runnerAnimation || !animation) return;
 
+    const runnerPosition = getRunnerPosition();
+    if (!runnerPosition) return;
+    const { x, y } = runnerPosition;
+    const pose = getCharacterPose(animation, runnerAnimation.frame);
+    const appearance = getSelectedBatterAppearance();
+    drawAnimatedKid(x, y, 0.88, pose, appearance);
+    drawCharacterTag(getSelectedBatterTag(), x, y + 24, appearance.cap);
+  }
+
+  function getRunnerPosition() {
+    if (!runnerAnimation) return null;
     const progress = prefersReducedMotion ? 1 : Math.min(1, runnerAnimation.frame / runnerAnimation.totalFrames);
     let x, y;
     if (runnerAnimation.bases > 1 && progress > 0.58) {
@@ -1034,11 +1091,7 @@ document.addEventListener('DOMContentLoaded', () => {
       x = 315 + (535 - 315) * firstLeg;
       y = 363 + (250 - 363) * firstLeg - Math.sin(firstLeg * Math.PI) * 18;
     }
-
-    const pose = getCharacterPose(animation, runnerAnimation.frame);
-    const appearance = getSelectedBatterAppearance();
-    drawAnimatedKid(x, y, 0.88, pose, appearance);
-    drawCharacterTag(getSelectedBatterTag(), x, y + 24, appearance.cap);
+    return { x, y, progress };
   }
 
   function updateCharacterAnimations() {
