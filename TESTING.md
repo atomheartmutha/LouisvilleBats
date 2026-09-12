@@ -44,6 +44,7 @@ requiring checks are separate settings and have not been changed.
 | Drafted batter identity, team colors, scale and skin tone persist while running | animations.test.js |
 | Louisville riverfront landmarks and sandlot field texture stay present | animations.test.js |
 | Cold questions return immediately, emphasize baseball math, and never repeat within a session | questions.test.js, gameplay.test.js |
+| Win expectancy uses readable semantic math and fixed three-decimal output | sabermetrics.test.js |
 
 ## Continuous deployment
 

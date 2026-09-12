@@ -1658,7 +1658,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const gamma = 1.83;
     const winPct = Math.pow(rs, gamma) / (Math.pow(rs, gamma) + Math.pow(ra, gamma));
     const wins = Math.round(winPct * 162);
-    document.getElementById('saber-pyth-res').innerHTML = `Simulated Record: <strong>.${Math.round(winPct * 1000)} (${wins} Wins - ${162 - wins} Losses)</strong>`;
+    const displayPct = winPct.toFixed(3).replace(/^0/, '');
+    document.getElementById('saber-pyth-res').innerHTML = `Simulated Record: <strong>${displayPct} (${wins} Wins - ${162 - wins} Losses)</strong>`;
     addPoints(20);
     speakAnnouncer(`Simulated record: ${wins} wins and ${162 - wins} losses.`);
   });
