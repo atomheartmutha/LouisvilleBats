@@ -1,0 +1,40 @@
+name: Deploy to Vultr
+
+on:
+  workflow_run:
+    workflows: [Unit tests]
+    types: [completed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vultr-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: >-
+      vars.VULTR_DEPLOY_ENABLED == 'true' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - name: Configure dedicated deployment key
+        env:
+          VULTR_SSH_PRIVATE_KEY: ${{ secrets.VULTR_SSH_PRIVATE_KEY }}
+        run: |
+          test -n "$VULTR_SSH_PRIVATE_KEY"
+          install -m 700 -d "$HOME/.ssh"
+          printf '%s\n' "$VULTR_SSH_PRIVATE_KEY" > "$HOME/.ssh/batyard_deploy"
+          chmod 600 "$HOME/.ssh/batyard_deploy"
+          cp deploy/known_hosts "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/known_hosts"
+      - name: Deploy tested commit
+        env:
+          GITHUB_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: ./scripts/deploy-vultr.sh 155.138.222.107 root
