@@ -7,6 +7,8 @@ const root = new URL('../', import.meta.url);
 const localScript = readFileSync(new URL('scripts/deploy-vultr.sh', root), 'utf8');
 const remoteScript = readFileSync(new URL('scripts/deploy-vultr-remote.sh', root), 'utf8');
 const workflow = readFileSync(new URL('.github/workflows/deploy-vultr.yml', root), 'utf8');
+const dockerfile = readFileSync(new URL('Dockerfile', root), 'utf8');
+const compose = readFileSync(new URL('docker-compose.yml', root), 'utf8');
 
 test('Vultr deployment scripts are valid shell', () => {
   for (const script of ['scripts/deploy-vultr.sh', 'scripts/deploy-vultr-remote.sh']) {
@@ -39,4 +41,10 @@ test('deployment fails when Docker or either health check fails', () => {
   assert.match(localScript, /curl --fail/);
   assert.match(remoteScript, /exit 1/);
   assert.doesNotMatch(localScript + remoteScript, /health[^\n]*\|\| true/i);
+});
+
+test('container health checks use IPv4 loopback to match the Node server binding', () => {
+  assert.match(dockerfile, /127\.0\.0\.1:3000\/api\/health/);
+  assert.match(compose, /127\.0\.0\.1:3000\/api\/health/);
+  assert.doesNotMatch(dockerfile + compose, /localhost:3000\/api\/health/);
 });
