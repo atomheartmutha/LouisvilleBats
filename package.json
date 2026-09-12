@@ -7,7 +7,9 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "test": "node --test"
+    "test": "node --test tests/*.test.js",
+    "hooks:install": "node scripts/install-hooks.js",
+    "prepare": "npm run hooks:install"
   },
   "keywords": [
     "louisville-bats",
