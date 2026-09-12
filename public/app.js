@@ -108,34 +108,49 @@ document.addEventListener('DOMContentLoaded', () => {
   // 2. ELEVENLABS GAME SOUNDS & WEB AUDIO FALLBACK
   // ============================================================
   const generatedSfx = {
-    organ: { src: 'assets/audio/ballpark-organ-charge.mp3', volume: 0.82 },
-    batCrack: { src: 'assets/audio/bat-crack.mp3', volume: 0.92 },
-    crowd: { src: 'assets/audio/crowd-home-run.mp3', volume: 0.78 },
-    celebration: { src: 'assets/audio/power-up-chime.mp3', volume: 0.74 }
+    organ: { player: document.getElementById('sfx-organ'), volume: 0.82 },
+    batCrack: { player: document.getElementById('sfx-bat-crack'), volume: 0.92 },
+    crowd: { player: document.getElementById('sfx-crowd'), volume: 0.78 },
+    celebration: { player: document.getElementById('sfx-celebration'), volume: 0.74 }
   };
   const activeSfx = new Set();
+  let soundEngineUnlocked = false;
+
+  function reportAudioState(state) {
+    soundBtn?.setAttribute('data-audio-state', state);
+  }
 
   function playGeneratedSfx(name, fallback) {
     const effect = generatedSfx[name];
-    if (!effect || typeof Audio !== 'function') {
+    const audio = effect?.player;
+    if (!audio || typeof audio.play !== 'function') {
+      reportAudioState('fallback');
       fallback();
       return;
     }
 
     try {
-      const audio = new Audio(effect.src);
       audio.preload = 'auto';
       audio.volume = effect.volume;
+      audio.pause();
+      audio.currentTime = 0;
       activeSfx.add(audio);
-      const cleanup = () => activeSfx.delete(audio);
+      const cleanup = () => {
+        activeSfx.delete(audio);
+        if (activeSfx.size === 0) reportAudioState('idle');
+      };
       audio.addEventListener('ended', cleanup, { once: true });
       audio.addEventListener('error', cleanup, { once: true });
       const playback = audio.play();
-      if (playback?.catch) playback.catch(() => {
+      if (playback?.then) playback.then(() => reportAudioState('playing')).catch(error => {
         cleanup();
+        reportAudioState('fallback');
+        console.warn(`[sound] ${name} media playback failed; using Web Audio fallback.`, error);
         fallback();
       });
+      else reportAudioState('playing');
     } catch {
+      reportAudioState('fallback');
       fallback();
     }
   }
@@ -147,10 +162,24 @@ document.addEventListener('DOMContentLoaded', () => {
       if (AudioContext) audioCtx = new AudioContext();
     }
     if (audioCtx && audioCtx.state === 'suspended') {
-      audioCtx.resume();
+      const resumed = audioCtx.resume();
+      resumed?.catch?.(error => console.warn('[sound] AudioContext resume failed.', error));
     }
     return audioCtx;
   }
+
+  // Capture the first pointer/key gesture before button handlers run. This
+  // keeps both generated MP3s and synthesized fallbacks inside the browser's
+  // user-activation window, including iOS and installed mobile web apps.
+  function unlockSoundEngine() {
+    if (!soundEnabled || soundEngineUnlocked) return;
+    soundEngineUnlocked = true;
+    getAudioContext();
+    Object.values(generatedSfx).forEach(effect => effect.player?.load?.());
+    reportAudioState('ready');
+  }
+  window.addEventListener('pointerdown', unlockSoundEngine, { capture: true, passive: true });
+  window.addEventListener('keydown', unlockSoundEngine, { capture: true });
 
   function synthesizeBallparkOrganCharge() {
     const ctx = getAudioContext();
@@ -276,7 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   let announcerRequest = null;
-  let announcerAudio = null;
+  let announcerAudio = document.getElementById('announcer-audio');
   let announcerAudioUrl = null;
   let elevenLabsConfigured = false;
 
@@ -293,8 +322,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
   function clearAnnouncerAudio() {
-    if (announcerAudio) announcerAudio.pause();
-    announcerAudio = null;
+    if (announcerAudio) {
+      announcerAudio.pause?.();
+      announcerAudio.removeAttribute?.('src');
+      announcerAudio.load?.();
+    }
     if (announcerAudioUrl) URL.revokeObjectURL(announcerAudioUrl);
     announcerAudioUrl = null;
   }
@@ -344,7 +376,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      const audio = new Audio(objectUrl);
+      const audio = announcerAudio || (typeof Audio === 'function' ? new Audio() : null);
+      if (!audio) throw new Error('Audio playback unavailable');
+      audio.src = objectUrl;
+      audio.preload = 'auto';
+      audio.load?.();
       announcerAudio = audio;
       announcerAudioUrl = objectUrl;
       const cleanup = () => {
@@ -367,7 +403,18 @@ document.addEventListener('DOMContentLoaded', () => {
   if (soundBtn) {
     soundBtn.addEventListener('click', () => {
       soundEnabled = !soundEnabled;
-      if (!soundEnabled) stopAnnouncer();
+      if (!soundEnabled) {
+        stopAnnouncer();
+        activeSfx.forEach(audio => {
+          audio.pause();
+          audio.currentTime = 0;
+        });
+        activeSfx.clear();
+        soundEngineUnlocked = false;
+        reportAudioState('muted');
+      } else {
+        unlockSoundEngine();
+      }
       localStorage.setItem('batyard_sound', soundEnabled.toString());
       soundBtn.innerHTML = soundEnabled ? '🔊 <span>ON</span>' : '🔇 <span>OFF</span>';
     });

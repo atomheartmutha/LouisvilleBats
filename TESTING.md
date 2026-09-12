@@ -51,6 +51,7 @@ requiring checks are separate settings and have not been changed.
 | Real FBX pitcher, batter and runner load through Three.js with the existing Canvas characters retained as an automatic fallback | animations.test.js |
 | Win expectancy uses readable semantic math and fixed three-decimal output | sabermetrics.test.js |
 | ElevenLabs game sounds effects assets are valid, routed to game events, and retain offline synthesis fallbacks | sfx.test.js |
+| Reusable sound players preload once, unlock during the first gesture, and expose media-to-Web-Audio fallback state | sfx.test.js |
 
 ## Continuous deployment
 

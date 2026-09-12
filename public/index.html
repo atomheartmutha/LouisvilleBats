@@ -387,6 +387,14 @@
 
   </div>
 
+  <!-- Reusable media elements are preloaded so stadium/mobile browsers can
+       authorize playback from the player's first tap instead of a late promise. -->
+  <audio id="sfx-organ" preload="auto" playsinline src="assets/audio/ballpark-organ-charge.mp3" hidden></audio>
+  <audio id="sfx-bat-crack" preload="auto" playsinline src="assets/audio/bat-crack.mp3" hidden></audio>
+  <audio id="sfx-crowd" preload="auto" playsinline src="assets/audio/crowd-home-run.mp3" hidden></audio>
+  <audio id="sfx-celebration" preload="auto" playsinline src="assets/audio/power-up-chime.mp3" hidden></audio>
+  <audio id="announcer-audio" preload="none" playsinline hidden></audio>
+
   <script type="importmap">
     { "imports": { "three": "./assets/vendor/three/three.module.js" } }
   </script>
