@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { baseballMathFacts, localFacts, validateQuestion, getAdaptiveQuestion, questionFacts } from '../src/questions.js';
+import { baseballMathFacts, localFacts, validateQuestion, createFallbackQuestion, getAdaptiveQuestion, questionFacts } from '../src/questions.js';
 import { getBatsCharacters } from '../src/mlbApi.js';
 
 test('rejects invalid answer keys, duplicate choices and school jargon', () => {
@@ -17,6 +17,14 @@ test('question facts emphasize calculation at every adaptive level', () => {
     assert.ok(facts.filter(f => /math/i.test(f.topic)).length >= 2, `tier ${tier} needs multiple math facts`);
   }
   assert.ok(baseballMathFacts.length > localFacts.length * 2);
+});
+
+test('every fallback question points at its factual answer', () => {
+  for (const fact of [...baseballMathFacts, ...localFacts]) {
+    const question = createFallbackQuestion(fact);
+    assert.equal(question.factId, fact.id);
+    assert.equal(question.options[question.ans], fact.answer, fact.q);
+  }
 });
 
 test('live roster, grounded Gemini questions, exclusion and malformed-response fallback', async t => {
@@ -48,6 +56,11 @@ test('live roster, grounded Gemini questions, exclusion and malformed-response f
   assert.notEqual(second.id, first.id);
   assert.equal(second.options.length, 4);
   assert.equal(generationCount, 1);
+});
+
+test('a used fact stays excluded even when Gemini paraphrases its wording', async () => {
+  const next = await getAdaptiveQuestion({ currentTier: 3, recentFactIds: ['opening'] });
+  assert.notEqual(next.factId, 'opening');
 });
 
 test('cold question loads do not wait for Gemini and exhausted sessions still stay unique', async t => {

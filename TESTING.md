@@ -43,7 +43,7 @@ requiring checks are separate settings and have not been changed.
 | Slugger/Hot Rod pitcher wind-ups and base-running assets stay named, local and gameplay-driven | animations.test.js |
 | Drafted batter identity, team colors, scale and skin tone persist while running | animations.test.js |
 | Supplied Louisville Slugger Field artwork replaces the procedural field background | animations.test.js |
-| Cold questions return immediately, emphasize baseball math, and never repeat within a session | questions.test.js, gameplay.test.js |
+| Cold questions return immediately, preserve correct answer keys, emphasize baseball math, and never repeat a fact within a session | questions.test.js, gameplay.test.js |
 | Win expectancy uses readable semantic math and fixed three-decimal output | sabermetrics.test.js |
 | ElevenLabs game sounds effects assets are valid, routed to game events, and retain offline synthesis fallbacks | sfx.test.js |
 

@@ -50,7 +50,7 @@ function game({ offline = false, sessionStore = new Map() } = {}) {
     fetch: async (_, options) => {
       requests.push(JSON.parse(options.body));
       if (offline) throw new Error('Offline');
-      return { ok: true, json: async () => ({ id: `q-${requests.length}`, difficulty: 3, q: `Question ${requests.length}`, options: ['Correct', 'Wrong'], ans: 0, explanation: 'Explanation' }) };
+      return { ok: true, json: async () => ({ id: `q-${requests.length}`, factId: `fact-${requests.length}`, difficulty: 3, q: `Question ${requests.length}`, options: ['Correct', 'Wrong'], ans: 0, explanation: 'Explanation' }) };
     }
   });
   init();
@@ -75,6 +75,7 @@ test('question gates every pitch; wrong answers advance once and three strikes m
   await g.nextTimer();
   assert.equal(g.el('cat-question-text').textContent, 'Question 2');
   assert.equal(g.requests[1].excludeId, 'q-1');
+  assert.deepEqual(g.requests[1].recentFactIds, ['fact-1']);
   assert.equal(g.requests[1].lastResult, false);
   g.answer(1); await g.nextTimer(); g.answer(1);
   assert.match(g.el('announcer-text').textContent, /Strike three! 1 out/);
@@ -136,4 +137,5 @@ test('answered questions remain excluded after a new game starts in the same bro
   firstGame.answer(1); await firstGame.nextTimer();
   const secondGame = game({ sessionStore }); await secondGame.start();
   assert.deepEqual(secondGame.requests[0].recentIds, ['q-1']);
+  assert.deepEqual(secondGame.requests[0].recentFactIds, ['fact-1']);
 });

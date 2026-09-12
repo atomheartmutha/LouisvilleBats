@@ -381,20 +381,27 @@ document.addEventListener('DOMContentLoaded', () => {
   let answerLocked = false;
   let derbyPaused = false;
   const questionSessionKey = 'batyard_answered_question_ids';
+  const factTokenPrefix = 'fact:';
   let storedQuestionIds = [];
   try {
     storedQuestionIds = JSON.parse(window.sessionStorage?.getItem(questionSessionKey) || '[]');
   } catch (_) {}
-  const answeredQuestionIds = new Set(Array.isArray(storedQuestionIds) ? storedQuestionIds : []);
+  const storedQuestionTokens = Array.isArray(storedQuestionIds) ? storedQuestionIds : [];
+  const answeredQuestionIds = new Set(storedQuestionTokens.filter(token => !String(token).startsWith(factTokenPrefix)));
+  const answeredFactIds = new Set(storedQuestionTokens
+    .filter(token => String(token).startsWith(factTokenPrefix))
+    .map(token => String(token).slice(factTokenPrefix.length)));
   const recentQuestions = [];
 
   function rememberAnsweredQuestion(question) {
     if (!question?.id) return;
     answeredQuestionIds.add(question.id);
+    if (question.factId) answeredFactIds.add(question.factId);
     recentQuestions.push(question.q);
     if (recentQuestions.length > 20) recentQuestions.shift();
     try {
-      window.sessionStorage?.setItem(questionSessionKey, JSON.stringify([...answeredQuestionIds]));
+      const sessionTokens = [...answeredQuestionIds, ...[...answeredFactIds].map(id => `${factTokenPrefix}${id}`)];
+      window.sessionStorage?.setItem(questionSessionKey, JSON.stringify(sessionTokens));
     } catch (_) {}
   }
 
@@ -427,6 +434,7 @@ document.addEventListener('DOMContentLoaded', () => {
           lastResult: catLastResult,
           excludeId: catLastQId,
           recentIds: [...answeredQuestionIds],
+          recentFactIds: [...answeredFactIds],
           recentQuestions
         })
       });

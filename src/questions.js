@@ -54,7 +54,21 @@ export function validateQuestion(q, facts) {
       new Set(q.options.map(o => o.trim().toLowerCase())).size !== 4 ||
       !Number.isInteger(q.ans) || q.ans < 0 || q.ans > 3 ||
       q.options[q.ans] !== fact.answer || /JCPS|academic standard|scaffold|CAT testing/i.test(q.q + q.explanation)) return null;
-  return { id: idFor(q.q), q: q.q, options: q.options, ans: q.ans, explanation: q.explanation, source: fact.source };
+  return { id: idFor(q.q), factId: fact.id, q: q.q, options: q.options, ans: q.ans, explanation: q.explanation, source: fact.source };
+}
+
+export function createFallbackQuestion(fact) {
+  const ans = fact.options.indexOf(fact.answer);
+  if (ans < 0) throw new Error(`Fallback fact ${fact.id} does not contain its answer`);
+  return {
+    id: idFor(fact.q),
+    factId: fact.id,
+    q: fact.q,
+    options: [...fact.options],
+    ans,
+    explanation: `The answer is ${fact.answer}.`,
+    source: fact.source
+  };
 }
 
 async function generate(tier, facts, recent) {
@@ -116,12 +130,13 @@ function overflowMathQuestion(tier, sequence) {
   const answer = first + second;
   const q = `The Bats have ${first} hits and add ${second} more. How many hits do they have now?`;
   return {
-    id: idFor(q), q, options: [answer, answer + 1, answer + 2, answer + 3].map(String), ans: 0,
+    id: idFor(q), factId: `overflow-${tier}-${sequence}`, q,
+    options: [answer, answer + 1, answer + 2, answer + 3].map(String), ans: 0,
     explanation: `${first} + ${second} = ${answer} hits.`, source: 'https://www.mlb.com/glossary/standard-stats/hit'
   };
 }
 
-export async function getAdaptiveQuestion({ currentTier = 3, streak = 0, lastResult = null, excludeId = '', recentIds = [], recentQuestions = [] } = {}) {
+export async function getAdaptiveQuestion({ currentTier = 3, streak = 0, lastResult = null, excludeId = '', recentIds = [], recentFactIds = [], recentQuestions = [] } = {}) {
   let tier = Math.max(1, Math.min(5, Number.parseInt(currentTier, 10) || 3));
   if (lastResult === true && Number(streak) >= 1) tier = Math.min(5, tier + 1);
   if (lastResult === false) tier = Math.max(1, tier - 1);
@@ -129,18 +144,20 @@ export async function getAdaptiveQuestion({ currentTier = 3, streak = 0, lastRes
   const rosterPromise = getBatsCharacters();
   const facts = questionFacts([], tier);
   const excluded = new Set([excludeId, ...(Array.isArray(recentIds) ? recentIds.slice(-250) : [])].filter(Boolean));
+  const excludedFacts = new Set((Array.isArray(recentFactIds) ? recentFactIds.slice(-250) : []).filter(Boolean));
   const recent = Array.isArray(recentQuestions) ? recentQuestions.slice(-12).map(q => String(q).slice(0, 400)) : [];
   let pool = pools.get(tier);
-  if (!pool || pool.expires < Date.now() || !pool.questions.some(q => !excluded.has(q.id))) {
+  const isAvailable = q => !excluded.has(q.id) && !excludedFacts.has(q.factId);
+  if (!pool || pool.expires < Date.now() || !pool.questions.some(isAvailable)) {
     startGeneration(tier, rosterPromise, recent);
     if (!pool || pool.expires < Date.now()) pool = { expires: Date.now() + 30_000, questions: [] };
   }
-  let candidates = pool.questions.filter(q => !excluded.has(q.id));
+  let candidates = pool.questions.filter(isAvailable);
   let generated = true;
   if (!candidates.length) {
     generated = false;
-    const fallback = facts.map(f => ({ id: idFor(f.q), q: f.q, options: f.options, ans: 0, explanation: `The answer is ${f.answer}.`, source: f.source }));
-    candidates = fallback.filter(q => !excluded.has(q.id));
+    const fallback = facts.map(createFallbackQuestion);
+    candidates = fallback.filter(isAvailable);
     if (!candidates.length) candidates = [overflowMathQuestion(tier, excluded.size)];
   }
   const selected = candidates[Math.floor(Math.random() * candidates.length)];
