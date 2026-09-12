@@ -39,6 +39,7 @@ requiring checks are separate settings and have not been changed.
 | Question exclusions, distinct choices, valid answer index and no school jargon | questions.test.js |
 | A failing suite blocks a real fixture commit; a passing suite permits it | pre-commit.test.js |
 | Vultr deploy waits for passing main tests, pins the exact commit and verifies health | deploy.test.js |
+| ElevenLabs keys remain server-side; approved lines are cached and safely fall back | announcer.test.js |
 
 ## Continuous deployment
 

@@ -64,6 +64,12 @@ npm start
 ```
 Visit [http://localhost:3000](http://localhost:3000).
 
+For ElevenLabs PA voice-overs, copy `.env.example` to `.env` and set
+`ELEVENLABS_API_KEY`. Voice ID `GyIXYY876myKNtA1j8NI` and the low-latency
+`eleven_flash_v2_5` model are configured by default. The API key stays on the
+server; browsers automatically fall back to native speech when voice generation
+is unavailable.
+
 ---
 
 ## ☁️ Live Cloud Deployment on Vultr
