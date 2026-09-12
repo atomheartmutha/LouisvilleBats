@@ -125,44 +125,61 @@ function startGeneration(tier, rosterPromise, recent) {
 }
 
 export function overflowMathQuestion(tier, sequence) {
-  let q;
-  let answer;
-  let distractors;
-  if (tier === 1) {
-    const first = 1 + (sequence % 4);
-    const second = 1 + (sequence % 3);
-    answer = first + second;
-    q = `Buddy has ${first} baseballs and finds ${second} more. How many baseballs does he have?`;
-    distractors = [answer + 1, Math.max(1, answer - 1), answer + 2];
-  } else if (tier === 2) {
-    const groups = 2 + (sequence % 4);
-    const perGroup = 2 + (sequence % 3);
-    answer = groups * perGroup;
-    q = `${groups} players each carry ${perGroup} baseballs. How many baseballs do they carry altogether?`;
-    distractors = [answer + groups, answer + perGroup, Math.max(1, answer - groups)];
-  } else if (tier === 3) {
-    const hits = 2 + (sequence % 6);
-    answer = `.${String(hits * 100).padStart(3, '0')}`;
-    q = `A Bats hitter gets ${hits} hits in 10 at-bats. What is the batting average?`;
-    distractors = [`.0${hits}0`, `.${String((hits + 1) * 100).padStart(3, '0')}`, `.${String(Math.max(1, hits - 1) * 100).padStart(3, '0')}`];
-  } else if (tier === 4) {
-    const onBase = 300 + (sequence % 5) * 10;
-    const slugging = 400 + (sequence % 4) * 25;
-    answer = `.${onBase + slugging}`;
-    q = `A hitter has a .${onBase} on-base percentage and a .${slugging} slugging percentage. What is the OPS?`;
-    distractors = [`.${slugging}`, `.${onBase}`, `.${onBase + slugging - 50}`];
-  } else {
-    const start = 125 + (sequence % 5) * 10;
-    const end = 35 + (sequence % 4) * 5;
-    answer = ((start - end) / 100).toFixed(2);
-    q = `A base-out state starts at ${(start / 100).toFixed(2)} expected runs and ends at ${(end / 100).toFixed(2)}. What is the change in expected runs?`;
-    distractors = [((start + end) / 100).toFixed(2), ((start - end + 10) / 100).toFixed(2), ((start - end - 10) / 100).toFixed(2)];
-  }
-  const options = [String(answer), ...distractors.map(String)];
+  // Keep the six skill families in a stable rotation while advancing the
+  // numbers independently. This avoids exhausting one family and collapsing
+  // back into a long run of near-identical questions.
+  const questionSequence = Math.max(0, Number.parseInt(sequence, 10) || 0);
+  sequence = Math.floor(questionSequence / 6);
+  const average = (part, whole) => (part / whole).toFixed(3).replace(/^0/, '');
+  const builders = {
+    1: [
+      () => { const a = 2 + sequence % 4, b = 1 + sequence % 3, answer = a + b; return { skill: 'add-balls', q: `Buddy has ${a} baseballs and finds ${b} more. How many baseballs does he have?`, answer, distractors: [answer - 1, answer + 1, answer + 2] }; },
+      () => { const start = 7 + sequence % 3, used = 2 + sequence % 2, answer = start - used; return { skill: 'subtract-balls', q: `Buddy starts with ${start} baseballs and gives ${used} away. How many are left?`, answer, distractors: [answer - 1, answer + 1, start] }; },
+      () => { const bats = 4 + sequence % 3, visitors = 1 + sequence % 2, answer = bats - visitors; return { skill: 'run-lead', q: `The Bats have ${bats} runs and the visitors have ${visitors} runs. How many more runs do the Bats have?`, answer, distractors: [answer - 1, answer + 1, bats + visitors] }; },
+      () => { const red = 2 + sequence % 3, blue = 2 + (sequence + 1) % 3, answer = red + blue; return { skill: 'count-caps', q: `There are ${red} red caps and ${blue} blue caps in the dugout. How many caps are there?`, answer, distractors: [answer - 1, answer + 1, answer + 2] }; },
+      () => { const innings = 2 + sequence % 2, answer = innings * 3; return { skill: 'count-outs', q: `Each inning needs 3 outs. How many outs finish ${innings} innings?`, answer, distractors: [answer - 1, answer + 1, answer + 2] }; },
+      () => { const have = 3 + sequence % 5, answer = 10 - have; return { skill: 'make-ten', q: `Buddy needs 10 bats and already has ${have}. How many more bats does he need?`, answer, distractors: [answer - 1, answer + 1, answer + 2] }; }
+    ],
+    2: [
+      () => { const groups = 2 + sequence % 4, each = 2 + sequence % 3, answer = groups * each; return { skill: 'equal-groups', q: `${groups} players each carry ${each} baseballs. How many baseballs do they carry altogether?`, answer, distractors: [answer - 1, answer + 1, answer + groups] }; },
+      () => { const start = 18 + sequence % 7, used = 5 + sequence % 4, answer = start - used; return { skill: 'equipment-left', q: `The team has ${start} practice balls and uses ${used}. How many are left?`, answer, distractors: [answer - 1, answer + 1, start + used] }; },
+      () => { const players = 2 + sequence % 3, each = 3 + sequence % 4, total = players * each; return { skill: 'equal-share', q: `${total} baseball cards are shared equally by ${players} kids. How many cards does each kid get?`, answer: each, distractors: [each - 1, each + 1, each + 2] }; },
+      () => { const first = 6 + sequence % 5, second = 4 + sequence % 4, answer = first + second; return { skill: 'inning-sum', q: `The teams score ${first} total runs early and ${second} more later. How many runs is that altogether?`, answer, distractors: [answer - 2, answer + 1, first] }; },
+      () => { const a = 3 + sequence % 3, b = 4 + sequence % 4, c = 2 + sequence % 2, answer = a + b + c; return { skill: 'three-game-hits', q: `A hitter gets ${a}, ${b}, and ${c} hits in three games. How many hits total?`, answer, distractors: [answer - 1, answer + 2, a + b] }; },
+      () => { const doubles = 3 + sequence % 5, answer = doubles * 2; return { skill: 'double-bases', q: `A player hits ${doubles} doubles. At 2 total bases each, how many total bases is that?`, answer, distractors: [doubles, answer + 2, answer - 2] }; }
+    ],
+    3: [
+      () => { const hits = 2 + sequence % 6, answer = average(hits, 10); return { skill: 'batting-average', q: `A Bats hitter gets ${hits} hits in 10 at-bats. What is the batting average?`, answer, distractors: [average(hits, 100), average(hits + 1, 10), average(hits - 1, 10)] }; },
+      () => { const singles = 2 + sequence % 4, doubles = 1 + sequence % 3, answer = singles + doubles * 2; return { skill: 'total-bases', q: `A hitter has ${singles} singles and ${doubles} double${doubles === 1 ? '' : 's'}. How many total bases is that?`, answer, distractors: [singles + doubles, answer + 1, answer + 2] }; },
+      () => { const bases = 1 + sequence % 3, answer = bases * 90; return { skill: 'base-distance', q: `Base paths are 90 feet apart. How far does a runner travel across ${bases} base path${bases === 1 ? '' : 's'}?`, answer: `${answer} feet`, distractors: [`${bases * 45} feet`, `${answer + 90} feet`, `${Math.max(30, answer - 30)} feet`] }; },
+      () => { const games = 3 + sequence % 3, perGame = 2 + sequence % 4, total = games * perGame; return { skill: 'runs-average', q: `The Bats score ${total} runs in ${games} games. What is the average number of runs per game?`, answer: perGame, distractors: [perGame - 1, perGame + 1, perGame + 2] }; },
+      () => { const target = 12 + sequence % 5, current = 5 + sequence % 4, answer = target - current; return { skill: 'hits-needed', q: `A hitter wants ${target} hits and already has ${current}. How many more hits are needed?`, answer, distractors: [answer - 1, answer + 1, target + current] }; },
+      () => { const innings = 4 + sequence % 4, answer = innings * 3; return { skill: 'outs-per-innings', q: `A defense records 3 outs per inning. How many outs are recorded in ${innings} innings?`, answer, distractors: [innings * 2, answer + 3, answer - 3] }; }
+    ],
+    4: [
+      () => { const obp = 300 + sequence % 5 * 10, slg = 400 + sequence % 4 * 25, answer = `.${obp + slg}`; return { skill: 'ops', q: `A hitter has a .${obp} on-base percentage and a .${slg} slugging percentage. What is the OPS?`, answer, distractors: [`.${slg}`, `.${obp}`, `.${obp + slg - 50}`] }; },
+      () => { const innings = 6, runs = 1 + sequence % 4, answer = (runs * 9 / innings).toFixed(2); return { skill: 'era', q: `A pitcher allows ${runs} earned runs in ${innings} innings. Using ERA = runs × 9 ÷ innings, what is the ERA?`, answer, distractors: [(runs / innings).toFixed(2), (runs * 6 / innings).toFixed(2), (runs * 9).toFixed(2)] }; },
+      () => { const wins = 55 + sequence % 31, answer = `${wins}%`; return { skill: 'win-percentage', q: `The Bats win ${wins} of 100 games. What is their winning percentage?`, answer, distractors: [`${100 - wins}%`, `${wins - 5}%`, `${wins + 5}%`] }; },
+      () => { const attempts = 20, steals = 11 + sequence % 7, answer = `${steals * 5}%`; return { skill: 'steal-rate', q: `A runner steals safely ${steals} times in ${attempts} attempts. What is the success rate?`, answer, distractors: [`${steals}%`, `${(attempts - steals) * 5}%`, `${steals * 4}%`] }; },
+      () => { const hits = 24 + sequence % 9, atBats = 80, answer = average(hits, atBats); return { skill: 'average-eighty', q: `A hitter has ${hits} hits in ${atBats} at-bats. What is the batting average to three decimals?`, answer, distractors: [average(hits, 100), average(hits + 4, atBats), average(hits - 4, atBats)] }; },
+      () => { const bases = 40 + sequence % 9, games = 10, answer = (bases / games).toFixed(1); return { skill: 'bases-rate', q: `A hitter earns ${bases} total bases over ${games} games. What is the average total bases per game?`, answer, distractors: [(bases / 5).toFixed(1), ((bases + 10) / games).toFixed(1), ((bases - 10) / games).toFixed(1)] }; }
+    ],
+    5: [
+      () => { const start = 125 + sequence % 5 * 10, end = 35 + sequence % 4 * 5, answer = ((start - end) / 100).toFixed(2); return { skill: 'run-expectancy', q: `A base-out state starts at ${(start / 100).toFixed(2)} expected runs and ends at ${(end / 100).toFixed(2)}. What is the change in expected runs?`, answer, distractors: [((start + end) / 100).toFixed(2), ((start - end + 10) / 100).toFixed(2), ((start - end - 10) / 100).toFixed(2)] }; },
+      () => { const singles = 2 + sequence % 4, doubles = 1 + sequence % 3, answer = (singles * 0.9 + doubles * 1.3).toFixed(1); return { skill: 'weighted-events', q: `Using weights 0.9 per single and 1.3 per double, what is the weighted value of ${singles} singles and ${doubles} doubles?`, answer, distractors: [(Number(answer) - 0.5).toFixed(1), (Number(answer) + 0.5).toFixed(1), (singles + doubles).toFixed(1)] }; },
+      () => { const runsFor = 6 + sequence % 4, runsAgainst = 4, rf2 = runsFor ** 2, ra2 = runsAgainst ** 2, answer = average(rf2, rf2 + ra2); return { skill: 'pythagorean', q: `For a simplified win model, use RS² ÷ (RS² + RA²). If RS is ${runsFor} and RA is ${runsAgainst}, what is the expectancy?`, answer, distractors: [average(runsFor, runsFor + runsAgainst), average(ra2, rf2 + ra2), average(rf2 - ra2, rf2 + ra2)] }; },
+      () => { const walks = 2 + sequence % 3, singles = 3 + sequence % 3, answer = (walks * 0.7 + singles * 0.9).toFixed(1); return { skill: 'woba-weights', q: `A practice wOBA model values a walk at 0.7 and a single at 0.9. What is the value of ${walks} walks and ${singles} singles?`, answer, distractors: [(Number(answer) - 0.4).toFixed(1), (Number(answer) + 0.4).toFixed(1), (walks + singles).toFixed(1)] }; },
+      () => { const before = 80 + sequence % 5 * 5, after = 130 + sequence % 5 * 5, answer = ((after - before) / 100).toFixed(2); return { skill: 're24-gain', q: `Run expectancy rises from ${(before / 100).toFixed(2)} to ${(after / 100).toFixed(2)} after a play. What is the RE24 gain?`, answer, distractors: [((after + before) / 100).toFixed(2), ((after - before + 10) / 100).toFixed(2), ((after - before - 10) / 100).toFixed(2)] }; },
+      () => { const games = 4, shift = sequence % 7 / 10, values = [1.2 + shift, 0.8 + shift, 1.6 + shift, 0.4 + shift], answer = (values.reduce((sum, value) => sum + value, 0) / games).toFixed(2); return { skill: 'average-value', q: `A metric records ${values.map(value => value.toFixed(1)).join(', ')} over ${games} games. What is the mean value?`, answer, distractors: [(Number(answer) - 0.2).toFixed(2), (Number(answer) + 0.2).toFixed(2), values.reduce((sum, value) => sum + value, 0).toFixed(2)] }; }
+    ]
+  };
+  const gradeBuilders = builders[Math.max(1, Math.min(5, tier))];
+  const built = gradeBuilders[questionSequence % gradeBuilders.length]();
+  const options = [String(built.answer), ...built.distractors.map(String)];
   return {
-    id: idFor(q), factId: `overflow-${tier}-${sequence}`, q,
+    id: idFor(built.q), factId: `overflow-${tier}-${built.skill}-${questionSequence}`, q: built.q,
     options, ans: 0,
-    explanation: `Work through the baseball numbers to get ${answer}.`, source: 'https://www.mlb.com/glossary/standard-stats'
+    explanation: `Work through the baseball numbers to get ${built.answer}.`, source: 'https://www.mlb.com/glossary/standard-stats'
   };
 }
 
@@ -179,8 +196,8 @@ export async function getAdaptiveQuestion({ currentTier = 3, gradeTier = current
   // Start roster and Gemini work without putting either network on the critical path.
   const rosterPromise = getBatsCharacters();
   const facts = questionFacts([], tier);
-  const excluded = new Set([excludeId, ...(Array.isArray(recentIds) ? recentIds.slice(-250) : [])].filter(Boolean));
-  const excludedFacts = new Set((Array.isArray(recentFactIds) ? recentFactIds.slice(-250) : []).filter(Boolean));
+  const excluded = new Set([excludeId, ...(Array.isArray(recentIds) ? recentIds : [])].filter(Boolean));
+  const excludedFacts = new Set((Array.isArray(recentFactIds) ? recentFactIds : []).filter(Boolean));
   const recent = Array.isArray(recentQuestions) ? recentQuestions.slice(-12).map(q => String(q).slice(0, 400)) : [];
   let pool = pools.get(tier);
   const isAvailable = q => !excluded.has(q.id) && !excludedFacts.has(q.factId);
@@ -194,7 +211,14 @@ export async function getAdaptiveQuestion({ currentTier = 3, gradeTier = current
     generated = false;
     const fallback = facts.filter(fact => /math/i.test(fact.topic)).map(createFallbackQuestion);
     candidates = fallback.filter(isAvailable);
-    if (!candidates.length) candidates = [overflowMathQuestion(tier, excluded.size)];
+    if (!candidates.length) {
+      let sequence = Math.max(excluded.size, excludedFacts.size);
+      let overflow = overflowMathQuestion(tier, sequence);
+      while (!isAvailable(overflow) && sequence < excluded.size + 500) {
+        overflow = overflowMathQuestion(tier, ++sequence);
+      }
+      candidates = [overflow];
+    }
   }
   const selected = candidates[Math.floor(Math.random() * candidates.length)];
   // Shuffle choices without changing the answer key.

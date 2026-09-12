@@ -34,13 +34,29 @@ test('grade bands anchor adaptive difficulty and overflow questions stay age-app
   assert.equal(resolveAdaptiveTier({ currentTier: 1, gradeTier: 5 }), 4);
   assert.equal(resolveAdaptiveTier({ currentTier: 3, gradeTier: 3, lastResult: false }), 2);
 
-  const expectedTopics = [/Buddy has/, /players each carry/, /batting average/, /What is the OPS/, /expected runs/];
   for (let tier = 1; tier <= 5; tier++) {
-    const question = overflowMathQuestion(tier, 7);
-    assert.match(question.q, expectedTopics[tier - 1]);
-    assert.equal(question.options[question.ans], question.options[0]);
-    assert.equal(new Set(question.options).size, 4);
+    const questions = Array.from({ length: 12 }, (_, sequence) => overflowMathQuestion(tier, sequence));
+    const skills = new Set(questions.map(question => question.factId.replace(/^overflow-\d-/, '').replace(/-\d+$/, '')));
+    assert.equal(skills.size, 6, `tier ${tier} should rotate six different math skills`);
+    for (const question of questions) {
+      assert.equal(question.options[question.ans], question.options[0]);
+      assert.equal(new Set(question.options).size, 4, question.q);
+    }
   }
+});
+
+test('exhausted sessions rotate operations instead of repeating one addition template', () => {
+  const questions = Array.from({ length: 18 }, (_, sequence) => overflowMathQuestion(3, sequence));
+  for (let start = 0; start < questions.length; start += 6) {
+    assert.equal(new Set(questions.slice(start, start + 6).map(question => question.factId.replace(/^overflow-3-/, '').replace(/-\d+$/, ''))).size, 6);
+  }
+  assert.equal(new Set(questions.map(question => question.id)).size, questions.length);
+  assert.ok(questions.some(question => /batting average/i.test(question.q)));
+  assert.ok(questions.some(question => /total bases/i.test(question.q)));
+  assert.ok(questions.some(question => /90 feet/i.test(question.q)));
+  assert.ok(questions.some(question => /average number of runs/i.test(question.q)));
+  assert.ok(questions.some(question => /outs per inning/i.test(question.q)));
+  assert.ok(questions.every(question => !/^The Bats have \d+ hits and add \d+ more/.test(question.q)));
 });
 
 test('live roster, grounded Gemini questions, exclusion and malformed-response fallback', async t => {
