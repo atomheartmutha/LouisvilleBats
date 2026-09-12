@@ -725,6 +725,191 @@ body {
   color: #CBD5E1;
 }
 
+/* ========================================================= */
+/* BACKYARD BASEBALL '97 RETRO HUD SCOREBOARD               */
+/* ========================================================= */
+.bb97-hud-bar {
+  width: 100%;
+  max-width: 700px;
+  background: #0B4A23;
+  border: 4px solid #FFFFFF;
+  border-radius: 4px;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+  font-family: monospace, monospace;
+}
+
+.hud-inning-col {
+  background: #083318;
+  border-right: 3px solid #FFFFFF;
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+  gap: 8px;
+}
+
+.hud-inning-badge {
+  background: #041F0E;
+  border: 2px solid #4ADE80;
+  border-radius: 4px;
+  padding: 4px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.7rem;
+  color: #A7F3D0;
+  font-weight: 900;
+}
+
+.hud-inning-num {
+  font-size: 1.2rem;
+  color: #FFFFFF;
+}
+
+.hud-teams-box {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hud-team-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 900;
+  color: #FFFFFF;
+}
+
+.team-runs {
+  background: #000000;
+  color: #FFC72C;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 0.95rem;
+  margin-left: auto;
+}
+
+.hud-atbat-col {
+  flex: 1;
+  padding: 6px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.hud-batter-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hud-batter-avatar {
+  font-size: 1.4rem;
+  background: #083318;
+  border: 1.5px solid #4ADE80;
+  border-radius: 4px;
+  padding: 2px 4px;
+}
+
+.hud-batter-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.hud-batter-name {
+  color: #FFC72C;
+  font-size: 0.85rem;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+}
+
+.hud-batter-stat {
+  color: #A7F3D0;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.hud-count-row {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.hud-count-group {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.count-lbl {
+  color: #FFC72C;
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.dot-box {
+  display: flex;
+  gap: 3px;
+}
+
+.hud-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1.5px solid #FFFFFF;
+  background: #041F0E;
+}
+
+.hud-dot.on {
+  background: #FFC72C;
+  box-shadow: 0 0 6px #FFC72C;
+}
+
+.hud-action-col {
+  border-left: 3px solid #FFFFFF;
+  background: #083318;
+  display: flex;
+  align-items: center;
+  padding: 4px;
+}
+
+.hud-timeout-btn {
+  background: #EF4444;
+  border: 2px solid #FFFFFF;
+  border-radius: 4px;
+  color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.hud-timeout-btn:hover {
+  background: #DC2626;
+  transform: scale(1.05);
+}
+
+.timeout-hand {
+  font-size: 1.1rem;
+}
+
+.timeout-txt {
+  font-size: 0.65rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.mini-strip {
+  margin-top: 4px;
+}
+
 /* Common UI */
 .hidden { display: none !important; }
 

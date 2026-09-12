@@ -139,7 +139,55 @@
             <button id="derby-power-btn" class="arcade-btn power">⚡ Math & Science Power-Up</button>
           </div>
 
-          <div class="scoreboard-strip">
+          <!-- Backyard Baseball '97 Style Retro Green Scoreboard HUD Bar -->
+          <div class="bb97-hud-bar">
+            <!-- Left: Inning & Teams -->
+            <div class="hud-inning-col">
+              <div class="hud-inning-badge">
+                <span class="hud-half">BOT</span>
+                <span class="hud-inning-num">1</span>
+              </div>
+              <div class="hud-teams-box">
+                <div class="hud-team-row"><span class="team-logo">🦇</span> <span class="team-name">Bats</span> <span class="team-runs" id="hud-bats-runs">0</span></div>
+                <div class="hud-team-row"><span class="team-logo">⚓</span> <span class="team-name">Clippers</span> <span class="team-runs">0</span></div>
+              </div>
+            </div>
+
+            <!-- Center: At-Bat Info & Count Dots -->
+            <div class="hud-atbat-col">
+              <div class="hud-batter-card">
+                <div class="hud-batter-avatar">🧢</div>
+                <div class="hud-batter-details">
+                  <div class="hud-batter-name">AT BAT: <strong>PABLO SANCHEZ - LF</strong></div>
+                  <div class="hud-batter-stat"><span id="hud-avg">.300</span> &bull; <span id="hud-today">0 FOR 0 TODAY</span></div>
+                </div>
+              </div>
+              <div class="hud-count-row">
+                <div class="hud-count-group">
+                  <span class="count-lbl">BALLS</span>
+                  <span class="dot-box" id="hud-balls-dots"><span class="hud-dot off"></span><span class="hud-dot off"></span><span class="hud-dot off"></span><span class="hud-dot off"></span></span>
+                </div>
+                <div class="hud-count-group">
+                  <span class="count-lbl">STRIKES</span>
+                  <span class="dot-box" id="hud-strikes-dots"><span class="hud-dot off"></span><span class="hud-dot off"></span></span>
+                </div>
+                <div class="hud-count-group">
+                  <span class="count-lbl">OUTS</span>
+                  <span class="dot-box" id="hud-outs-dots"><span class="hud-dot off"></span><span class="hud-dot off"></span></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Backyard Baseball Time Out Button -->
+            <div class="hud-action-col">
+              <button id="bb97-timeout-btn" class="hud-timeout-btn" title="Call Time Out for a Math/Science Power-Up!">
+                <span class="timeout-hand">✋</span>
+                <span class="timeout-txt">TIME<br>OUT</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="scoreboard-strip mini-strip">
             <div class="strip-item"><span>OUTS:</span> <strong id="derby-outs">0 / 3</strong></div>
             <div class="strip-item"><span>HITS:</span> <strong id="derby-hits">0</strong></div>
             <div class="strip-item"><span>HOME RUNS:</span> <strong id="derby-hr">0</strong></div>

@@ -329,84 +329,139 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderDerbyField() {
     dctx.clearRect(0, 0, derbyCanvas.width, derbyCanvas.height);
 
-    // River Sky
-    const sky = dctx.createLinearGradient(0, 0, 0, 130);
-    sky.addColorStop(0, '#193B68');
-    sky.addColorStop(1, '#60A5FA');
+    // 1. SKY & BACKGROUND TREES (Backyard Baseball '97 style)
+    const sky = dctx.createLinearGradient(0, 0, 0, 95);
+    sky.addColorStop(0, '#3A86C8');
+    sky.addColorStop(1, '#8ECAE6');
     dctx.fillStyle = sky;
-    dctx.fillRect(0, 0, derbyCanvas.width, 130);
+    dctx.fillRect(0, 0, derbyCanvas.width, 95);
 
-    // Ohio River Ribbon
-    dctx.fillStyle = '#2563EB';
-    dctx.fillRect(0, 115, derbyCanvas.width, 20);
-    dctx.fillStyle = '#FFFFFF';
-    dctx.font = 'bold 10px sans-serif';
-    dctx.fillText('🌊 Ohio River (Home Run Target!)', 15, 128);
-
-    // Outfield Wooden Sandlot Fence
-    dctx.fillStyle = '#8B4513';
-    dctx.fillRect(0, 135, derbyCanvas.width, 30);
-    dctx.fillStyle = '#FFC72C';
-    dctx.font = 'bold 14px sans-serif';
-    dctx.textAlign = 'center';
-    dctx.fillText('⚾ LOUISVILLE SLUGGER FIELD &bull; BATYARD ⚾', 350, 155);
-
-    // Grass & Infield
+    // Fluffy Green Trees along fence
     dctx.fillStyle = '#2D6A4F';
-    dctx.fillRect(0, 165, derbyCanvas.width, 255);
+    for (let tx = 10; tx < derbyCanvas.width; tx += 45) {
+      dctx.beginPath();
+      dctx.arc(tx, 74, 25, 0, Math.PI * 2);
+      dctx.fill();
+    }
+    dctx.fillStyle = '#40916C';
+    for (let tx = 32; tx < derbyCanvas.width; tx += 50) {
+      dctx.beginPath();
+      dctx.arc(tx, 78, 18, 0, Math.PI * 2);
+      dctx.fill();
+    }
 
-    // Dirt Infield
+    // Wooden Blue/Teal Outfield Fence (Backyard Baseball '97 style)
+    dctx.fillStyle = '#1D3557';
+    dctx.fillRect(0, 80, derbyCanvas.width, 24);
+    dctx.fillStyle = '#457B9D';
+    dctx.fillRect(0, 78, derbyCanvas.width, 4);
+
+    // Center Outfield Scoreboard Screen
+    dctx.fillStyle = '#0C2340';
+    dctx.fillRect(285, 66, 130, 24);
+    dctx.strokeStyle = '#FFFFFF';
+    dctx.lineWidth = 1.5;
+    dctx.strokeRect(285, 66, 130, 24);
+    dctx.fillStyle = '#FFC72C';
+    dctx.font = 'bold 9px monospace';
+    dctx.textAlign = 'center';
+    dctx.fillText('LOUISVILLE BATS', 350, 81);
+
+    // 2. OUTFIELD & INFIELD GRASS
+    dctx.fillStyle = '#386641';
+    dctx.fillRect(0, 100, derbyCanvas.width, 320);
+
+    // Cut lawn stripes
+    dctx.fillStyle = '#407B4A';
+    dctx.fillRect(0, 125, derbyCanvas.width, 20);
+    dctx.fillRect(0, 165, derbyCanvas.width, 25);
+
+    // 3. INFIELD DIRT DIAMOND
     dctx.fillStyle = '#DDA15E';
     dctx.beginPath();
-    dctx.moveTo(350, 170); // 2nd
-    dctx.lineTo(500, 270); // 1st
-    dctx.lineTo(350, 380); // Home
-    dctx.lineTo(200, 270); // 3rd
+    dctx.moveTo(350, 130); // 2nd base
+    dctx.lineTo(580, 260); // 1st base
+    dctx.lineTo(350, 410); // Home plate
+    dctx.lineTo(120, 260); // 3rd base
     dctx.closePath();
     dctx.fill();
 
-    // Pitcher Mound & Rubber
-    dctx.fillStyle = '#B07D62';
+    // Infield grass cutout
+    dctx.fillStyle = '#386641';
     dctx.beginPath();
-    dctx.ellipse(350, 240, 20, 10, 0, 0, Math.PI * 2);
+    dctx.moveTo(350, 165);
+    dctx.lineTo(510, 260);
+    dctx.lineTo(350, 355);
+    dctx.lineTo(190, 260);
+    dctx.closePath();
     dctx.fill();
-    dctx.fillStyle = '#FFFFFF';
-    dctx.fillRect(344, 238, 12, 3);
 
-    // Home Plate
+    // 4. CHALK FOUL LINES & BATTER'S BOXES
+    dctx.strokeStyle = '#FFFFFF';
+    dctx.lineWidth = 3.5;
+    // 3rd base line
+    dctx.beginPath();
+    dctx.moveTo(350, 380);
+    dctx.lineTo(70, 220);
+    dctx.stroke();
+    // 1st base line
+    dctx.beginPath();
+    dctx.moveTo(350, 380);
+    dctx.lineTo(630, 220);
+    dctx.stroke();
+
+    // Home Plate Pentagon
     dctx.fillStyle = '#FFFFFF';
     dctx.beginPath();
     dctx.moveTo(350, 370);
-    dctx.lineTo(360, 380);
-    dctx.lineTo(360, 390);
-    dctx.lineTo(340, 390);
-    dctx.lineTo(340, 380);
+    dctx.lineTo(365, 385);
+    dctx.lineTo(365, 400);
+    dctx.lineTo(335, 400);
+    dctx.lineTo(335, 385);
     dctx.closePath();
     dctx.fill();
 
-    // Batter
-    dctx.fillStyle = '#BA0C2F';
-    dctx.beginPath();
-    dctx.arc(batter.x, batter.y, 10, 0, Math.PI * 2);
-    dctx.fill();
-    dctx.fillRect(batter.x - 6, batter.y + 10, 12, 18);
+    // Left & Right Chalk Batter's Boxes
+    dctx.strokeStyle = '#FFFFFF';
+    dctx.lineWidth = 2.5;
+    dctx.strokeRect(275, 355, 50, 58); // Left box (Pablo Sanchez stance)
+    dctx.strokeRect(375, 355, 50, 58); // Right box
 
-    // Bat
-    dctx.save();
-    dctx.translate(batter.x + 4, batter.y + 12);
-    dctx.rotate(batter.state === 'swinging' ? Math.PI / 3 : -Math.PI / 4);
-    dctx.fillStyle = hasPowerBat ? '#FFC72C' : '#C49A45';
-    dctx.fillRect(0, -3, 28, 6);
-    if (hasPowerBat) {
-      dctx.strokeStyle = '#FF6B00';
-      dctx.strokeRect(0, -3, 28, 6);
-    }
-    dctx.restore();
+    // 5. BASES & PITCHER MOUND
+    dctx.fillStyle = '#BC6C25';
+    dctx.beginPath();
+    dctx.ellipse(350, 225, 42, 20, 0, 0, Math.PI * 2);
+    dctx.fill();
+    dctx.fillStyle = '#FFFFFF';
+    dctx.fillRect(340, 222, 20, 4); // rubber
+
+    drawDerbyBase(350, 140); // 2nd
+    drawDerbyBase(530, 250); // 1st
+    drawDerbyBase(170, 250); // 3rd
+
+    // 6. BACKYARD FIELDERS (Chibi kids)
+    drawFielderKid(230, 175, '#BA0C2F');
+    drawFielderKid(470, 175, '#BA0C2F');
+    drawFielderKid(180, 235, '#0C2340');
+    drawFielderKid(520, 235, '#0C2340');
+
+    // 7. PITCHER ON THE MOUND
+    drawPitcherKid(350, 210);
+
+    // 8. BATTER (PABLO SANCHEZ / KID SLUGGER STYLE)
+    drawBackyardBatter(295, 365);
+
+    // 9. TOP-LEFT MINI-RADAR DIAMOND (Backyard Baseball '97)
+    drawMiniRadar(18, 12);
+
+    // 10. TOP-RIGHT "ON THE MOUND" HUD CARD
+    drawMoundHUD(515, 10);
 
     // Power bat active banner
     if (hasPowerBat) {
       dctx.fillStyle = '#FFC72C';
       dctx.font = 'bold 12px sans-serif';
+      dctx.textAlign = 'center';
       dctx.fillText('⚡ 3X ALUMINUM POWER BAT ENGAGED! ⚡', 350, 410);
     }
 
@@ -415,16 +470,185 @@ document.addEventListener('DOMContentLoaded', () => {
       dctx.save();
       if (hasPowerBat && ball.state === 'hit') {
         dctx.shadowColor = '#FFC72C';
-        dctx.shadowBlur = 12;
+        dctx.shadowBlur = 16;
       }
       dctx.fillStyle = '#FFFFFF';
       dctx.beginPath();
       dctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
       dctx.fill();
       dctx.strokeStyle = '#BA0C2F';
+      dctx.lineWidth = 1.5;
       dctx.stroke();
       dctx.restore();
     }
+  }
+
+  function drawDerbyBase(x, y) {
+    dctx.save();
+    dctx.translate(x, y);
+    dctx.rotate(Math.PI / 4);
+    dctx.fillStyle = '#FFFFFF';
+    dctx.fillRect(-6, -6, 12, 12);
+    dctx.restore();
+  }
+
+  function drawFielderKid(x, y, capColor) {
+    dctx.fillStyle = capColor;
+    dctx.beginPath();
+    dctx.arc(x, y - 10, 6, 0, Math.PI * 2);
+    dctx.fill();
+    dctx.fillStyle = '#FFD166';
+    dctx.beginPath();
+    dctx.arc(x, y - 6, 5, 0, Math.PI * 2);
+    dctx.fill();
+    dctx.fillStyle = '#FFFFFF';
+    dctx.fillRect(x - 4, y - 2, 8, 8);
+  }
+
+  function drawPitcherKid(x, y) {
+    dctx.fillStyle = '#FF758F';
+    dctx.beginPath();
+    dctx.arc(x, y - 14, 8, 0, Math.PI * 2);
+    dctx.fill();
+    dctx.fillStyle = '#FFD166';
+    dctx.beginPath();
+    dctx.arc(x, y - 9, 7, 0, Math.PI * 2);
+    dctx.fill();
+    dctx.fillStyle = '#FFFFFF';
+    dctx.fillRect(x - 5, y - 3, 10, 11);
+    dctx.fillStyle = '#8B4513';
+    dctx.fillRect(x - 9, y - 2, 5, 6);
+  }
+
+  function drawBackyardBatter(x, y) {
+    dctx.save();
+    // Backwards Blue Cap
+    dctx.fillStyle = '#2563EB';
+    dctx.beginPath();
+    dctx.arc(x, y - 20, 18, 0, Math.PI * 2);
+    dctx.fill();
+    dctx.fillStyle = '#1D4ED8';
+    dctx.beginPath();
+    dctx.ellipse(x - 14, y - 24, 10, 4, -0.4, 0, Math.PI * 2);
+    dctx.fill();
+
+    // Round Face
+    dctx.fillStyle = '#FBBF24';
+    dctx.beginPath();
+    dctx.arc(x, y - 12, 16, 0, Math.PI * 2);
+    dctx.fill();
+
+    // Eyes & Smile
+    dctx.fillStyle = '#000000';
+    dctx.beginPath();
+    dctx.arc(x + 4, y - 14, 2, 0, Math.PI * 2);
+    dctx.arc(x + 10, y - 14, 2, 0, Math.PI * 2);
+    dctx.fill();
+    dctx.beginPath();
+    dctx.arc(x + 6, y - 9, 7, 0.2, Math.PI - 0.2);
+    dctx.stroke();
+
+    // Blue Jersey
+    dctx.fillStyle = '#3B82F6';
+    dctx.beginPath();
+    dctx.arc(x - 2, y + 10, 14, 0, Math.PI * 2);
+    dctx.fill();
+
+    // Belly button
+    dctx.fillStyle = '#FBBF24';
+    dctx.beginPath();
+    dctx.arc(x - 1, y + 16, 5, 0, Math.PI * 2);
+    dctx.fill();
+    dctx.fillStyle = '#B45309';
+    dctx.fillRect(x - 1, y + 16, 1.5, 1.5);
+
+    // Shorts & Red Shoes
+    dctx.fillStyle = '#1E3A8A';
+    dctx.fillRect(x - 8, y + 19, 7, 8);
+    dctx.fillRect(x + 1, y + 19, 7, 8);
+
+    dctx.fillStyle = '#EF4444';
+    dctx.beginPath();
+    dctx.ellipse(x - 6, y + 28, 7, 4, 0, 0, Math.PI * 2);
+    dctx.ellipse(x + 5, y + 28, 7, 4, 0, 0, Math.PI * 2);
+    dctx.fill();
+
+    // Wood Bat
+    dctx.save();
+    dctx.translate(x + 2, y + 4);
+    if (batter.state === 'swinging') {
+      dctx.rotate(Math.PI / 2.8);
+    } else {
+      dctx.rotate(0.3);
+    }
+    dctx.fillStyle = hasPowerBat ? '#FFC72C' : '#DEB887';
+    dctx.fillRect(0, -5, 42, 9);
+    if (hasPowerBat) {
+      dctx.strokeStyle = '#FF6B00';
+      dctx.lineWidth = 2;
+      dctx.strokeRect(0, -5, 42, 9);
+    }
+    dctx.restore();
+
+    dctx.restore();
+  }
+
+  function drawMiniRadar(x, y) {
+    dctx.save();
+    dctx.fillStyle = '#14532D';
+    dctx.beginPath();
+    dctx.moveTo(x + 40, y + 55);
+    dctx.arc(x + 40, y + 55, 48, -Math.PI * 0.85, -Math.PI * 0.15);
+    dctx.closePath();
+    dctx.fill();
+    dctx.strokeStyle = '#FFFFFF';
+    dctx.lineWidth = 2;
+    dctx.stroke();
+
+    dctx.fillStyle = '#B07D62';
+    dctx.beginPath();
+    dctx.moveTo(x + 40, y + 20);
+    dctx.lineTo(x + 62, y + 36);
+    dctx.lineTo(x + 40, y + 52);
+    dctx.lineTo(x + 18, y + 36);
+    dctx.closePath();
+    dctx.fill();
+
+    dctx.fillStyle = '#FFFFFF';
+    dctx.fillRect(x + 38, y + 18, 4, 4);
+    dctx.fillRect(x + 60, y + 34, 4, 4);
+    dctx.fillRect(x + 16, y + 34, 4, 4);
+    dctx.fillRect(x + 38, y + 50, 4, 4);
+    dctx.restore();
+  }
+
+  function drawMoundHUD(x, y) {
+    dctx.save();
+    dctx.fillStyle = '#0F5132';
+    dctx.fillRect(x, y, 165, 42);
+    dctx.strokeStyle = '#FFFFFF';
+    dctx.lineWidth = 2;
+    dctx.strokeRect(x, y, 165, 42);
+
+    dctx.fillStyle = '#081C15';
+    dctx.fillRect(x + 4, y + 4, 34, 34);
+    dctx.strokeStyle = '#4ADE80';
+    dctx.strokeRect(x + 4, y + 4, 34, 34);
+    dctx.font = '18px sans-serif';
+    dctx.textAlign = 'center';
+    dctx.fillText('🧢', x + 21, y + 27);
+
+    dctx.textAlign = 'left';
+    dctx.fillStyle = '#FFC72C';
+    dctx.font = 'bold 8px monospace';
+    dctx.fillText('ON THE MOUND:', x + 44, y + 15);
+    dctx.fillStyle = '#FFFFFF';
+    dctx.font = 'bold 11px sans-serif';
+    dctx.fillText('BUDDY BAT', x + 44, y + 27);
+    dctx.fillStyle = '#A7F3D0';
+    dctx.font = 'bold 8px monospace';
+    dctx.fillText('0 PT, 0 K, 0 BB', x + 44, y + 37);
+    dctx.restore();
   }
 
   function updateDerby() {
@@ -543,6 +767,22 @@ document.addEventListener('DOMContentLoaded', () => {
     hitsEl.textContent = hits;
     hrEl.textContent = hr;
     distEl.textContent = `${longestDist} FT`;
+
+    const batsRuns = document.getElementById('hud-bats-runs');
+    if (batsRuns) batsRuns.textContent = hr;
+
+    const outsDots = document.getElementById('hud-outs-dots');
+    if (outsDots) {
+      outsDots.innerHTML = `
+        <span class="hud-dot ${outs >= 1 ? 'on' : 'off'}"></span>
+        <span class="hud-dot ${outs >= 2 ? 'on' : 'off'}"></span>
+      `;
+    }
+  }
+
+  const timeoutBtn = document.getElementById('bb97-timeout-btn');
+  if (timeoutBtn) {
+    timeoutBtn.addEventListener('click', loadElemQuestion);
   }
 
   // 3rd-5th Grade Math & Science Quiz
