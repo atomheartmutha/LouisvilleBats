@@ -331,8 +331,23 @@ document.addEventListener('DOMContentLoaded', () => {
   let questionPending = false;
   let answerLocked = false;
   let derbyPaused = false;
-  const recentQuestionIds = [];
+  const questionSessionKey = 'batyard_answered_question_ids';
+  let storedQuestionIds = [];
+  try {
+    storedQuestionIds = JSON.parse(window.sessionStorage?.getItem(questionSessionKey) || '[]');
+  } catch (_) {}
+  const answeredQuestionIds = new Set(Array.isArray(storedQuestionIds) ? storedQuestionIds : []);
   const recentQuestions = [];
+
+  function rememberAnsweredQuestion(question) {
+    if (!question?.id) return;
+    answeredQuestionIds.add(question.id);
+    recentQuestions.push(question.q);
+    if (recentQuestions.length > 20) recentQuestions.shift();
+    try {
+      window.sessionStorage?.setItem(questionSessionKey, JSON.stringify([...answeredQuestionIds]));
+    } catch (_) {}
+  }
 
   const catTierBadge = document.getElementById('cat-tier-badge');
   const catStreakBadge = document.getElementById('cat-streak-badge');
@@ -362,7 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
           streak: catStreak,
           lastResult: catLastResult,
           excludeId: catLastQId,
-          recentIds: recentQuestionIds,
+          recentIds: [...answeredQuestionIds],
           recentQuestions
         })
       });
@@ -392,10 +407,6 @@ document.addEventListener('DOMContentLoaded', () => {
       questionPending = false;
       answerLocked = false;
     }
-      recentQuestionIds.push(catLastQId);
-      recentQuestions.push(activeAdaptiveQuestion.q);
-      if (recentQuestionIds.length > 30) recentQuestionIds.shift();
-      if (recentQuestions.length > 12) recentQuestions.shift();
       activeAdaptiveQuestion.options.forEach((opt, idx) => {
         const btn = document.createElement('button');
         btn.className = 'cat-opt-btn';
@@ -414,6 +425,7 @@ document.addEventListener('DOMContentLoaded', () => {
     catFbBox.classList.remove('hidden');
     const isCorrect = selectedIdx === activeAdaptiveQuestion.ans;
     catLastResult = isCorrect;
+    rememberAnsweredQuestion(activeAdaptiveQuestion);
 
     if (isCorrect) {
       catStreak++;

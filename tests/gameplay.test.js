@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 // Run the actual frontend event handlers with deterministic frames, timers and requests.
-function game({ offline = false } = {}) {
+function game({ offline = false, sessionStore = new Map() } = {}) {
   const elements = new Map(), timers = [], requests = [];
   let frame, init;
   class Element {
@@ -37,7 +37,7 @@ function game({ offline = false } = {}) {
     addEventListener: (_, callback) => { init = callback; }
   };
   vm.runInNewContext(fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8'), {
-    document, window: { addEventListener() {} }, console,
+    document, window: { addEventListener() {}, sessionStorage: { getItem: key => sessionStore.get(key) || null, setItem: (key, value) => sessionStore.set(key, value) } }, console,
     localStorage: { getItem: key => key === 'batyard_sound' ? 'false' : '0', setItem() {} },
     requestAnimationFrame: callback => { frame = callback; },
     setTimeout: callback => { timers.push(callback); },
@@ -122,4 +122,12 @@ test('leaving a required question cannot bypass it; offline questions remain ans
   assert.notEqual(g.el('cat-question-text').textContent, first);
   g.answer(2);
   assert.equal(g.el('arcade-pitch-btn').disabled, false);
+});
+
+test('answered questions remain excluded after a new game starts in the same browser session', async () => {
+  const sessionStore = new Map();
+  const firstGame = game({ sessionStore }); await firstGame.start();
+  firstGame.answer(1); await firstGame.nextTimer();
+  const secondGame = game({ sessionStore }); await secondGame.start();
+  assert.deepEqual(secondGame.requests[0].recentIds, ['q-1']);
 });
