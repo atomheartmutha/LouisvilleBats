@@ -396,22 +396,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 1. Sky & Trees
     const sky = dctx.createLinearGradient(0, 0, 0, 95);
-    sky.addColorStop(0, '#3A86C8');
-    sky.addColorStop(1, '#8ECAE6');
+    sky.addColorStop(0, '#e9c78e');
+    sky.addColorStop(1, '#f5e6bd');
     dctx.fillStyle = sky;
     dctx.fillRect(0, 0, derbyCanvas.width, 95);
 
-    dctx.fillStyle = '#2D6A4F';
-    for (let tx = 10; tx < derbyCanvas.width; tx += 45) {
-      dctx.beginPath();
-      dctx.arc(tx, 74, 25, 0, Math.PI * 2);
-      dctx.fill();
+    // A playful riverfront silhouette, rather than a geographically exact stadium view.
+    dctx.fillStyle = '#e8af5f';
+    dctx.beginPath();
+    dctx.arc(470, 30, 21, 0, Math.PI * 2);
+    dctx.fill();
+    dctx.fillStyle = '#728b7d';
+    const skyline = [[100, 40, 26], [132, 24, 34], [172, 12, 28], [207, 35, 40], [254, 48, 24]];
+    for (const [x, y, width] of skyline) {
+      dctx.fillRect(x, y, width, 76 - y);
     }
-    dctx.fillStyle = '#40916C';
-    for (let tx = 32; tx < derbyCanvas.width; tx += 50) {
+    dctx.fillStyle = '#9bbbad';
+    dctx.fillRect(0, 65, derbyCanvas.width, 15);
+    dctx.strokeStyle = '#456b62';
+    dctx.lineWidth = 3;
+    for (let bx = 310; bx < 710; bx += 80) {
       dctx.beginPath();
-      dctx.arc(tx, 78, 18, 0, Math.PI * 2);
-      dctx.fill();
+      dctx.moveTo(bx, 61);
+      dctx.quadraticCurveTo(bx + 40, 11, bx + 80, 61);
+      dctx.lineTo(bx, 61);
+      dctx.stroke();
+      dctx.fillStyle = '#456b62';
+      dctx.fillRect(bx, 60, 4, 20);
     }
 
     // Wooden Blue Outfield Fence
@@ -430,6 +441,10 @@ document.addEventListener('DOMContentLoaded', () => {
     dctx.font = 'bold 9px monospace';
     dctx.textAlign = 'center';
     dctx.fillText('LOUISVILLE BATS', 360, 81);
+    dctx.fillStyle = '#f5e9cd';
+    dctx.font = 'bold 8px monospace';
+    dctx.fillText('RIVER CITY SANDLOT', 135, 95);
+    dctx.fillText('LOUISVILLE • KY', 580, 95);
 
     // 2. Outfield & Infield Grass
     dctx.fillStyle = '#386641';

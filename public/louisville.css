@@ -1,0 +1,109 @@
+/* Louisville ballpark edition. Local fonts and CSS scenery keep the first pitch light. */
+:root { --paper: #f5e9cd; --ink: #172d36; --card-border: #46605c; }
+body.arcade-body { background: #e5d9bc; background-image: repeating-linear-gradient(90deg, transparent 0 79px, #172d3606 79px 80px); padding: 20px; }
+.arcade-cabinet { max-width: 1120px; border: 2px solid var(--ink); outline: none; border-radius: 12px; box-shadow: 6px 8px 0 #172d3626; }
+.arcade-marquee { background: #132e32; border-bottom: 4px solid #bb3440; padding: 14px 22px; }
+.marquee-title { font-family: Georgia, serif; font-size: 1.3rem; letter-spacing: .4px; text-shadow: none; color: var(--paper); }
+.marquee-subtitle { font-size: .62rem; letter-spacing: 1.7px; color: #d7c8a5; }
+.marquee-logo { background: #b52e3e; border-color: #e0cc99; }
+.arcade-mini-btn, .arcade-mini-btn.organ, .arcade-rank-badge { background: #193c3f; border-color: #6f8274; color: var(--paper); }
+.arcade-points-box { background: #0c2226; border-color: #9eaf8f; }
+.arcade-screen { background: #173b35; }
+#screen-title { padding: 0; }
+.title-backdrop { position: relative; isolation: isolate; overflow: hidden; border: 0; border-radius: 0; background: #f3e5c4; color: var(--ink); padding: 0 30px 18px; gap: 14px; }
+.hometown-strip { z-index: 1; display: flex; justify-content: space-between; width: calc(100% + 60px); padding: 11px 26px; border-bottom: 1px solid #233c3430; font: bold 10px monospace; letter-spacing: 1.5px; }
+.title-logo-container { position: relative; z-index: 1; margin-top: 5px; }
+.title-bat-mascot { font-size: 2.8rem; line-height: 1.2; }
+.hometown-eyebrow { font: bold 10px monospace; letter-spacing: 2px; margin: 10px 0 14px; }
+.retro-title { color: #ad2838; font-family: Georgia, 'Times New Roman', serif; font-size: clamp(3.5rem, 7.8vw, 6rem); font-style: italic; line-height: .84; letter-spacing: -4px; text-shadow: 2px 3px 0 #fff6e1, 4px 5px 0 #183d3640; transform: rotate(-4deg); }
+.retro-title .highlight-gold { color: #173e35; font-family: inherit; }
+.title-tagline { margin-top: 22px; font-family: Georgia, serif; font-size: 1.15rem; font-style: italic; color: #233f35; }
+.jcps-badge-pill { position: relative; z-index: 1; background: #f9edcf; color: #3d4b36; border: 1px solid #b1ab81; border-radius: 3px; font-size: .74rem; padding: 6px 12px; }
+.start-prompt-box { position: relative; z-index: 1; }
+.arcade-start-btn { background: #b52e3e; color: #fff2d7; border: 2px solid #692331; border-radius: 5px; padding: 14px 44px; font-size: 1.15rem; letter-spacing: 2px; box-shadow: 0 5px 0 #692331; animation: none; }
+.arcade-start-btn:hover { background: #962333; transform: translateY(-2px); }
+.start-subhint { color: #203c33; font-size: .7rem; margin-top: 12px; background: #f5e9cde8; padding: 4px 8px; border-radius: 3px; }
+.title-mode-selector { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(4, 1fr); width: 100%; gap: 10px; margin-top: 18px; }
+.mode-shortcut-btn { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; text-align: left; background: var(--paper); color: var(--ink); border: 1px solid #243d35; border-radius: 5px; padding: 14px; box-shadow: 0 3px 0 #173e3540; }
+.mode-shortcut-btn:hover { background: #fff7e3; border-color: #ad2838; transform: translateY(-3px); }
+.mode-number { font: bold 9px monospace; letter-spacing: 1.7px; color: #a52b39; }
+.mode-shortcut-btn strong { font-family: Georgia, serif; font-size: 1rem; }
+.mode-shortcut-btn small { font-size: .68rem; font-weight: 500; }
+.hometown-ticket { position: relative; z-index: 1; display: flex; justify-content: space-between; width: 100%; padding-top: 12px; border-top: 1px dashed #173e3570; font: bold 9px monospace; letter-spacing: 1.6px; }
+.riverfront-scene { position: absolute; inset: 45px 0 60px; z-index: 0; pointer-events: none; }
+.riverfront-sun { position: absolute; width: 135px; height: 135px; border-radius: 50%; background: #e4b55b; top: 42px; right: 9%; opacity: .65; }
+.riverfront-skyline { position: absolute; display: flex; align-items: flex-end; gap: 5px; left: 2%; bottom: 145px; height: 170px; opacity: .38; }
+.riverfront-skyline i { width: 36px; height: 65px; background: #627f74; border-top: 5px solid #49695f; }
+.riverfront-skyline i:nth-child(2) { height: 100px; width: 26px; }
+.riverfront-skyline i:nth-child(3) { height: 140px; clip-path: polygon(35% 0,65% 0,100% 15%,100% 100%,0 100%,0 15%); }
+.riverfront-skyline i:nth-child(4) { height: 83px; width: 48px; }
+.riverfront-skyline i:nth-child(6) { height: 115px; }
+.riverfront-bridge { position: absolute; right: -35px; bottom: 162px; display: flex; width: 36%; height: 63px; border-bottom: 7px solid #53776c; transform: rotate(-3deg); opacity: .55; }
+.riverfront-bridge i { flex: 1; border: 5px solid #53776c; border-radius: 50% 50% 0 0; border-bottom: 0; }
+.riverfront-bridge::after { content: ''; position: absolute; inset: 60px 20px -36px; border-left: 9px solid #53776c; border-right: 9px solid #53776c; }
+.riverfront-water { position: absolute; bottom: 82px; height: 80px; width: 100%; background: repeating-linear-gradient(0deg,#8aafa1 0 9px,#9cb8a7 9px 11px); opacity: .65; }
+.riverfront-grass { position: absolute; bottom: -100px; width: 120%; left: -10%; height: 190px; background: #7d966d; border-radius: 50% 40% 0 0; opacity: .35; }
+.arcade-bottom-panel { background: #132e32; color: #c5cbb4; border-color: #40574b; font-size: .6rem; gap: 10px; }
+.screen-header-bar, .derby-top-bar { background: #102d29; border-color: #728867; }
+.screen-header-bar h2 { color: var(--paper); font-family: Georgia, serif; }
+.canvas-game-frame { background: #102d29; border-color: #bdac78; }
+.bb97-hud-bar { border-color: #e6ddbc; }
+.pitch-pill.active, .gamepad-btn.blue { background: #28655e; }
+button { touch-action: manipulation; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #ffcf57; outline-offset: 3px; }
+.game-modal-overlay { position: fixed; overflow-y: auto; }
+.chalkboard-modal { max-height: calc(100dvh - 32px); overflow-y: auto; }
+@media (max-width: 640px) {
+  body.arcade-body { padding: 0; align-items: flex-start; }
+  .arcade-cabinet { border: 0; border-radius: 0; box-shadow: none; min-height: 100dvh; }
+  .arcade-marquee { padding: 10px 14px; gap: 8px; }
+  .marquee-brand { gap: 8px; }
+  .marquee-logo { width: 34px; height: 34px; font-size: 1.5rem; }
+  .marquee-title { font-size: 1rem; }
+  .marquee-subtitle { font-size: .5rem; }
+  .marquee-stats { width: 100%; justify-content: space-between; gap: 5px; }
+  .arcade-mini-btn { min-height: 40px; }
+  .arcade-screen { flex: 1; min-height: 0; }
+  .title-backdrop { padding: 0 16px 14px; gap: 10px; min-height: 100%; }
+  .hometown-strip { width: calc(100% + 32px); padding: 10px 16px; font-size: 8px; letter-spacing: .5px; }
+  .hometown-strip span:last-child { display: none; }
+  .title-bat-mascot { font-size: 2rem; }
+  .hometown-eyebrow { font-size: 8px; letter-spacing: 1px; margin: 6px 0 12px; }
+  .retro-title { font-size: 3.9rem; letter-spacing: -3px; }
+  .title-tagline { font-size: 1rem; margin-top: 16px; }
+  .title-mode-selector { grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px; }
+  .mode-shortcut-btn { padding: 11px; gap: 6px; }
+  .mode-shortcut-btn strong { font-size: .9rem; }
+  .mode-shortcut-btn small { font-size: .62rem; }
+  .hometown-ticket { font-size: 7px; letter-spacing: .5px; }
+  .riverfront-skyline { left: -90px; opacity: .2; }
+  .riverfront-bridge { width: 45%; }
+  .game-screen { padding: 10px; }
+  .screen-header-bar, .derby-top-bar { flex-wrap: wrap; gap: 10px; padding: 10px; }
+  .screen-header-bar h2 { font-size: .95rem; }
+  .derby-nav-buttons { width: 100%; }
+  .derby-nav-btn, .screen-back-btn, .pitch-pill { min-height: 44px; }
+  .canvas-game-frame { padding: 5px; }
+  .gamepad-control-bar { justify-content: center; }
+  .gamepad-action-buttons { flex-basis: 100%; }
+  .gamepad-btn { flex: 1; padding: 12px 6px; font-size: .8rem; }
+  .gamepad-btn kbd { display: none; }
+  .bb97-hud-bar { flex-wrap: wrap; }
+  .hud-inning-col { padding: 5px; border-right: 0; }
+  .hud-atbat-col { padding: 6px; min-width: 180px; }
+  .hud-count-row { gap: 6px; flex-wrap: wrap; }
+  .hud-batter-name { font-size: .7rem; }
+  .hud-action-col { width: 100%; border-left: 0; border-top: 1px solid #e6ddbc; }
+  .hud-timeout-btn { width: 100%; flex-direction: row; gap: 8px; min-height: 44px; }
+  .timeout-txt br { display: none; }
+  .chalkboard-modal { padding: 12px; border-width: 5px; }
+  .chalkboard-header, .chalkboard-footer { flex-wrap: wrap; gap: 12px; }
+  .chalkboard-close-btn, .cat-resume-btn { min-height: 44px; }
+  .gauge-flex { flex-wrap: wrap; }
+  .cat-slider { min-width: 100px; }
+  .arcade-bottom-panel { padding: 10px 14px; }
+  .panel-left { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

@@ -2,10 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Batyard Slugger — Louisville Bats Video Game</title>
   <meta name="description" content="Batyard Slugger: A 90s Backyard Baseball inspired video game for the Louisville Bats featuring JCPS computer-adaptive math & science challenges.">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="louisville.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦇</text></svg>">
 </head>
 <body class="arcade-body">
@@ -49,29 +50,39 @@
       <!-- ============================================================ -->
       <div id="screen-title" class="game-screen active">
         <div class="title-backdrop">
+          <div class="hometown-strip"><span>LOUISVILLE, KENTUCKY</span><span>YOUR BALLPARK. YOUR BIG LEAGUE.</span></div>
+          <div class="riverfront-scene" aria-hidden="true">
+            <div class="riverfront-sun"></div>
+            <div class="riverfront-skyline"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="riverfront-bridge"><i></i><i></i><i></i></div>
+            <div class="riverfront-water"></div>
+            <div class="riverfront-grass"></div>
+          </div>
           <div class="title-logo-container">
-            <div class="title-bat-mascot">🦇</div>
+            <div class="title-bat-mascot" aria-hidden="true">🦇</div>
+            <p class="hometown-eyebrow">A LITTLE LOUISVILLE. A LOT OF GAME.</p>
             <h1 class="retro-title">BATYARD<br><span class="highlight-gold">SLUGGER</span></h1>
-            <p class="title-tagline">"BRING THE BALLPARK TO THE BROWSER"</p>
+            <p class="title-tagline">Big swings. Riverfront dreams.</p>
           </div>
 
           <div class="jcps-badge-pill">
-            <span>⚡ POWERED BY JCPS ADAPTIVE TESTING ENGINE (TIERS 1–5)</span>
+            <span>⚡ Solve a challenge. Power up your bat.</span>
           </div>
 
           <div class="start-prompt-box">
             <button id="start-game-btn" class="arcade-start-btn">
-              ► PRESS START / PLAY BALL ◄
+              PLAY BALL <span aria-hidden="true">↗</span>
             </button>
-            <p class="start-subhint">Tap button or press <kbd>SPACE</kbd> / <kbd>ENTER</kbd> to begin!</p>
+            <p class="start-subhint">Step up to the plate · Tap or press <kbd>SPACE</kbd></p>
           </div>
 
           <div class="title-mode-selector">
-            <button class="mode-shortcut-btn" data-target="screen-derby">⚾ Sandlot Derby</button>
-            <button class="mode-shortcut-btn" data-target="screen-coloring">🎨 Pre-K Coloring Dugout</button>
-            <button class="mode-shortcut-btn" data-target="screen-roster">🧢 Bats Roster (MLB API)</button>
-            <button class="mode-shortcut-btn" data-target="screen-saber">📊 Front Office Sabermetrics</button>
+            <button class="mode-shortcut-btn" data-target="screen-derby"><span class="mode-number">01 / PLAY</span><strong>⚾ Sandlot Derby</strong><small>Swing for the river</small></button>
+            <button class="mode-shortcut-btn" data-target="screen-coloring"><span class="mode-number">02 / CREATE</span><strong>🎨 Buddy’s Art Club</strong><small>Little fans, big imagination</small></button>
+            <button class="mode-shortcut-btn" data-target="screen-roster"><span class="mode-number">03 / DRAFT</span><strong>🧢 Meet the Bats</strong><small>Pick your hometown hitter</small></button>
+            <button class="mode-shortcut-btn" data-target="screen-saber"><span class="mode-number">04 / DISCOVER</span><strong>📊 Front Office</strong><small>Think like a baseball boss</small></button>
           </div>
+          <div class="hometown-ticket"><span>ADMIT EVERYONE</span><span>SLUGGER FIELD → YOUR SANDLOT</span><span>502</span></div>
         </div>
       </div>
 
@@ -83,7 +94,7 @@
           <h2>🧢 DUGOUT DRAFT: SELECT YOUR BATTER</h2>
           <button class="screen-back-btn" data-target="screen-title">◀ BACK TO TITLE</button>
         </div>
-        <p class="dugout-subtitle">Real Triple-A Louisville Bats stars from the MLB Stats API translated into 1–10 Backyard kid attributes!</p>
+        <p class="dugout-subtitle">Hometown hitters. Sandlot superpowers. Pick a Louisville Bats player and take the field with ratings from 1–10.</p>
         
         <div class="dugout-roster-grid" id="dugout-roster-grid">
           <!-- Populated dynamically with kid cards -->
@@ -106,7 +117,7 @@
           </div>
           <div class="derby-nav-buttons">
             <button id="game-timeout-btn" class="derby-nav-btn warning" title="Call Time Out for JCPS Math/Science Challenge">
-              ✋ TIME OUT (JCPS CHALLENGE)
+              ✋ POWER-UP CHALLENGE
             </button>
             <button class="derby-nav-btn" data-target="screen-title">TITLE</button>
           </div>
@@ -191,7 +202,7 @@
         <div class="chalkboard-modal">
           <div class="chalkboard-header">
             <div class="jcps-cat-meter">
-              <span class="cat-pill">⚡ JCPS ADAPTIVE TESTING ENGINE</span>
+              <span class="cat-pill">⚡ BUDDY’S BRAIN BREAK</span>
               <span class="tier-indicator" id="cat-tier-badge">TIER 3: PROFICIENT</span>
               <span class="streak-indicator" id="cat-streak-badge">🔥 STREAK: 0</span>
             </div>
@@ -220,7 +231,7 @@
           </div>
 
           <div class="chalkboard-footer">
-            <span class="cat-hint">Correct answers increase adaptive difficulty tier; incorrect answers provide scaffolding!</span>
+            <span class="cat-hint">Build a correct-answer streak to earn your power bat. Buddy’s got your back!</span>
             <button id="return-to-atbat-btn" class="cat-resume-btn">⚾ RETURN TO AT-BAT WITH POWER BAT</button>
           </div>
         </div>
