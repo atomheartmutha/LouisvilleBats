@@ -4,15 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Batyard Slugger — Louisville Bats Ballpark Video Game</title>
-  <meta name="description" content="Batyard Slugger: A 90s Backyard Baseball inspired game for the Louisville Bats. Features Pre-K Coloring Book, 3-5th Grade Math/Science Batting Derby, and Post-Secondary Sabermetrics.">
+  <meta name="description" content="Batyard Slugger: 90s Backyard Baseball inspired game for the Louisville Bats. Features Pre-K Coloring Dugout & ELC Puzzles, 3-5th Grade Math/Science Batting Derby, and Post-Secondary Sabermetrics.">
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦇</text></svg>">
 </head>
 <body>
-  <!-- Backyard Style Top Header -->
+  <!-- Sandlot Wooden Scoreboard Header -->
   <header class="sandlot-header">
-    <div class="header-content">
-      <div class="mascot-badge">
+    <div class="header-left">
+      <div class="mascot-badge" title="Louisville Bats Mascot Buddy Bat">
         <span class="bat-icon">🦇</span>
       </div>
       <div class="title-group">
@@ -20,9 +20,23 @@
         <p class="tagline">Ballpark to the Browser &bull; Louisville Bats &bull; Triple-A Cincinnati Reds</p>
       </div>
     </div>
-    <div class="header-status">
+
+    <!-- Audio & Player Badge Controls -->
+    <div class="header-controls">
+      <button id="organ-charge-btn" class="audio-btn organ-btn" title="Play Ballpark Organ 'Charge!' Fanfare">
+        🎹 <span>Play Organ ("Charge!")</span>
+      </button>
+      <button id="sound-toggle-btn" class="audio-btn" title="Toggle Sound Effects">
+        🔊 <span>Sound: ON</span>
+      </button>
+
+      <div class="player-rank-badge" id="player-rank-badge">
+        <span class="rank-icon" id="rank-icon">🥉</span>
+        <span class="rank-title" id="rank-title">T-Ball Rookie</span>
+      </div>
+
       <div class="score-wood-box">
-        <span class="wood-label">JUICE BOX POINTS:</span>
+        <span class="wood-label">JUICE BOX PTS:</span>
         <span id="global-points" class="wood-val">0</span>
       </div>
     </div>
@@ -32,7 +46,7 @@
   <nav class="plank-nav">
     <button class="plank-btn active" data-tab="tab-prek">
       <span class="plank-icon">🎨</span>
-      <span class="plank-text">Level 1: Pre-K Coloring Dugout</span>
+      <span class="plank-text">Level 1: Pre-K Coloring Dugout & Puzzles</span>
     </button>
     <button class="plank-btn" data-tab="tab-elem">
       <span class="plank-icon">⚾</span>
@@ -41,6 +55,10 @@
     <button class="plank-btn" data-tab="tab-postsec">
       <span class="plank-icon">📊</span>
       <span class="plank-text">Level 3: Post-Secondary Sabermetrics</span>
+    </button>
+    <button class="plank-btn" data-tab="tab-trophy">
+      <span class="plank-icon">🏆</span>
+      <span class="plank-text">Trophy Case & Badges</span>
     </button>
     <button class="plank-btn" data-tab="tab-roster">
       <span class="plank-icon">🧢</span>
@@ -51,18 +69,24 @@
   <main class="main-viewport">
 
     <!-- ============================================================ -->
-    <!-- LEVEL 1: PRE-K COLORING DUGOUT (ELC, SHAPES, COUNTING, BATS) -->
+    <!-- LEVEL 1: PRE-K COLORING DUGOUT & TACTILE ELC PUZZLES         -->
     <!-- ============================================================ -->
     <section id="tab-prek" class="level-section active">
       <div class="level-intro-card">
-        <h2>🎨 Buddy Bat's Pre-K Coloring Dugout</h2>
-        <p class="subtext">Designed for early learners (Pre-K & Kindergarten). Modernizing printed activity books with digital coloring and Kentucky Early Childhood Standards (counting, shapes, and bat biology)!</p>
+        <h2>🎨 Buddy Bat's Pre-K Coloring Dugout & Action Puzzles</h2>
+        <p class="subtext">Digital replacement for printed activity books at Louisville Slugger Field! Paint clean templates without shape overlap, solve counting action puzzles, and learn bat biology!</p>
       </div>
 
+      <!-- Coloring Studio & Interactive Canvas -->
       <div class="coloring-workspace">
-        <!-- Coloring Tools Sidebar -->
         <div class="coloring-toolbox">
-          <h3>🖍️ Pick a Color</h3>
+          <h3>🖍️ Paint Tools</h3>
+          <div class="tool-mode-row">
+            <button id="draw-mode-btn" class="mode-btn active" title="Freehand Brush Drawing">🖌️ Brush</button>
+            <button id="fill-mode-btn" class="mode-btn" title="Tap-to-Fill Bucket (Clean outlines!)">🪣 Bucket Fill</button>
+          </div>
+
+          <h3>🎨 Crayon Palette</h3>
           <div class="crayon-palette">
             <button class="crayon-btn active" data-color="#BA0C2F" style="background: #BA0C2F;" title="Bats Red"></button>
             <button class="crayon-btn" data-color="#0C2340" style="background: #0C2340;" title="Midnight Navy"></button>
@@ -76,38 +100,81 @@
 
           <h3>📏 Brush Size</h3>
           <div class="brush-sizes">
-            <button class="size-btn" data-size="4">Small</button>
-            <button class="size-btn active" data-size="10">Medium</button>
-            <button class="size-btn" data-size="22">Thick</button>
+            <button class="size-btn" data-size="6">Fine</button>
+            <button class="size-btn active" data-size="14">Medium</button>
+            <button class="size-btn" data-size="28">Jumbo</button>
           </div>
 
           <h3>📄 Choose Template</h3>
           <div class="template-picker">
-            <button class="tmpl-btn active" data-tmpl="buddy">🦇 Buddy Bat</button>
+            <button class="tmpl-btn active" data-tmpl="buddy">🦇 Buddy Bat & Slugger</button>
             <button class="tmpl-btn" data-tmpl="diamond">⚾ Ballpark Diamond</button>
-            <button class="tmpl-btn" data-tmpl="cap">🧢 Bats Cap & Ball</button>
+            <button class="tmpl-btn" data-tmpl="cap">🧢 Bats Mascot Cap</button>
           </div>
 
           <div class="tool-actions">
-            <button id="clear-canvas-btn" class="tool-btn secondary">🗑️ Reset Page</button>
-            <button id="download-art-btn" class="tool-btn primary">💾 Save My Art</button>
+            <button id="clear-canvas-btn" class="tool-btn secondary">🗑️ Reset Sheet</button>
+            <button id="download-art-btn" class="tool-btn primary">💾 Save / Print Art</button>
           </div>
         </div>
 
-        <!-- Main Interactive Coloring Canvas -->
+        <!-- Clean Outline Canvas without overlapping lines -->
         <div class="canvas-panel">
-          <canvas id="coloring-canvas" width="600" height="460"></canvas>
-          <p class="canvas-hint">Touch, tap, or drag your mouse to color Buddy Bat!</p>
+          <canvas id="coloring-canvas" width="620" height="460"></canvas>
+          <p class="canvas-hint">Pick a color and draw, or switch to <strong>🪣 Bucket Fill</strong> to tap clean colored shapes!</p>
         </div>
       </div>
 
-      <!-- Pre-K ELC Quiz Station -->
+      <!-- Tactile ELC Action Puzzles (Replacing text-heavy testing) -->
+      <div class="prek-action-puzzles-grid">
+        <!-- Puzzle 1: Tap to Count Baseballs -->
+        <div class="elc-puzzle-card">
+          <div class="puzzle-badge">⚾ ACTION PUZZLE: TAP TO COUNT</div>
+          <h3>Tap all the baseballs into Buddy's bucket!</h3>
+          <p class="puzzle-instruction">Count out loud: 1, 2, 3, 4, 5!</p>
+          <div class="counting-play-area" id="counting-balls-container">
+            <button class="tap-ball-btn" data-idx="1">⚾</button>
+            <button class="tap-ball-btn" data-idx="2">⚾</button>
+            <button class="tap-ball-btn" data-idx="3">⚾</button>
+            <button class="tap-ball-btn" data-idx="4">⚾</button>
+            <button class="tap-ball-btn" data-idx="5">⚾</button>
+          </div>
+          <div class="bucket-status">
+            Baseballs Counted: <strong id="counted-total">0 / 5</strong>
+            <span id="bucket-complete-msg" class="puzzle-complete-msg hidden">🎉 5 BASEBALLS! +25 Points!</span>
+          </div>
+        </div>
+
+        <!-- Puzzle 2: Shape Recognition (Pentagon Home Plate) -->
+        <div class="elc-puzzle-card">
+          <div class="puzzle-badge">🔺 SHAPE PUZZLE</div>
+          <h3>Which shape is Home Plate at Louisville Slugger Field?</h3>
+          <p class="puzzle-instruction">Hint: Home plate has 5 straight sides!</p>
+          <div class="shape-match-grid">
+            <button class="shape-btn" data-shape="circle">
+              <span class="shape-draw circle"></span>
+              <span>Circle</span>
+            </button>
+            <button class="shape-btn correct-shape" data-shape="pentagon">
+              <span class="shape-draw pentagon">⬠</span>
+              <span>5-Sided Pentagon</span>
+            </button>
+            <button class="shape-btn" data-shape="triangle">
+              <span class="shape-draw triangle">▲</span>
+              <span>Triangle</span>
+            </button>
+          </div>
+          <div id="shape-feedback" class="shape-feedback hidden"></div>
+        </div>
+      </div>
+
+      <!-- Pre-K Question Station (Non-Repeating) -->
       <div class="quiz-card-container">
         <div class="quiz-header-banner">
-          <span class="quiz-badge">⭐ EARLY LEARNER QUIZ</span>
+          <span class="quiz-badge">⭐ BUDDY BAT'S QUESTION OF THE INNING</span>
           <span class="quiz-standard" id="prek-standard">KY Early Childhood Standards</span>
         </div>
-        <h3 id="prek-question-text" class="quiz-prompt">Count Buddy Bat's baseballs: ⚾ ⚾ ⚾ ⚾. How many are there?</h3>
+        <h3 id="prek-question-text" class="quiz-prompt">Loading question...</h3>
         <div id="prek-options-grid" class="quiz-options-grid"></div>
         <div id="prek-feedback" class="quiz-feedback hidden"></div>
         <button id="next-prek-q" class="quiz-next-btn">Next Fun Question 🌟</button>
@@ -115,28 +182,28 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- LEVEL 2: 3RD–5TH GRADE BATYARD DERBY (KAS MATH & SCIENCE)     -->
+    <!-- LEVEL 2: 3RD–5TH GRADE BATYARD DERBY (TACTILE GAMEPLAY & HUD) -->
     <!-- ============================================================ -->
     <section id="tab-elem" class="level-section">
       <div class="level-intro-card">
         <h2>⚾ 3rd–5th Grade Batyard Derby</h2>
-        <p class="subtext">Step up to the plate at the sandlot! Solve Kentucky 3rd–5th grade math (batting average decimals, fractions, total bases) and science (contact forces, gravity, energy transfer) to power up a 3x home run over the Ohio River!</p>
+        <p class="subtext">Authentic <em>Backyard Baseball '97</em> arcade action! Solve interactive Kentucky Math & Science puzzles to ignite your <strong>3X Aluminum Power Bat</strong> and launch home runs into the Ohio River!</p>
       </div>
 
       <div class="game-arcade-layout">
-        <!-- Canvas Baseball Arena -->
+        <!-- Canvas Baseball Arena with Backyard '97 HUD -->
         <div class="arcade-viewport">
           <canvas id="derby-canvas" width="700" height="420"></canvas>
           
           <div class="announcer-call-box">
             <span class="announcer-icon">🎙️</span>
-            <span id="derby-announcer">Step into the batter's box! Answer the Kentucky Math & Science challenge to unlock your 3X Super Slugger power!</span>
+            <span id="derby-announcer">Step into the batter's box! Tap Throw Pitch, or hit TIME OUT to solve a math/science puzzle and ignite your bat!</span>
           </div>
 
           <div class="arcade-controls">
             <button id="derby-pitch-btn" class="arcade-btn pitch">⚾ Throw Pitch</button>
-            <button id="derby-swing-btn" class="arcade-btn swing" disabled>💥 SWING! (Tap/Space)</button>
-            <button id="derby-power-btn" class="arcade-btn power">⚡ Math & Science Power-Up</button>
+            <button id="derby-swing-btn" class="arcade-btn swing" disabled>💥 SWING! (Tap / Spacebar)</button>
+            <button id="derby-power-btn" class="arcade-btn power">⚡ Interactive Power-Up Puzzle</button>
           </div>
 
           <!-- Backyard Baseball '97 Style Retro Green Scoreboard HUD Bar -->
@@ -195,23 +262,52 @@
           </div>
         </div>
 
-        <!-- Grade 3-5 Quiz & Stats Educational Station -->
+        <!-- Interactive Lego/Arcade-Style Puzzle Stations (Action-First, Not Text Quizzes!) -->
         <div class="elem-edu-sidebar">
-          <div class="edu-card">
+          
+          <!-- Interactive Action Puzzle 1: Batting Average Dial Gauge -->
+          <div class="edu-card puzzle-action-card">
             <div class="edu-header">
-              <span class="edu-tag">KENTUCKY ACADEMIC STANDARDS</span>
+              <span class="edu-tag">KAS MATH ACTION PUZZLE</span>
               <span class="edu-grade">Grades 3–5</span>
             </div>
-            <h3 id="elem-q-text" class="edu-question">A Louisville Bats hitter gets 3 hits in 10 at-bats (3/10). What is their batting average expressed as a three-place decimal?</h3>
-            <div id="elem-opts-container" class="edu-options-list"></div>
-            <div id="elem-feedback" class="edu-feedback hidden"></div>
-            <button id="next-elem-q" class="edu-next-btn">Next Math/Science Challenge ⚾</button>
+            <h4>🎯 Dial in the Batting Average!</h4>
+            <p class="puzzle-prompt-txt">A Louisville Bats player has <strong>3 hits in 10 at-bats ($3/10$)</strong>. Slide the dial to lock in their 3-decimal batting average!</p>
+            
+            <div class="gauge-slider-box">
+              <input type="range" id="avg-slider" min="100" max="500" value="200" step="25" class="custom-gauge">
+              <div class="gauge-display">Target Dial: <strong id="gauge-readout">.200</strong></div>
+              <button id="lock-avg-btn" class="action-submit-btn">🔒 Lock In Batting Average</button>
+            </div>
+            <div id="avg-dial-feedback" class="edu-feedback hidden"></div>
           </div>
 
-          <!-- Did You Know Bats Science Box -->
-          <div class="bats-fact-box">
-            <h4>🦇 Bats Ballpark Science & History</h4>
-            <p id="dynamic-fact-text">Did you know? Louisville Slugger bats are made from northern white ash and maple. When the bat strikes an 85 mph ball, the collision lasts only 1/1000th of a second, exerting thousands of pounds of force!</p>
+          <!-- Interactive Action Puzzle 2: Physics Launch Angle & Force Slider -->
+          <div class="edu-card puzzle-action-card">
+            <div class="edu-header">
+              <span class="edu-tag">KAS SCIENCE (3-PS2 & 5-PS2)</span>
+              <span class="edu-grade">Forces & Motion</span>
+            </div>
+            <h4>🚀 Set Launch Angle & Kinetic Power</h4>
+            <p class="puzzle-prompt-txt">Tune the bat's launch angle ($25^\circ - 35^\circ$) to beat gravitational drag and clear the 10-foot outfield wall!</p>
+            
+            <div class="physics-controls">
+              <label>Launch Angle: <strong id="angle-val">28&deg;</strong></label>
+              <input type="range" id="angle-slider" min="10" max="60" value="28" class="custom-gauge">
+              <button id="test-launch-btn" class="action-submit-btn">💥 Unleash Kinetic Strike</button>
+            </div>
+            <div id="physics-feedback" class="edu-feedback hidden"></div>
+          </div>
+
+          <!-- Question Bank for Extra Points -->
+          <div class="edu-card">
+            <div class="edu-header">
+              <span class="edu-tag">BALLPARK TRIVIA & HISTORY</span>
+            </div>
+            <h3 id="elem-q-text" class="edu-question">Loading challenge...</h3>
+            <div id="elem-opts-container" class="edu-options-list"></div>
+            <div id="elem-feedback" class="edu-feedback hidden"></div>
+            <button id="next-elem-q" class="edu-next-btn">Next Louisville Bats Challenge ⚾</button>
           </div>
         </div>
       </div>
@@ -227,7 +323,7 @@
       </div>
 
       <div class="sabermetric-dashboard">
-        <!-- Sabermetric Interactive Calculators -->
+        <!-- Interactive Calculators -->
         <div class="saber-calc-column">
           <div class="calculator-card">
             <h3>📈 1. Bill James Pythagorean Win Expectation</h3>
@@ -262,14 +358,14 @@
           </div>
         </div>
 
-        <!-- Collegiate Question & Scenario Solver -->
+        <!-- Front Office Scenario Solver -->
         <div class="saber-quiz-column">
           <div class="calculator-card">
             <div class="edu-header">
               <span class="edu-tag">COLLEGIATE SABERMETRICS</span>
               <span class="edu-grade">Post-Secondary</span>
             </div>
-            <h3 id="postsec-q-text" class="edu-question">Bill James' Pythagorean Expectation formula models a team's true talent win percentage. Using the empirical exponent γ = 1.83, what is the formula?</h3>
+            <h3 id="postsec-q-text" class="edu-question">Loading front-office challenge...</h3>
             <div id="postsec-opts-container" class="edu-options-list"></div>
             <div id="postsec-feedback" class="edu-feedback hidden"></div>
             <button id="next-postsec-q" class="edu-next-btn">Next Front Office Scenario 📊</button>
@@ -299,7 +395,50 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- TAB 4: BATS KID ROSTER (MLB STATS API)                        -->
+    <!-- TAB 4: TROPHY CASE & COLLECTIBLE CARDS (Survey Feedback!)    -->
+    <!-- ============================================================ -->
+    <section id="tab-trophy" class="level-section">
+      <div class="level-intro-card">
+        <h2>🏆 Trophy Case & Unlocked Baseball Cards</h2>
+        <p class="subtext">100% of user survey participants wanted collectible cards and badges! Earn points across any level to level up and unlock official Bats cards!</p>
+      </div>
+
+      <div class="trophy-grid" id="trophy-grid">
+        <div class="trophy-card unlocked" id="badge-rookie">
+          <div class="trophy-icon">🥉</div>
+          <h4>T-Ball Rookie Badge</h4>
+          <p>Scored your first 25 Juice Box Points!</p>
+          <span class="unlocked-tag">UNLOCKED</span>
+        </div>
+        <div class="trophy-card locked" id="badge-derby">
+          <div class="trophy-icon">🥈</div>
+          <h4>Sandlot Home Run Club</h4>
+          <p>Unlock at 100 Points: Hit a moonshot in the Batyard Derby!</p>
+          <span class="locked-tag">100 PTS</span>
+        </div>
+        <div class="trophy-card locked" id="badge-splash">
+          <div class="trophy-icon">🌊</div>
+          <h4>Ohio River Splash Hit</h4>
+          <p>Unlock at 250 Points: Clear the Louisville Slugger Field wall!</p>
+          <span class="locked-tag">250 PTS</span>
+        </div>
+        <div class="trophy-card locked" id="badge-pro">
+          <div class="trophy-icon">🦇</div>
+          <h4>Official Louisville Bats Card</h4>
+          <p>Unlock at 500 Points: Joey Votto & Noelvi Marte Rookie Card!</p>
+          <span class="locked-tag">500 PTS</span>
+        </div>
+        <div class="trophy-card locked" id="badge-gm">
+          <div class="trophy-icon">👑</div>
+          <h4>Front Office GM Ring</h4>
+          <p>Unlock at 1,000 Points: Master sabermetrics and lead the Bats!</p>
+          <span class="locked-tag">1,000 PTS</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- TAB 5: BATS KID ROSTER (MLB STATS API)                        -->
     <!-- ============================================================ -->
     <section id="tab-roster" class="level-section">
       <div class="level-intro-card">
@@ -320,7 +459,7 @@
 
   <footer class="sandlot-footer">
     <p>⚾ <strong>Batyard Slugger</strong> &bull; Louisville Bats Ballpark Video Game &bull; Built for HackKentucky 2026</p>
-    <p>Powered by Google Gemini 1.5 Flash, Vultr Cloud Compute, and the MLB Stats API &bull; Sourced for Carter Davis, Louisville Bats</p>
+    <p>Featuring Web Audio API Synthesized Ballpark Organ, Web Speech Announcer, Google Gemini 1.5 Flash, Vultr Cloud, and the MLB Stats API</p>
   </footer>
 
   <script src="app.js"></script>

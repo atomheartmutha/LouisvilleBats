@@ -7,7 +7,6 @@ import { getTripleASchedule, transformToBackyardStats, FALLBACK_BATS_ROSTER } fr
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load .env configuration
 function loadEnv() {
   const envPath = path.join(__dirname, '.env');
   if (fs.existsSync(envPath)) {
@@ -70,10 +69,11 @@ async function callGemini(prompt, systemInstruction = '') {
   }
 }
 
-// Curriculum Fallbacks grounded in KY Academic Standards & Louisville Bats History
+// Expanded Curriculum Questions (Kentucky Academic Standards + Louisville Bats History)
 const CURRICULUM_QUESTIONS = {
   'pre-k': [
     {
+      id: 'pk-1',
       q: "Count Buddy Bat's baseballs: ⚾ ⚾ ⚾ ⚾. How many are there?",
       options: ["3", "4", "5", "6"],
       ans: 1,
@@ -81,6 +81,7 @@ const CURRICULUM_QUESTIONS = {
       standard: "ELC / KY.K.CC - Counting & Cardinality"
     },
     {
+      id: 'pk-2',
       q: "Home plate has 5 straight sides. What shape is home plate?",
       options: ["Circle", "Triangle", "Pentagon", "Square"],
       ans: 2,
@@ -88,22 +89,49 @@ const CURRICULUM_QUESTIONS = {
       standard: "ELC - Shape Identification"
     },
     {
-      q: "Science Fact: Bats like Buddy Bat are the only mammals that can truly fly! How do real bats find food in the dark?",
+      id: 'pk-3',
+      q: "Science Fact: Bats like Buddy Bat are the only mammals that can fly! How do bats navigate in the dark?",
       options: ["Flashlights", "Echolocation (sound waves)", "Smell only", "Night vision goggles"],
       ans: 1,
       explanation: "Bats use echolocation! They make high-pitched sounds that bounce off objects like radar!",
       standard: "ELC / NGSS Science - Animal Traits & Senses"
     },
     {
-      q: "The Louisville Bats have 3 runs and the opposing team has 2 runs. Who has MORE runs?",
+      id: 'pk-4',
+      q: "The Louisville Bats have 5 runs and the opposing team has 3 runs. Who has MORE runs?",
       options: ["Louisville Bats", "Opposing Team", "They are tied", "Zero"],
       ans: 0,
-      explanation: "3 is greater than 2! The Bats are in the lead!",
+      explanation: "5 is greater than 3! The Bats are winning the game!",
       standard: "ELC - Number Comparisons"
+    },
+    {
+      id: 'pk-5',
+      q: "What color is the official cap of the Louisville Bats mascot, Buddy Bat?",
+      options: ["Green", "Purple", "Bats Red & Navy Blue", "Orange"],
+      ans: 2,
+      explanation: "Buddy Bat wears the official Louisville Bats colors: Red, Navy Blue, and Gold!",
+      standard: "ELC - Color & Community Recognition"
+    },
+    {
+      id: 'pk-6',
+      q: "How many bases must a player run around to score a run? (1st, 2nd, 3rd, and Home)",
+      options: ["2", "3", "4", "5"],
+      ans: 2,
+      explanation: "There are 4 bases! First base, second base, third base, and home plate!",
+      standard: "ELC - Counting & Sequencing"
+    },
+    {
+      id: 'pk-7',
+      q: "Buddy Bat has 2 baseballs in his left wing and 3 in his right wing. How many in all?",
+      options: ["4", "5", "6", "7"],
+      ans: 1,
+      explanation: "2 + 3 = 5 baseballs in total! Fantastic counting!",
+      standard: "KY.K.OA - Basic Addition Foundations"
     }
   ],
   'grades-3-5': [
     {
+      id: 'elem-1',
       q: "A Louisville Bats hitter gets 3 hits in 10 at-bats (3/10). What is their batting average expressed as a three-place decimal?",
       options: [".030", ".300", ".333", ".003"],
       ans: 1,
@@ -111,6 +139,7 @@ const CURRICULUM_QUESTIONS = {
       standard: "KY.5.NBT & KY.4.NF - Decimals to Thousandths & Fractions as Division"
     },
     {
+      id: 'elem-2',
       q: "Buddy Bat hit 2 singles, 1 double, and 1 home run. What are his Total Bases (TB)? [Formula: (1B×1) + (2B×2) + (3B×3) + (4B×4)]",
       options: ["6", "7", "8", "9"],
       ans: 2,
@@ -118,7 +147,8 @@ const CURRICULUM_QUESTIONS = {
       standard: "KY.4.OA - Multi-step Arithmetic & Order of Operations"
     },
     {
-      q: "Science (Forces & Motion): When a Louisville Slugger wood bat collides with an incoming 85 mph pitch, what causes the ball to reverse direction?",
+      id: 'elem-3',
+      q: "Science (Forces & Motion): When a Louisville Slugger bat strikes an incoming pitch, what causes the ball to accelerate into the outfield?",
       options: [
         "Unbalanced contact force exerted by the swinging bat",
         "The spin of the Earth",
@@ -126,10 +156,11 @@ const CURRICULUM_QUESTIONS = {
         "Gravity pulling it forward"
       ],
       ans: 0,
-      explanation: "KY.3-PS2: The swinging bat applies an unbalanced contact force to the ball, changing its direction and accelerating it into the outfield!",
+      explanation: "KY.3-PS2: The swinging bat applies an unbalanced kinetic contact force to the ball, reversing its direction and propelling it into fair territory!",
       standard: "KY.3-PS2 & KY.5-PS2 - Forces, Motion & Energy Transfer"
     },
     {
+      id: 'elem-4',
       q: "A center fielder at Louisville Slugger Field has 20 fielding chances and makes 19 successful outs (1 error). What is their fielding percentage?",
       options: [".950", ".850", ".900", ".990"],
       ans: 0,
@@ -137,15 +168,46 @@ const CURRICULUM_QUESTIONS = {
       standard: "KY.5.NBT - Fraction-to-Decimal Division"
     },
     {
+      id: 'elem-5',
+      q: "Science (Aerodynamics): Why does a fly ball follow a curved parabolic arc rather than flying in a straight line forever?",
+      options: [
+        "Earth's gravity pulls it downward while aerodynamic drag slows it",
+        "The outfield grass acts like a magnet",
+        "The clouds block the ball",
+        "Sunlight pushes the ball down"
+      ],
+      ans: 0,
+      explanation: "KY.5-PS2: Gravity constantly pulls the baseball toward the ground, and air drag opposes its forward velocity, creating an arc trajectory!",
+      standard: "KY.5-PS2 - Gravitational Force & Projectile Motion"
+    },
+    {
+      id: 'elem-6',
+      q: "In Little League, the distance between each base is 60 feet. What is the total perimeter around all 4 bases?",
+      options: ["180 feet", "240 feet", "300 feet", "360 feet"],
+      ans: 1,
+      explanation: "4 sides × 60 feet = 240 feet total perimeter around the base paths!",
+      standard: "KY.3.MD & KY.4.MD - Perimeter & Measurement"
+    },
+    {
+      id: 'elem-7',
       q: "Bats History: What famous river flows right behind the outfield wall of Louisville Slugger Field?",
       options: ["Mississippi River", "Ohio River", "Kentucky River", "Hudson River"],
       ans: 1,
       explanation: "The Ohio River flows directly past Louisville Slugger Field on East Main Street in downtown Louisville!",
       standard: "Kentucky History & Geography"
+    },
+    {
+      id: 'elem-8',
+      q: "Joey Votto played for the Louisville Bats before becoming an MVP. If he had 150 hits in 500 at-bats in Triple-A, what was his batting average?",
+      options: [".250", ".300", ".350", ".275"],
+      ans: 1,
+      explanation: "150 ÷ 500 = 15 ÷ 50 = 0.300 batting average! A stellar .300 Triple-A mark!",
+      standard: "KY.5.NBT - Decimal Division & Player Stats"
     }
   ],
   'post-secondary': [
     {
+      id: 'ps-1',
       q: "Bill James' Pythagorean Expectation formula models a team's true talent win percentage. Using the empirical exponent γ = 1.83, what is the formula?",
       options: [
         "Win% = RS^1.83 / (RS^1.83 + RA^1.83)",
@@ -154,10 +216,11 @@ const CURRICULUM_QUESTIONS = {
         "Win% = RS / (RA × 1.83)"
       ],
       ans: 0,
-      explanation: "Pythagorean Win Expectation: Win% = RS^1.83 / (RS^1.83 + RA^1.83). It isolates true performance from 1-run game luck!",
+      explanation: "Pythagorean Win Expectation: Win% = RS^1.83 / (RS^1.83 + RA^1.83). It isolates true run-differential efficiency from luck!",
       standard: "Collegiate Sports Analytics - Non-linear Modeling & Sabermetrics"
     },
     {
+      id: 'ps-2',
       q: "Why does Weighted On-Base Average (wOBA) assign higher linear weights to extra-base hits (e.g. 1.27 for 2B, 2.10 for HR) compared to OBP or SLG?",
       options: [
         "Linear weights reflect the empirical run expectancy change added by each specific event",
@@ -170,6 +233,7 @@ const CURRICULUM_QUESTIONS = {
       standard: "Post-Secondary Econometrics & Linear Regression"
     },
     {
+      id: 'ps-3',
       q: "Fielding Independent Pitching (FIP) formula: [(13×HR) + 3×(BB+HBP) - (2×K)] / IP + C. What fundamental assumption underlies FIP?",
       options: [
         "Pitchers have minimal control over the outcome of balls hit into fair play (BABIP)",
@@ -178,10 +242,11 @@ const CURRICULUM_QUESTIONS = {
         "Home runs should be ignored in modern evaluation"
       ],
       ans: 0,
-      explanation: "DIPS theory (Voros McCracken) proved pitchers have very little control over fair balls landing for hits; FIP isolates true pitching skill (HR, BB, K)!",
+      explanation: "DIPS theory (Voros McCracken) demonstrated pitchers have very little control over fair balls falling for hits; FIP isolates true pitching talent (HR, BB, K)!",
       standard: "Advanced Sabermetric Theory & Stochastic Variance Decomposition"
     },
     {
+      id: 'ps-4',
       q: "Statcast Aerodynamics: When a pitcher throws a four-seam fastball with 2400 RPM backspin, what physical phenomenon creates 'induced vertical break'?",
       options: [
         "The Magnus Effect (pressure differential from rotational airflow)",
@@ -192,6 +257,14 @@ const CURRICULUM_QUESTIONS = {
       ans: 0,
       explanation: "The Magnus Effect: Backspin creates high velocity and low pressure on top of the ball, generating aerodynamic lift that resists gravity!",
       standard: "Collegiate Fluid Dynamics & Sports Physics"
+    },
+    {
+      id: 'ps-5',
+      q: "In discrete Markov chain baseball modeling, how many fundamental base-out states exist in a half-inning before the 3rd out absorbing state?",
+      options: ["18 states", "24 states", "27 states", "32 states"],
+      ans: 1,
+      explanation: "3 out states (0, 1, 2) × 8 base runner configurations (empty, 1st, 2nd, 3rd, 1-2, 1-3, 2-3, loaded) = exactly 24 base-out states!",
+      standard: "Stochastic Processes & Discrete Markov Chains"
     }
   ]
 };
@@ -268,47 +341,53 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // 4. Curriculum-Aligned Quiz Generator (Pre-K, 3-5th, Post-Secondary)
+  // 4. Curriculum-Aligned Quiz Generator (Non-Repeating + Gemini Powered)
   if (pathname === '/api/quiz/generate' && req.method === 'POST') {
     let body = '';
     req.on('data', chunk => { body += chunk; });
     req.on('end', async () => {
       try {
-        const { level = 'grades-3-5', subject = 'math' } = JSON.parse(body || '{}');
+        const { level = 'grades-3-5', excludeId = '' } = JSON.parse(body || '{}');
         const validLevel = CURRICULUM_QUESTIONS[level] ? level : 'grades-3-5';
+        const pool = CURRICULUM_QUESTIONS[validLevel];
 
-        // Try generating dynamic question via Gemini
-        const systemPrompt = `You are the lead educational question designer for "Batyard Slugger", a Backyard Baseball-styled video game for the Louisville Bats. 
+        // Filter out recently seen ID to prevent repeating question bug
+        const eligible = pool.filter(item => item.id !== excludeId);
+        const selectedFallback = eligible.length > 0
+          ? eligible[Math.floor(Math.random() * eligible.length)]
+          : pool[Math.floor(Math.random() * pool.length)];
+
+        // If Gemini is configured, occasionally generate a fresh question
+        if (GEMINI_API_KEY && GEMINI_API_KEY !== 'your_gemini_api_key_here' && Math.random() > 0.4) {
+          const systemPrompt = `You are the lead educational question designer for "Batyard Slugger", a Backyard Baseball-styled video game for the Louisville Bats. 
 Level: "${validLevel}". 
 Generate ONE multiple choice question teaching baseball statistics and love for baseball through Kentucky State Standards (Math, Science, or Louisville Bats History).
 Return ONLY valid JSON matching this exact format:
 {
+  "id": "gemini-${Date.now()}",
   "q": "question text",
   "options": ["A", "B", "C", "D"],
   "ans": 0,
   "explanation": "why it is correct",
   "standard": "specific standard (e.g. KAS KY.4.NF / KY.3-PS2 / Sabermetrics wOBA)"
 }`;
-
-        const userPrompt = `Generate a fresh, engaging question for ${validLevel} themed around Louisville Bats, Louisville Slugger Field, or real baseball statistics.`;
-        
-        let questionData = null;
-        const geminiRes = await callGemini(userPrompt, systemPrompt);
-        if (geminiRes.text) {
-          try {
-            const clean = geminiRes.text.replace(/```json/g, '').replace(/```/g, '').trim();
-            questionData = JSON.parse(clean);
-          } catch (_) {}
-        }
-
-        // Fallback to verified curriculum questions if offline or JSON parse issue
-        if (!questionData || !questionData.q || !Array.isArray(questionData.options)) {
-          const pool = CURRICULUM_QUESTIONS[validLevel];
-          questionData = pool[Math.floor(Math.random() * pool.length)];
+          const userPrompt = `Generate a fresh question for ${validLevel} themed around Louisville Bats, Louisville Slugger Field, or baseball statistics.`;
+          const geminiRes = await callGemini(userPrompt, systemPrompt);
+          if (geminiRes.text) {
+            try {
+              const clean = geminiRes.text.replace(/```json/g, '').replace(/```/g, '').trim();
+              const parsed = JSON.parse(clean);
+              if (parsed.q && Array.isArray(parsed.options) && parsed.options.length === 4) {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify(parsed));
+                return;
+              }
+            } catch (_) {}
+          }
         }
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(questionData));
+        res.end(JSON.stringify(selectedFallback));
       } catch (err) {
         res.writeHead(500, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: err.message }));
@@ -365,5 +444,5 @@ Include:
 server.listen(PORT, HOST, () => {
   console.log(`⚾ Batyard Slugger Server Ready!`);
   console.log(`⚾ Running at: http://${HOST}:${PORT}`);
-  console.log(`⚾ Levels: Pre-K (Coloring), Grades 3-5 (Little League), Post-Secondary (Sabermetrics)`);
+  console.log(`⚾ Levels: Pre-K (Coloring), Grades 3-5 (Derby), Post-Secondary (Sabermetrics)`);
 });

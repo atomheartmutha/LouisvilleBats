@@ -40,7 +40,7 @@ body {
 .sandlot-header {
   background: linear-gradient(180deg, #162F4D 0%, var(--bats-navy) 100%);
   border-bottom: 5px solid var(--bats-red);
-  padding: 14px 20px;
+  padding: 12px 18px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -49,15 +49,15 @@ body {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
-.header-content {
+.header-left {
   display: flex;
   align-items: center;
   gap: 14px;
 }
 
 .mascot-badge {
-  width: 54px;
-  height: 54px;
+  width: 52px;
+  height: 52px;
   background: var(--bats-red);
   border: 3px solid var(--bats-gold);
   border-radius: 50%;
@@ -65,15 +65,21 @@ body {
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 10px rgba(186, 12, 47, 0.5);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.mascot-badge:hover {
+  transform: scale(1.08) rotate(-5deg);
 }
 
 .bat-icon {
-  font-size: 2.2rem;
+  font-size: 2.1rem;
 }
 
 .game-title {
   color: var(--chalk-white);
-  font-size: 1.6rem;
+  font-size: 1.5rem;
   font-weight: 900;
   letter-spacing: 1.5px;
   text-transform: uppercase;
@@ -82,30 +88,81 @@ body {
 
 .tagline {
   color: var(--bats-gold);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.audio-btn {
+  background: #081626;
+  border: 2px solid var(--card-border);
+  color: var(--text-main);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.audio-btn:hover {
+  border-color: var(--bats-gold);
+  color: #FFFFFF;
+}
+
+.organ-btn {
+  background: #1E3A5F;
+  border-color: var(--bats-gold);
+  color: var(--bats-gold);
+}
+
+.organ-btn:hover {
+  background: var(--bats-red);
+  color: #FFFFFF;
+}
+
+.player-rank-badge {
+  background: #081626;
+  border: 2px solid var(--bats-gold);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--bats-gold);
 }
 
 .score-wood-box {
   background: #081626;
   border: 2px solid var(--bats-gold);
   border-radius: var(--radius-md);
-  padding: 8px 16px;
+  padding: 6px 14px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .wood-label {
   color: var(--bats-gold);
   font-size: 0.75rem;
   font-weight: 800;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
 }
 
 .wood-val {
   color: #FFFFFF;
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   font-weight: 900;
 }
 
@@ -125,8 +182,8 @@ body {
   background: #172A42;
   color: var(--text-muted);
   border: 2px solid #233F63;
-  padding: 10px 18px;
-  font-size: 0.95rem;
+  padding: 10px 16px;
+  font-size: 0.9rem;
   font-weight: 800;
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -155,7 +212,7 @@ body {
 /* ========================================================= */
 .main-viewport {
   flex: 1;
-  max-width: 1050px;
+  max-width: 1060px;
   width: 100%;
   margin: 0 auto;
   padding: 18px 16px;
@@ -184,23 +241,23 @@ body {
   border: 2px solid var(--card-border);
   border-left: 6px solid var(--bats-gold);
   border-radius: var(--radius-md);
-  padding: 18px 24px;
+  padding: 16px 22px;
 }
 
 .level-intro-card h2 {
   color: var(--bats-gold);
-  font-size: 1.35rem;
-  margin-bottom: 6px;
+  font-size: 1.3rem;
+  margin-bottom: 4px;
 }
 
 .subtext {
   color: var(--text-muted);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   line-height: 1.45;
 }
 
 /* ========================================================= */
-/* LEVEL 1: COLORING WORKSPACE                               */
+/* LEVEL 1: PRE-K COLORING DUGOUT & ELC PUZZLES              */
 /* ========================================================= */
 .coloring-workspace {
   display: grid;
@@ -218,23 +275,46 @@ body {
   background: var(--card-bg);
   border: 2px solid var(--card-border);
   border-radius: var(--radius-md);
-  padding: 18px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .coloring-toolbox h3 {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--bats-gold);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
+.tool-mode-row {
+  display: flex;
+  gap: 6px;
+}
+
+.mode-btn {
+  flex: 1;
+  background: #081626;
+  border: 1px solid var(--card-border);
+  color: var(--text-main);
+  padding: 8px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mode-btn.active {
+  background: var(--bats-red);
+  color: #FFFFFF;
+  border-color: var(--bats-gold);
+}
+
 .crayon-palette {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+  gap: 8px;
 }
 
 .crayon-btn {
@@ -272,7 +352,7 @@ body {
   border: 1px solid var(--card-border);
   padding: 8px 12px;
   border-radius: var(--radius-sm);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
   text-align: left;
@@ -288,14 +368,14 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-top: 8px;
+  margin-top: 6px;
 }
 
 .tool-btn {
   padding: 10px 14px;
   border: none;
   border-radius: var(--radius-sm);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 800;
   cursor: pointer;
 }
@@ -311,6 +391,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow: hidden;
 }
 
 #coloring-canvas {
@@ -327,7 +408,147 @@ body {
 .canvas-hint {
   color: var(--text-muted);
   font-size: 0.8rem;
-  margin-top: 10px;
+  margin-top: 8px;
+}
+
+/* Pre-K Action Puzzles */
+.prek-action-puzzles-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .prek-action-puzzles-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.elc-puzzle-card {
+  background: var(--card-bg);
+  border: 2px solid var(--card-border);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.puzzle-badge {
+  background: #10B981;
+  color: #FFFFFF;
+  font-size: 0.7rem;
+  font-weight: 900;
+  padding: 3px 8px;
+  border-radius: 4px;
+  width: fit-content;
+}
+
+.puzzle-instruction {
+  color: var(--bats-gold);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.counting-play-area {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  padding: 14px 8px;
+  background: #081626;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--bats-gold);
+}
+
+.tap-ball-btn {
+  font-size: 2.2rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+  user-select: none;
+}
+
+.tap-ball-btn:hover {
+  transform: scale(1.25);
+}
+
+.tap-ball-btn.counted {
+  opacity: 0.35;
+  filter: grayscale(1);
+  transform: scale(0.85);
+  pointer-events: none;
+}
+
+.bucket-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  color: var(--text-main);
+}
+
+.puzzle-complete-msg {
+  color: #4ADE80;
+  font-weight: 800;
+}
+
+.shape-match-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.shape-btn {
+  background: #081626;
+  border: 2px solid var(--card-border);
+  color: var(--text-main);
+  padding: 14px 8px;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+}
+
+.shape-btn:hover {
+  border-color: var(--bats-gold);
+  background: #162B44;
+}
+
+.shape-draw {
+  font-size: 1.8rem;
+  color: var(--bats-gold);
+}
+
+.shape-draw.circle {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--bats-gold);
+  border-radius: 50%;
+}
+
+.shape-feedback {
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.shape-feedback.correct {
+  background: #14532D;
+  color: #DCFCE7;
+  border-left: 4px solid #4ADE80;
+}
+
+.shape-feedback.incorrect {
+  background: #7F1D1D;
+  color: #FEE2E2;
+  border-left: 4px solid #F87171;
 }
 
 /* ========================================================= */
@@ -406,324 +627,6 @@ body {
 .arcade-btn.swing { background: var(--bats-gold); color: var(--bats-navy); font-size: 1.05rem; }
 .arcade-btn.swing:disabled { background: #475569; color: #94A3B8; cursor: not-allowed; }
 .arcade-btn.power { background: linear-gradient(135deg, #FF6B00 0%, #FF9E00 100%); color: #FFFFFF; }
-
-.scoreboard-strip {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  width: 100%;
-}
-
-.strip-item {
-  background: #081626;
-  border: 1px solid var(--card-border);
-  padding: 8px 10px;
-  border-radius: 8px;
-  text-align: center;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-.strip-item strong {
-  display: block;
-  color: #FFFFFF;
-  font-size: 1.15rem;
-  margin-top: 2px;
-}
-
-.strip-item.gold strong {
-  color: var(--bats-gold);
-}
-
-/* Educational Sidebar */
-.elem-edu-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.edu-card {
-  background: var(--card-bg);
-  border: 2px solid var(--card-border);
-  border-radius: var(--radius-md);
-  padding: 20px;
-}
-
-.edu-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.edu-tag {
-  background: var(--bats-red);
-  color: #FFFFFF;
-  font-size: 0.7rem;
-  font-weight: 900;
-  padding: 4px 8px;
-  border-radius: 4px;
-  letter-spacing: 0.5px;
-}
-
-.edu-grade {
-  color: var(--bats-gold);
-  font-size: 0.8rem;
-  font-weight: 800;
-}
-
-.edu-question {
-  font-size: 1.05rem;
-  color: #FFFFFF;
-  line-height: 1.4;
-  margin-bottom: 16px;
-}
-
-.edu-options-list, .quiz-options-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.edu-opt-btn, .quiz-opt-btn {
-  background: #081626;
-  border: 2px solid #1E3A5F;
-  color: var(--text-main);
-  padding: 12px 14px;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  font-weight: 700;
-  text-align: left;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.edu-opt-btn:hover, .quiz-opt-btn:hover {
-  background: #183152;
-  border-color: var(--bats-gold);
-}
-
-.edu-feedback, .quiz-feedback {
-  margin-top: 14px;
-  padding: 12px;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  line-height: 1.4;
-}
-
-.edu-feedback.correct, .quiz-feedback.correct {
-  background: #14532D;
-  border-left: 4px solid #4ADE80;
-  color: #DCFCE7;
-}
-
-.edu-feedback.incorrect, .quiz-feedback.incorrect {
-  background: #7F1D1D;
-  border-left: 4px solid #F87171;
-  color: #FEE2E2;
-}
-
-.edu-next-btn, .quiz-next-btn {
-  margin-top: 14px;
-  background: var(--bats-red);
-  color: #FFFFFF;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-weight: 800;
-  font-size: 0.9rem;
-  cursor: pointer;
-  width: 100%;
-}
-
-.bats-fact-box {
-  background: #081626;
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius-md);
-  padding: 16px;
-}
-
-.bats-fact-box h4 {
-  color: var(--bats-gold);
-  font-size: 0.95rem;
-  margin-bottom: 6px;
-}
-
-.bats-fact-box p {
-  color: var(--text-muted);
-  font-size: 0.85rem;
-  line-height: 1.4;
-}
-
-/* ========================================================= */
-/* LEVEL 3: POST-SECONDARY SABERMETRICS                      */
-/* ========================================================= */
-.sabermetric-dashboard {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-
-@media (max-width: 860px) {
-  .sabermetric-dashboard {
-    grid-template-columns: 1fr;
-  }
-}
-
-.saber-calc-column, .saber-quiz-column {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.calculator-card {
-  background: var(--card-bg);
-  border: 2px solid var(--card-border);
-  border-radius: var(--radius-md);
-  padding: 20px;
-}
-
-.calculator-card h3 {
-  color: var(--bats-gold);
-  font-size: 1.05rem;
-  margin-bottom: 6px;
-}
-
-.calc-desc {
-  color: var(--text-muted);
-  font-size: 0.8rem;
-  margin-bottom: 14px;
-  line-height: 1.35;
-}
-
-.calc-inputs-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.calc-inputs-grid.four-col {
-  grid-template-columns: repeat(3, 1fr);
-}
-
-.calc-field label {
-  display: block;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--text-muted);
-  margin-bottom: 4px;
-}
-
-.num-box {
-  width: 100%;
-  background: #081626;
-  border: 1px solid var(--card-border);
-  color: #FFFFFF;
-  border-radius: 6px;
-  padding: 8px 10px;
-  font-size: 0.95rem;
-  font-weight: 700;
-}
-
-.calc-btn {
-  background: var(--bats-red);
-  color: #FFFFFF;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 6px;
-  font-weight: 800;
-  font-size: 0.85rem;
-  cursor: pointer;
-  width: 100%;
-}
-
-.calc-output {
-  margin-top: 10px;
-  background: #081626;
-  border: 1px solid var(--bats-gold);
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  color: var(--chalk-white);
-  text-align: center;
-}
-
-.calc-output strong {
-  color: var(--bats-gold);
-}
-
-.saber-select {
-  background: #081626;
-  border: 1px solid var(--card-border);
-  color: #FFFFFF;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  font-weight: 700;
-  margin-bottom: 10px;
-  width: 100%;
-}
-
-.re24-badge {
-  background: #1A3454;
-  border-left: 4px solid var(--bats-gold);
-  padding: 10px;
-  border-radius: 6px;
-  font-size: 0.9rem;
-}
-
-/* ========================================================= */
-/* TAB 4: ROSTER GRID (MLB API)                              */
-/* ========================================================= */
-.roster-grid-layout {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 16px;
-  margin-top: 14px;
-}
-
-.backyard-kid-card {
-  background: #081626;
-  border: 2px solid var(--bats-gold);
-  border-radius: var(--radius-md);
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-}
-
-.kid-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.kid-name {
-  color: #FFFFFF;
-  font-size: 1.1rem;
-  font-weight: 900;
-}
-
-.kid-pos {
-  background: var(--bats-red);
-  color: #FFFFFF;
-  font-size: 0.75rem;
-  font-weight: 800;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-.kid-persona-box {
-  background: #11243A;
-  border-left: 3px solid var(--bats-gold);
-  padding: 8px 10px;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  line-height: 1.35;
-  color: #CBD5E1;
-}
 
 /* ========================================================= */
 /* BACKYARD BASEBALL '97 RETRO HUD SCOREBOARD               */
@@ -908,6 +811,427 @@ body {
 
 .mini-strip {
   margin-top: 4px;
+}
+
+.scoreboard-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  width: 100%;
+}
+
+.strip-item {
+  background: #081626;
+  border: 1px solid var(--card-border);
+  padding: 8px 10px;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.strip-item strong {
+  display: block;
+  color: #FFFFFF;
+  font-size: 1.15rem;
+  margin-top: 2px;
+}
+
+.strip-item.gold strong {
+  color: var(--bats-gold);
+}
+
+/* Interactive Action Puzzles (Lego / Arcade Style) */
+.puzzle-action-card {
+  border: 2px solid var(--bats-gold);
+  background: #142840;
+}
+
+.puzzle-prompt-txt {
+  color: #CBD5E1;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin: 6px 0 10px 0;
+}
+
+.gauge-slider-box, .physics-controls {
+  background: #081626;
+  border: 1px solid var(--card-border);
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.custom-gauge {
+  width: 100%;
+  accent-color: var(--bats-gold);
+  cursor: pointer;
+}
+
+.gauge-display {
+  font-size: 1rem;
+  color: var(--bats-gold);
+  font-weight: 800;
+  text-align: center;
+}
+
+.action-submit-btn {
+  background: var(--bats-red);
+  color: #FFFFFF;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: 800;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.action-submit-btn:hover {
+  background: #D90429;
+}
+
+/* Educational Sidebar & Quiz Cards */
+.elem-edu-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.edu-card {
+  background: var(--card-bg);
+  border: 2px solid var(--card-border);
+  border-radius: var(--radius-md);
+  padding: 18px;
+}
+
+.edu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.edu-tag {
+  background: var(--bats-red);
+  color: #FFFFFF;
+  font-size: 0.7rem;
+  font-weight: 900;
+  padding: 4px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+.edu-grade {
+  color: var(--bats-gold);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.edu-question, .quiz-prompt {
+  font-size: 1rem;
+  color: #FFFFFF;
+  line-height: 1.4;
+  margin-bottom: 14px;
+}
+
+.edu-options-list, .quiz-options-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.edu-opt-btn, .quiz-opt-btn {
+  background: #081626;
+  border: 2px solid #1E3A5F;
+  color: var(--text-main);
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.edu-opt-btn:hover, .quiz-opt-btn:hover {
+  background: #183152;
+  border-color: var(--bats-gold);
+}
+
+.edu-feedback, .quiz-feedback {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.edu-feedback.correct, .quiz-feedback.correct {
+  background: #14532D;
+  border-left: 4px solid #4ADE80;
+  color: #DCFCE7;
+}
+
+.edu-feedback.incorrect, .quiz-feedback.incorrect {
+  background: #7F1D1D;
+  border-left: 4px solid #F87171;
+  color: #FEE2E2;
+}
+
+.edu-next-btn, .quiz-next-btn {
+  margin-top: 14px;
+  background: var(--bats-red);
+  color: #FFFFFF;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 0.88rem;
+  cursor: pointer;
+  width: 100%;
+}
+
+/* ========================================================= */
+/* LEVEL 3: POST-SECONDARY SABERMETRICS                      */
+/* ========================================================= */
+.sabermetric-dashboard {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 860px) {
+  .sabermetric-dashboard {
+    grid-template-columns: 1fr;
+  }
+}
+
+.saber-calc-column, .saber-quiz-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.calculator-card {
+  background: var(--card-bg);
+  border: 2px solid var(--card-border);
+  border-radius: var(--radius-md);
+  padding: 18px;
+}
+
+.calculator-card h3 {
+  color: var(--bats-gold);
+  font-size: 1.05rem;
+  margin-bottom: 6px;
+}
+
+.calc-desc {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin-bottom: 12px;
+  line-height: 1.35;
+}
+
+.calc-inputs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.calc-inputs-grid.four-col {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.calc-field label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.num-box {
+  width: 100%;
+  background: #081626;
+  border: 1px solid var(--card-border);
+  color: #FFFFFF;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.calc-btn {
+  background: var(--bats-red);
+  color: #FFFFFF;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: 800;
+  font-size: 0.85rem;
+  cursor: pointer;
+  width: 100%;
+}
+
+.calc-output {
+  margin-top: 10px;
+  background: #081626;
+  border: 1px solid var(--bats-gold);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: var(--chalk-white);
+  text-align: center;
+}
+
+.calc-output strong {
+  color: var(--bats-gold);
+}
+
+.saber-select {
+  background: #081626;
+  border: 1px solid var(--card-border);
+  color: #FFFFFF;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.re24-badge {
+  background: #1A3454;
+  border-left: 4px solid var(--bats-gold);
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+/* ========================================================= */
+/* TAB 4: TROPHY CASE & BADGES (100% SURVEY DEMAND)          */
+/* ========================================================= */
+.trophy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.trophy-card {
+  background: #081626;
+  border: 2px solid var(--card-border);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.trophy-card.unlocked {
+  border-color: var(--bats-gold);
+  box-shadow: 0 4px 14px rgba(255, 199, 44, 0.25);
+}
+
+.trophy-card.locked {
+  opacity: 0.55;
+  filter: grayscale(0.8);
+}
+
+.trophy-icon {
+  font-size: 2.8rem;
+  margin-bottom: 4px;
+}
+
+.trophy-card h4 {
+  color: #FFFFFF;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.trophy-card p {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.unlocked-tag {
+  background: #10B981;
+  color: #FFFFFF;
+  font-size: 0.7rem;
+  font-weight: 900;
+  padding: 3px 8px;
+  border-radius: 4px;
+  margin-top: auto;
+}
+
+.locked-tag {
+  background: #475569;
+  color: #E2E8F0;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 4px;
+  margin-top: auto;
+}
+
+/* ========================================================= */
+/* TAB 5: ROSTER GRID (MLB API)                              */
+/* ========================================================= */
+.roster-grid-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.backyard-kid-card {
+  background: #081626;
+  border: 2px solid var(--bats-gold);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.kid-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.kid-name {
+  color: #FFFFFF;
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+.kid-pos {
+  background: var(--bats-red);
+  color: #FFFFFF;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.kid-persona-box {
+  background: #11243A;
+  border-left: 3px solid var(--bats-gold);
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: #CBD5E1;
 }
 
 /* Common UI */
