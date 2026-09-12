@@ -1,0 +1,52 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+
+const root = new URL('../', import.meta.url);
+const assetSource = fs.readFileSync(new URL('public/assets/character-animations.js', root), 'utf8');
+const appSource = fs.readFileSync(new URL('public/app.js', root), 'utf8');
+const html = fs.readFileSync(new URL('public/index.html', root), 'utf8');
+
+test('requested pitcher and runner animation assets are local and well formed', () => {
+  const window = {};
+  vm.runInNewContext(assetSource, { window });
+  const animations = window.BatyardCharacterAnimations;
+
+  assert.deepEqual(Object.keys(animations), ['Slugger_Pitcher', 'HotRods_Pitcher', 'HotRods_Run']);
+  assert.equal(animations.Slugger_Pitcher.sourceFile, 'Assets/Slugger_Pitcher.fbx');
+  assert.equal(animations.HotRods_Pitcher.sourceFile, 'Assets/HotRods_Pitcher.fbx');
+  assert.equal(animations.HotRods_Run.sourceFile, 'Assets/HotRods_Run.fbx');
+  for (const animation of Object.values(animations)) {
+    assert.ok(animation.durationFrames > 1);
+    assert.ok(animation.poses.length >= 5);
+    assert.equal(animation.poses[0].at, 0);
+    assert.equal(animation.poses.at(-1).at, 1);
+  }
+
+  assert.ok(fs.existsSync(new URL('Assets/Slugger_Pitcher.fbx', root)));
+  assert.ok(fs.existsSync(new URL('Assets/HotRods_Pitcher.fbx', root)));
+  assert.ok(fs.existsSync(new URL('Assets/HotRods_Run.fbx', root)));
+});
+
+test('gameplay loads and triggers both character animation roles', () => {
+  assert.match(html, /assets\/character-animations\.js/);
+  assert.ok(html.indexOf('assets/character-animations.js') < html.indexOf('app.js'));
+  assert.match(appSource, /characterAnimations\.Slugger_Pitcher/);
+  assert.match(appSource, /characterAnimations\.HotRods_Pitcher/);
+  assert.match(appSource, /characterAnimations\.HotRods_Run/);
+  assert.match(appSource, /activePitcherKey === 'Slugger_Pitcher'/);
+  assert.match(appSource, /pitcherAnimationFrame = 0/);
+  assert.match(appSource, /startHotRodsRun\(hitTitle\)/);
+  assert.match(appSource, /runnerAnimation = null/);
+});
+
+test('derby backdrop combines Louisville riverfront landmarks with sandlot texture', () => {
+  assert.match(appSource, /function drawLouisvilleSkyline\(\)/);
+  assert.match(appSource, /function drawOhioRiverBridges\(\)/);
+  assert.match(appSource, /function drawSandlotTexture\(\)/);
+  assert.match(appSource, /drawLouisvilleSkyline\(\);/);
+  assert.match(appSource, /drawOhioRiverBridges\(\);/);
+  assert.match(appSource, /DOWNTOWN LOUISVILLE/);
+  assert.match(appSource, /I-65\/Kennedy bridge sightline/);
+});

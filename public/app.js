@@ -492,6 +492,12 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentPitchType = 'fastball';
   let ball = { x: 360, y: 160, r: 7, vx: 0, vy: 0, state: 'ready' };
   let batter = { x: 300, y: 365, state: 'idle' };
+  const characterAnimations = window.BatyardCharacterAnimations || {};
+  const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || false;
+  let characterIdleFrame = 0;
+  let pitcherAnimationFrame = null;
+  let runnerAnimation = null;
+  let activePitcherKey = 'Slugger_Pitcher';
 
   // Pitch selector pills
   document.querySelectorAll('.pitch-pill').forEach(pill => {
@@ -505,36 +511,31 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderDerbyField() {
     dctx.clearRect(0, 0, derbyCanvas.width, derbyCanvas.height);
 
-    // 1. Sky & Trees
+    // 1. A storybook version of the real Slugger Field riverfront sightline.
     const sky = dctx.createLinearGradient(0, 0, 0, 95);
-    sky.addColorStop(0, '#e9c78e');
-    sky.addColorStop(1, '#f5e6bd');
+    sky.addColorStop(0, '#E8B875');
+    sky.addColorStop(0.58, '#F4D49D');
+    sky.addColorStop(1, '#F9E8BE');
     dctx.fillStyle = sky;
     dctx.fillRect(0, 0, derbyCanvas.width, 95);
+    drawBackyardCloud(68, 25, 0.72);
+    drawBackyardCloud(575, 20, 0.58);
+    drawLouisvilleSkyline();
+    drawOhioRiverBridges();
 
-    // A playful riverfront silhouette, rather than a geographically exact stadium view.
-    dctx.fillStyle = '#e8af5f';
+    // A thin Ohio River ribbon keeps downtown visually separate from the fence.
+    const river = dctx.createLinearGradient(0, 66, 0, 82);
+    river.addColorStop(0, '#A9CDD0');
+    river.addColorStop(1, '#6F9FA9');
+    dctx.fillStyle = river;
+    dctx.fillRect(0, 66, derbyCanvas.width, 16);
+    dctx.strokeStyle = 'rgba(255,255,255,.55)';
+    dctx.lineWidth = 1.5;
     dctx.beginPath();
-    dctx.arc(470, 30, 21, 0, Math.PI * 2);
-    dctx.fill();
-    dctx.fillStyle = '#728b7d';
-    const skyline = [[100, 40, 26], [132, 24, 34], [172, 12, 28], [207, 35, 40], [254, 48, 24]];
-    for (const [x, y, width] of skyline) {
-      dctx.fillRect(x, y, width, 76 - y);
-    }
-    dctx.fillStyle = '#9bbbad';
-    dctx.fillRect(0, 65, derbyCanvas.width, 15);
-    dctx.strokeStyle = '#456b62';
-    dctx.lineWidth = 3;
-    for (let bx = 310; bx < 710; bx += 80) {
-      dctx.beginPath();
-      dctx.moveTo(bx, 61);
-      dctx.quadraticCurveTo(bx + 40, 11, bx + 80, 61);
-      dctx.lineTo(bx, 61);
-      dctx.stroke();
-      dctx.fillStyle = '#456b62';
-      dctx.fillRect(bx, 60, 4, 20);
-    }
+    dctx.moveTo(18, 71);
+    dctx.bezierCurveTo(135, 67, 226, 76, 350, 71);
+    dctx.bezierCurveTo(470, 67, 555, 76, 704, 70);
+    dctx.stroke();
 
     // Wooden Blue Outfield Fence
     dctx.fillStyle = '#1D3557';
@@ -555,7 +556,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dctx.fillStyle = '#f5e9cd';
     dctx.font = 'bold 8px monospace';
     dctx.fillText('RIVER CITY SANDLOT', 135, 95);
-    dctx.fillText('LOUISVILLE • KY', 580, 95);
+    dctx.fillText('DOWNTOWN LOUISVILLE', 580, 95);
 
     // 2. Outfield & Infield Grass
     dctx.fillStyle = '#386641';
@@ -564,6 +565,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dctx.fillStyle = '#407B4A';
     dctx.fillRect(0, 125, derbyCanvas.width, 20);
     dctx.fillRect(0, 165, derbyCanvas.width, 25);
+    drawSandlotTexture();
 
     // 3. Dirt Diamond
     dctx.fillStyle = '#DDA15E';
@@ -633,11 +635,12 @@ document.addEventListener('DOMContentLoaded', () => {
     drawFielder(190, 235, '#0C2340');
     drawFielder(530, 235, '#0C2340');
 
-    // Pitcher
+    // Pitcher — animated from the Slugger_Pitcher pose asset when available.
     drawPitcher(360, 210);
 
     // Batter (Pablo Sanchez / Kid Slugger)
-    drawBatter(batter.x, batter.y);
+    if (!runnerAnimation) drawBatter(batter.x, batter.y);
+    drawHotRodsRunner();
 
     // Mini-radar and mound HUD
     drawMiniRadar(18, 12);
@@ -659,6 +662,143 @@ document.addEventListener('DOMContentLoaded', () => {
       dctx.stroke();
       dctx.restore();
     }
+  }
+
+  function drawBackyardCloud(x, y, scale) {
+    dctx.save();
+    dctx.translate(x, y);
+    dctx.scale(scale, scale);
+    dctx.fillStyle = 'rgba(255, 247, 218, .72)';
+    dctx.strokeStyle = 'rgba(110, 105, 89, .22)';
+    dctx.lineWidth = 2;
+    dctx.beginPath();
+    dctx.moveTo(-28, 10);
+    dctx.bezierCurveTo(-38, 1, -25, -8, -13, -4);
+    dctx.bezierCurveTo(-6, -19, 16, -16, 18, -4);
+    dctx.bezierCurveTo(35, -8, 42, 7, 29, 13);
+    dctx.quadraticCurveTo(0, 17, -28, 10);
+    dctx.closePath();
+    dctx.fill();
+    dctx.stroke();
+    dctx.restore();
+  }
+
+  function drawLouisvilleSkyline() {
+    dctx.save();
+
+    // Soft back layer: irregular blocks make the skyline feel inked, not architectural.
+    dctx.fillStyle = '#8B9E8D';
+    [[8, 45, 35, 22], [48, 37, 29, 30], [82, 48, 42, 19], [237, 43, 31, 24], [274, 51, 38, 16]].forEach(([x, y, w, h]) => {
+      dctx.fillRect(x, y, w, h);
+    });
+
+    dctx.fillStyle = '#405E5A';
+    dctx.strokeStyle = '#294845';
+    dctx.lineWidth = 2;
+
+    // Downtown rooflines as seen over the outfield: Humana angles and the
+    // instantly readable stepped/pyramid cap of the Old National tower.
+    dctx.fillRect(92, 30, 33, 38);
+    dctx.beginPath();
+    dctx.moveTo(90, 30);
+    dctx.lineTo(108, 18);
+    dctx.lineTo(127, 30);
+    dctx.closePath();
+    dctx.fill();
+    dctx.stroke();
+
+    dctx.fillRect(137, 17, 39, 51);
+    dctx.beginPath();
+    dctx.moveTo(137, 17);
+    dctx.lineTo(156, 7);
+    dctx.lineTo(176, 17);
+    dctx.closePath();
+    dctx.fill();
+    dctx.stroke();
+    dctx.fillStyle = '#E8C780';
+    dctx.fillRect(142, 23, 4, 5);
+    dctx.fillRect(151, 23, 4, 5);
+    dctx.fillRect(160, 23, 4, 5);
+    dctx.fillRect(142, 34, 4, 5);
+    dctx.fillRect(151, 34, 4, 5);
+    dctx.fillRect(160, 34, 4, 5);
+
+    dctx.fillStyle = '#4E6F68';
+    dctx.beginPath();
+    dctx.moveTo(184, 67);
+    dctx.lineTo(184, 34);
+    dctx.lineTo(196, 25);
+    dctx.lineTo(217, 25);
+    dctx.lineTo(229, 34);
+    dctx.lineTo(229, 67);
+    dctx.closePath();
+    dctx.fill();
+    dctx.stroke();
+
+    // A tiny water-tower silhouette gives the scene a friendly sandlot scale.
+    dctx.strokeStyle = '#35534F';
+    dctx.lineWidth = 2;
+    dctx.beginPath();
+    dctx.moveTo(55, 52);
+    dctx.lineTo(59, 67);
+    dctx.moveTo(70, 52);
+    dctx.lineTo(66, 67);
+    dctx.stroke();
+    dctx.fillStyle = '#4E6F68';
+    dctx.beginPath();
+    dctx.ellipse(62, 48, 12, 7, 0, 0, Math.PI * 2);
+    dctx.fill();
+    dctx.restore();
+  }
+
+  function drawOhioRiverBridges() {
+    dctx.save();
+    dctx.strokeStyle = '#355754';
+    dctx.fillStyle = '#355754';
+    dctx.lineCap = 'round';
+
+    // The I-65/Kennedy bridge sightline, simplified into chunky comic-book trusses.
+    dctx.fillRect(315, 57, 405, 5);
+    dctx.lineWidth = 3;
+    dctx.beginPath();
+    dctx.moveTo(322, 56);
+    for (let x = 322; x < 722; x += 48) {
+      dctx.lineTo(x + 24, 35);
+      dctx.lineTo(x + 48, 56);
+    }
+    dctx.stroke();
+    dctx.lineWidth = 2;
+    for (let x = 322; x <= 706; x += 48) {
+      dctx.beginPath();
+      dctx.moveTo(x, 56);
+      dctx.lineTo(x, 65);
+      dctx.stroke();
+    }
+
+    // Twin uprights echo the river bridges without competing with the scoreboard.
+    for (const x of [333, 684]) {
+      dctx.fillRect(x, 25, 6, 39);
+      dctx.fillRect(x - 5, 23, 16, 5);
+    }
+    dctx.restore();
+  }
+
+  function drawSandlotTexture() {
+    dctx.save();
+    dctx.strokeStyle = 'rgba(229, 222, 143, .26)';
+    dctx.lineWidth = 1.5;
+    const grassTufts = [[35, 120], [78, 202], [112, 149], [158, 188], [224, 116], [276, 202], [449, 122], [503, 198], [578, 143], [650, 182], [697, 117]];
+    for (const [x, y] of grassTufts) {
+      dctx.beginPath();
+      dctx.moveTo(x, y + 5);
+      dctx.quadraticCurveTo(x - 3, y, x - 6, y - 2);
+      dctx.moveTo(x, y + 5);
+      dctx.quadraticCurveTo(x + 1, y - 1, x + 4, y - 4);
+      dctx.moveTo(x, y + 5);
+      dctx.quadraticCurveTo(x + 5, y + 1, x + 8, y + 1);
+      dctx.stroke();
+    }
+    dctx.restore();
   }
 
   function drawBase(x, y) {
@@ -684,6 +824,22 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function drawPitcher(x, y) {
+    const animation = characterAnimations[activePitcherKey] || characterAnimations.Slugger_Pitcher;
+    if (animation) {
+      const frame = pitcherAnimationFrame === null ? 0 : pitcherAnimationFrame;
+      const pose = getCharacterPose(animation, frame);
+      const idleBob = pitcherAnimationFrame === null && !prefersReducedMotion
+        ? Math.sin(characterIdleFrame / 16) * 1.2
+        : 0;
+      const isHotRod = activePitcherKey === 'HotRods_Pitcher';
+      const colors = isHotRod
+        ? { cap: '#0C2340', jersey: '#BA0C2F', sleeves: '#F8FAFC', shorts: '#0C2340', skin: '#8D5524', shoes: '#FFC72C' }
+        : { cap: '#BA0C2F', jersey: '#F8FAFC', sleeves: '#BA0C2F', shorts: '#0C2340', skin: '#C97C5D', shoes: '#FFC72C' };
+      drawAnimatedKid(x, y + idleBob, 0.78, pose, colors, true);
+      drawCharacterTag(isHotRod ? 'HOT ROD' : 'SLUGGER', x, y + 22, isHotRod ? '#0C2340' : '#BA0C2F');
+      return;
+    }
+
     dctx.fillStyle = '#FF758F';
     dctx.beginPath();
     dctx.arc(x, y - 14, 8, 0, Math.PI * 2);
@@ -696,6 +852,162 @@ document.addEventListener('DOMContentLoaded', () => {
     dctx.fillRect(x - 5, y - 3, 10, 11);
     dctx.fillStyle = '#8B4513';
     dctx.fillRect(x - 9, y - 2, 5, 6);
+  }
+
+  function getCharacterPose(animation, frame) {
+    const progress = ((frame % animation.durationFrames) + animation.durationFrames) % animation.durationFrames / animation.durationFrames;
+    const poses = animation.poses;
+    let from = poses[0], to = poses[poses.length - 1];
+    for (let index = 1; index < poses.length; index++) {
+      if (progress <= poses[index].at) {
+        from = poses[index - 1];
+        to = poses[index];
+        break;
+      }
+    }
+    const span = Math.max(0.001, to.at - from.at);
+    const amount = (progress - from.at) / span;
+    const pose = {};
+    for (const key of ['armLeft', 'armRight', 'legLeft', 'legRight', 'lean', 'bob']) {
+      pose[key] = from[key] + (to[key] - from[key]) * amount;
+    }
+    return pose;
+  }
+
+  function drawJointedLimb(startX, startY, firstLength, firstAngle, secondLength, secondAngle, color, width) {
+    const jointX = startX + Math.sin(firstAngle) * firstLength;
+    const jointY = startY + Math.cos(firstAngle) * firstLength;
+    const endX = jointX + Math.sin(secondAngle) * secondLength;
+    const endY = jointY + Math.cos(secondAngle) * secondLength;
+    dctx.strokeStyle = color;
+    dctx.lineWidth = width;
+    dctx.lineCap = 'round';
+    dctx.lineJoin = 'round';
+    dctx.beginPath();
+    dctx.moveTo(startX, startY);
+    dctx.lineTo(jointX, jointY);
+    dctx.lineTo(endX, endY);
+    dctx.stroke();
+    return { x: endX, y: endY };
+  }
+
+  function drawAnimatedKid(x, y, scale, pose, colors, hasGlove = false) {
+    dctx.save();
+    dctx.translate(x, y + pose.bob * scale);
+    dctx.rotate(pose.lean);
+    dctx.scale(scale, scale);
+
+    const leftFoot = drawJointedLimb(-6, 0, 13, pose.legLeft, 12, pose.legLeft * -0.45, colors.shorts, 7);
+    const rightFoot = drawJointedLimb(6, 0, 13, pose.legRight, 12, pose.legRight * -0.45, colors.shorts, 7);
+    dctx.fillStyle = colors.shoes;
+    dctx.beginPath();
+    dctx.ellipse(leftFoot.x + 2, leftFoot.y, 7, 3.5, 0, 0, Math.PI * 2);
+    dctx.ellipse(rightFoot.x + 2, rightFoot.y, 7, 3.5, 0, 0, Math.PI * 2);
+    dctx.fill();
+
+    const backHand = drawJointedLimb(-11, -22, 12, pose.armLeft, 11, pose.armLeft * -0.35, colors.sleeves, 6);
+
+    dctx.fillStyle = colors.jersey;
+    dctx.beginPath();
+    dctx.moveTo(-12, -25);
+    dctx.quadraticCurveTo(0, -31, 12, -25);
+    dctx.lineTo(10, 1);
+    dctx.quadraticCurveTo(0, 6, -10, 1);
+    dctx.closePath();
+    dctx.fill();
+    dctx.strokeStyle = '#172d36';
+    dctx.lineWidth = 2;
+    dctx.stroke();
+
+    const frontHand = drawJointedLimb(11, -22, 12, pose.armRight, 11, pose.armRight * -0.35, colors.sleeves, 6);
+    dctx.fillStyle = colors.skin;
+    dctx.beginPath();
+    dctx.arc(-1, -39, 12, 0, Math.PI * 2);
+    dctx.fill();
+    dctx.strokeStyle = '#172d36';
+    dctx.lineWidth = 2;
+    dctx.stroke();
+
+    dctx.fillStyle = colors.cap;
+    dctx.beginPath();
+    dctx.arc(-2, -44, 12, Math.PI, Math.PI * 2);
+    dctx.fill();
+    dctx.fillRect(5, -45, 11, 4);
+    dctx.fillStyle = '#172d36';
+    dctx.beginPath();
+    dctx.arc(3, -39, 1.7, 0, Math.PI * 2);
+    dctx.fill();
+    dctx.strokeStyle = '#7C2D12';
+    dctx.beginPath();
+    dctx.arc(3, -34, 5, 0.15, Math.PI - 0.15);
+    dctx.stroke();
+
+    if (hasGlove) {
+      dctx.fillStyle = '#8B4513';
+      dctx.beginPath();
+      dctx.arc(backHand.x, backHand.y, 6, 0, Math.PI * 2);
+      dctx.fill();
+    } else {
+      dctx.fillStyle = colors.skin;
+      dctx.beginPath();
+      dctx.arc(frontHand.x, frontHand.y, 3.5, 0, Math.PI * 2);
+      dctx.fill();
+    }
+    dctx.restore();
+  }
+
+  function drawCharacterTag(label, x, y, color) {
+    dctx.save();
+    dctx.font = 'bold 7px monospace';
+    dctx.textAlign = 'center';
+    const width = dctx.measureText(label).width + 8;
+    dctx.fillStyle = color;
+    dctx.fillRect(x - width / 2, y, width, 11);
+    dctx.fillStyle = '#FFFFFF';
+    dctx.fillText(label, x, y + 8);
+    dctx.restore();
+  }
+
+  function drawHotRodsRunner() {
+    const animation = characterAnimations.HotRods_Run;
+    if (!runnerAnimation || !animation) return;
+
+    const progress = prefersReducedMotion ? 1 : Math.min(1, runnerAnimation.frame / runnerAnimation.totalFrames);
+    let x, y;
+    if (runnerAnimation.bases > 1 && progress > 0.58) {
+      const secondLeg = (progress - 0.58) / 0.42;
+      x = 535 + (360 - 535) * secondLeg;
+      y = 250 + (145 - 250) * secondLeg - Math.sin(secondLeg * Math.PI) * 12;
+    } else {
+      const firstLeg = Math.min(1, progress / 0.58);
+      x = 315 + (535 - 315) * firstLeg;
+      y = 363 + (250 - 363) * firstLeg - Math.sin(firstLeg * Math.PI) * 18;
+    }
+
+    const pose = getCharacterPose(animation, runnerAnimation.frame);
+    drawAnimatedKid(x, y, 0.88, pose, {
+      cap: '#0C2340', jersey: '#BA0C2F', sleeves: '#F8FAFC', shorts: '#0C2340', skin: '#8D5524', shoes: '#FFC72C'
+    });
+    drawCharacterTag('HOT ROD', x, y + 24, '#0C2340');
+  }
+
+  function updateCharacterAnimations() {
+    characterIdleFrame++;
+    if (pitcherAnimationFrame !== null) {
+      pitcherAnimationFrame++;
+      if (pitcherAnimationFrame >= (characterAnimations[activePitcherKey]?.durationFrames || 48)) {
+        pitcherAnimationFrame = null;
+      }
+    }
+    if (runnerAnimation && !prefersReducedMotion) runnerAnimation.frame++;
+  }
+
+  function startHotRodsRun(hitTitle) {
+    runnerAnimation = {
+      frame: 0,
+      totalFrames: 92,
+      bases: hitTitle === 'Single' ? 1 : 2
+    };
   }
 
   function drawBatter(x, y) {
@@ -848,6 +1160,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (activeScreen === 'screen-derby') {
+      updateCharacterAnimations();
       renderDerbyField();
     }
     requestAnimationFrame(updateDerbyLoop);
@@ -862,6 +1175,7 @@ document.addEventListener('DOMContentLoaded', () => {
     arcadePitchBtn.disabled = true;
     arcadeSwingBtn.disabled = false;
     batter.state = 'idle';
+    pitcherAnimationFrame = 0;
 
     let pitchVy = 4.8;
     let pitchVx = 0;
@@ -941,6 +1255,7 @@ document.addEventListener('DOMContentLoaded', () => {
       speakAnnouncer(`Hit into the gap for a ${hitTitle}!`);
     }
 
+    startHotRodsRun(hitTitle);
     hits++;
     if (dist > longestDist) longestDist = dist;
     addPoints(pts);
@@ -983,6 +1298,10 @@ document.addEventListener('DOMContentLoaded', () => {
     isDerbyPitching = false;
     ball.state = 'ready';
     batter.state = 'idle';
+    runnerAnimation = null;
+    activePitcherKey = activePitcherKey === 'Slugger_Pitcher' && characterAnimations.HotRods_Pitcher
+      ? 'HotRods_Pitcher'
+      : 'Slugger_Pitcher';
     attemptPhase = 'question';
     activeAdaptiveQuestion = null;
     hasPowerBat = false;
