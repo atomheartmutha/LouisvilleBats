@@ -1016,10 +1016,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const pose = getCharacterPose(animation, runnerAnimation.frame);
-    drawAnimatedKid(x, y, 0.88, pose, {
-      cap: '#0C2340', jersey: '#BA0C2F', sleeves: '#F8FAFC', shorts: '#0C2340', skin: '#8D5524', shoes: '#FFC72C'
-    });
-    drawCharacterTag('HOT ROD', x, y + 24, '#0C2340');
+    const appearance = getSelectedBatterAppearance();
+    drawAnimatedKid(x, y, 0.88, pose, appearance);
+    drawCharacterTag(getSelectedBatterTag(), x, y + 24, appearance.cap);
   }
 
   function updateCharacterAnimations() {
@@ -1042,56 +1041,18 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function drawBatter(x, y) {
-    dctx.save();
-    // Backwards Cap
-    dctx.fillStyle = '#2563EB';
-    dctx.beginPath();
-    dctx.arc(x, y - 20, 18, 0, Math.PI * 2);
-    dctx.fill();
-    dctx.fillStyle = '#1D4ED8';
-    dctx.beginPath();
-    dctx.ellipse(x - 14, y - 24, 10, 4, -0.4, 0, Math.PI * 2);
-    dctx.fill();
+    const appearance = getSelectedBatterAppearance();
+    const battingPose = {
+      armLeft: -0.72,
+      armRight: -1.06,
+      legLeft: 0.18,
+      legRight: -0.18,
+      lean: batter.state === 'swinging' ? -0.14 : 0.05,
+      bob: !prefersReducedMotion && batter.state === 'idle' ? Math.sin(characterIdleFrame / 18) : 0
+    };
+    drawAnimatedKid(x, y, 0.88, battingPose, appearance);
 
-    // Face
-    dctx.fillStyle = '#FBBF24';
-    dctx.beginPath();
-    dctx.arc(x, y - 12, 16, 0, Math.PI * 2);
-    dctx.fill();
-
-    // Eyes & Smile
-    dctx.fillStyle = '#000000';
-    dctx.beginPath();
-    dctx.arc(x + 4, y - 14, 2, 0, Math.PI * 2);
-    dctx.arc(x + 10, y - 14, 2, 0, Math.PI * 2);
-    dctx.fill();
-    dctx.beginPath();
-    dctx.arc(x + 6, y - 9, 7, 0.2, Math.PI - 0.2);
-    dctx.stroke();
-
-    // Jersey & Belly
-    dctx.fillStyle = '#3B82F6';
-    dctx.beginPath();
-    dctx.arc(x - 2, y + 10, 14, 0, Math.PI * 2);
-    dctx.fill();
-    dctx.fillStyle = '#FBBF24';
-    dctx.beginPath();
-    dctx.arc(x - 1, y + 16, 5, 0, Math.PI * 2);
-    dctx.fill();
-    dctx.fillStyle = '#B45309';
-    dctx.fillRect(x - 1, y + 16, 1.5, 1.5);
-
-    // Shorts & Red Shoes
-    dctx.fillStyle = '#1E3A8A';
-    dctx.fillRect(x - 8, y + 19, 7, 8);
-    dctx.fillRect(x + 1, y + 19, 7, 8);
-    dctx.fillStyle = '#EF4444';
-    dctx.beginPath();
-    dctx.ellipse(x - 6, y + 28, 7, 4, 0, 0, Math.PI * 2);
-    dctx.ellipse(x + 5, y + 28, 7, 4, 0, 0, Math.PI * 2);
-    dctx.fill();
-
-    // Bat
+    // The bat remains a prop; the player's body is the same renderer used on the base path.
     dctx.save();
     dctx.translate(x + 2, y + 4);
     if (batter.state === 'swinging') {
@@ -1107,8 +1068,27 @@ document.addEventListener('DOMContentLoaded', () => {
       dctx.strokeRect(0, -5, 42, 9);
     }
     dctx.restore();
+    drawCharacterTag(getSelectedBatterTag(), x, y + 24, appearance.cap);
+  }
 
-    dctx.restore();
+  function getSelectedBatterAppearance() {
+    const identity = String(selectedKid?.id ?? selectedKid?.fullName ?? 'batyard-default');
+    let seed = 0;
+    for (const char of identity) seed = (seed * 31 + char.charCodeAt(0)) >>> 0;
+    const skinTones = ['#F6C58F', '#D99A62', '#B66F3C', '#8D5524', '#6F3B22'];
+    return {
+      cap: '#0C2340',
+      jersey: '#BA0C2F',
+      sleeves: '#F8FAFC',
+      shorts: '#0C2340',
+      skin: skinTones[seed % skinTones.length],
+      shoes: '#FFC72C'
+    };
+  }
+
+  function getSelectedBatterTag() {
+    const jersey = selectedKid?.jerseyNumber;
+    return jersey && jersey !== '—' ? `BATS #${jersey}` : 'BATS';
   }
 
   function drawMiniRadar(x, y) {

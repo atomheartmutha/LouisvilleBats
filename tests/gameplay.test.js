@@ -21,7 +21,13 @@ function game({ offline = false, sessionStore = new Map() } = {}) {
     click() { if (!this.disabled) this.events.click?.(); }
     appendChild(child) { this.children.push(child); }
     querySelectorAll() { return this.children; }
-    getContext() { return new Proxy({}, { get: (_, key) => key === 'createLinearGradient' ? () => ({ addColorStop() {} }) : () => {} }); }
+    getContext() {
+      return new Proxy({}, { get: (_, key) => {
+        if (key === 'createLinearGradient') return () => ({ addColorStop() {} });
+        if (key === 'measureText') return text => ({ width: String(text).length * 6 });
+        return () => {};
+      } });
+    }
   }
   const el = id => {
     if (!elements.has(id)) elements.set(id, new Element());

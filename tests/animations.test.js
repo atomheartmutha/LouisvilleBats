@@ -41,6 +41,16 @@ test('gameplay loads and triggers both character animation roles', () => {
   assert.match(appSource, /runnerAnimation = null/);
 });
 
+test('the drafted batter keeps one identity while batting and running', () => {
+  assert.match(appSource, /function getSelectedBatterAppearance\(\)/);
+  assert.match(appSource, /function getSelectedBatterTag\(\)/);
+  const appearanceUses = appSource.match(/const appearance = getSelectedBatterAppearance\(\);/g) || [];
+  assert.equal(appearanceUses.length, 2);
+  assert.match(appSource, /skin: skinTones\[seed % skinTones\.length\]/);
+  assert.match(appSource, /drawAnimatedKid\(x, y, 0\.88, battingPose, appearance\)/);
+  assert.match(appSource, /drawAnimatedKid\(x, y, 0\.88, pose, appearance\)/);
+});
+
 test('derby backdrop combines Louisville riverfront landmarks with sandlot texture', () => {
   assert.match(appSource, /function drawLouisvilleSkyline\(\)/);
   assert.match(appSource, /function drawOhioRiverBridges\(\)/);
