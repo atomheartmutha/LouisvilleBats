@@ -46,6 +46,7 @@ requiring checks are separate settings and have not been changed.
 | Cold questions return immediately, preserve correct answer keys, emphasize baseball math, and never repeat a fact within a session | questions.test.js, gameplay.test.js |
 | Selected school-grade band sets and anchors question difficulty across sessions | questions.test.js, gameplay.test.js |
 | Exhausted question banks rotate at least six math skills per grade instead of repeating one template | questions.test.js |
+| Dugout draft falls back to a dated, real-player MLB roster snapshot when Vultr cannot reach MLB Stats | roster.test.js |
 | Win expectancy uses readable semantic math and fixed three-decimal output | sabermetrics.test.js |
 | ElevenLabs game sounds effects assets are valid, routed to game events, and retain offline synthesis fallbacks | sfx.test.js |
 

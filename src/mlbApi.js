@@ -46,7 +46,11 @@ export async function getBatsCharacters() {
       return rosterCache;
     } catch (_) {
       rosterExpires = Date.now() + 30_000;
-      return rosterCache ? { ...rosterCache, source: 'cached-mlb' } : { characters: [], source: 'unavailable' };
+      return rosterCache ? { ...rosterCache, source: 'cached-mlb' } : {
+        characters: snapshotCharacters(),
+        source: 'mlb-snapshot',
+        fetchedAt: FALLBACK_BATS_ROSTER_DATE
+      };
     } finally { rosterRequest = null; }
   })();
   return rosterRequest;
@@ -134,47 +138,38 @@ export function transformToBackyardStats(player) {
 /**
  * Fallback authentic Louisville Bats player pool for offline or demo reliability
  */
+export const FALLBACK_BATS_ROSTER_DATE = '2026-09-12T00:00:00.000Z';
+// Last-known active roster from MLB Stats team 416. Position players lead the
+// list so the default draft choice remains a hitter when upstream is offline.
 export const FALLBACK_BATS_ROSTER = [
-  {
-    id: 670712,
-    fullName: "Noelvi Marte",
-    primaryNumber: "16",
-    primaryPosition: { abbreviation: "3B" },
-    stats: { avg: "0.285", homeRuns: "14", stolenBases: "8", fielding: "0.955", era: "0.00" }
-  },
-  {
-    id: 680700,
-    fullName: "Carlos Jorge",
-    primaryNumber: "52",
-    primaryPosition: { abbreviation: "2B" },
-    stats: { avg: "0.272", homeRuns: "9", stolenBases: "22", fielding: "0.970", era: "0.00" }
-  },
-  {
-    id: 668984,
-    fullName: "Michael Chavis",
-    primaryNumber: "23",
-    primaryPosition: { abbreviation: "1B" },
-    stats: { avg: "0.260", homeRuns: "18", stolenBases: "2", fielding: "0.985", era: "0.00" }
-  },
-  {
-    id: 669003,
-    fullName: "Dominic Fletcher",
-    primaryNumber: "7",
-    primaryPosition: { abbreviation: "OF" },
-    stats: { avg: "0.295", homeRuns: "11", stolenBases: "12", fielding: "0.990", era: "0.00" }
-  },
-  {
-    id: 682985,
-    fullName: "Jay Allen II",
-    primaryNumber: "11",
-    primaryPosition: { abbreviation: "CF" },
-    stats: { avg: "0.255", homeRuns: "7", stolenBases: "28", fielding: "0.980", era: "0.00" }
-  },
-  {
-    id: 686730,
-    fullName: "Buddy Bat (Mascot Legend)",
-    primaryNumber: "00",
-    primaryPosition: { abbreviation: "DH" },
-    stats: { avg: "0.333", homeRuns: "25", stolenBases: "15", fielding: "0.999", era: "1.50" }
-  }
+  { id: 802143, fullName: 'Dayne Leonard', jerseyNumber: '20', primaryPosition: 'C' },
+  { id: 666150, fullName: 'Dominic Fletcher', jerseyNumber: '18', primaryPosition: 'RF' },
+  { id: 694689, fullName: 'Dominic Pitelli', jerseyNumber: '17', primaryPosition: 'SS' },
+  { id: 695490, fullName: 'Edwin Arroyo', jerseyNumber: '19', primaryPosition: '2B' },
+  { id: 688005, fullName: 'Francisco Urbaez', jerseyNumber: '13', primaryPosition: '2B' },
+  { id: 641658, fullName: 'Garrett Hampson', jerseyNumber: '5', primaryPosition: '2B' },
+  { id: 699114, fullName: 'Leo Balcazar', jerseyNumber: '3', primaryPosition: 'SS' },
+  { id: 664948, fullName: 'Anthony Misiewicz', jerseyNumber: '36', primaryPosition: 'P' },
+  { id: 686844, fullName: 'Ben Wereski', jerseyNumber: '45', primaryPosition: 'P' },
+  { id: 694650, fullName: 'Cameron Cotter', jerseyNumber: '51', primaryPosition: 'P' },
+  { id: 686730, fullName: 'Carson Spiers', jerseyNumber: '53', primaryPosition: 'P' },
+  { id: 695534, fullName: 'Chase Petty', jerseyNumber: '14', primaryPosition: 'P' },
+  { id: 686678, fullName: 'Chase Solesky', jerseyNumber: '12', primaryPosition: 'P' },
+  { id: 683175, fullName: 'Connor Phillips', jerseyNumber: '34', primaryPosition: 'P' },
+  { id: 670241, fullName: 'Darius Vines', jerseyNumber: '41', primaryPosition: 'P' },
+  { id: 688609, fullName: 'Hunter Parks', jerseyNumber: '49', primaryPosition: 'P' },
+  { id: 805723, fullName: 'Jared Lyons', jerseyNumber: '32', primaryPosition: 'P' },
+  { id: 683742, fullName: 'Jose Franco', jerseyNumber: '48', primaryPosition: 'P' },
+  { id: 687924, fullName: 'Julian Aguiar', jerseyNumber: '39', primaryPosition: 'P' },
+  { id: 592288, fullName: 'Kent Emanuel', jerseyNumber: '40', primaryPosition: 'P' },
+  { id: 674265, fullName: 'Kevin Abel', jerseyNumber: '37', primaryPosition: 'P' }
 ];
+
+function snapshotCharacters() {
+  return FALLBACK_BATS_ROSTER.map(player => ({
+    ...player,
+    backyardStats: { batting: 5, running: 5, pitching: 5, fielding: 5 },
+    rawStats: { battingAvg: null, homeRuns: null, stolenBases: null },
+    source: `${MLB_API_BASE}/people/${player.id}`
+  }));
+}
