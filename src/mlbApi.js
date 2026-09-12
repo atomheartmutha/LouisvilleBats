@@ -6,6 +6,51 @@
 
 const MLB_API_BASE = 'https://statsapi.mlb.com/api/v1';
 const SPORT_ID_AAA = 11; // Triple-A Minor League Baseball
+let rosterCache = null;
+let rosterExpires = 0;
+let rosterRequest = null;
+
+export async function getBatsCharacters() {
+  if (Date.now() < rosterExpires && rosterCache) return rosterCache;
+  if (rosterRequest) return rosterRequest;
+  rosterRequest = (async () => {
+    try {
+      const response = await fetch(`${MLB_API_BASE}/teams/416/roster?rosterType=active`, { signal: AbortSignal.timeout(5000) });
+      if (!response.ok) throw new Error('Roster unavailable');
+      const data = await response.json();
+      const characters = (data.roster || []).filter(p => p.person?.id && p.person?.fullName).map(p => ({
+        id: p.person.id, fullName: p.person.fullName, jerseyNumber: p.jerseyNumber || '—',
+        primaryPosition: p.position?.abbreviation || '—',
+        // Neutral game ratings are not presented as real player statistics.
+        backyardStats: { batting: 5, running: 5, pitching: 5, fielding: 5 },
+        rawStats: { battingAvg: null, homeRuns: null, stolenBases: null },
+        source: `${MLB_API_BASE}/people/${p.person.id}`
+      }));
+      if (!characters.length) throw new Error('Empty roster');
+      try {
+        const statsURL = `${MLB_API_BASE}/stats?stats=season&group=hitting&teamId=416&sportIds=11&limit=1000&playerPool=ALL`;
+        const statsResponse = await fetch(statsURL, { signal: AbortSignal.timeout(4000) });
+        if (!statsResponse.ok) throw new Error('Stats unavailable');
+        const statsData = await statsResponse.json();
+        for (const player of characters) {
+          const split = statsData.stats?.flatMap(s => s.splits || []).find(s => s.player?.id === player.id && s.team?.id === 416);
+          if (!split) continue;
+          const stat = split.stat;
+          player.rawStats = { battingAvg: stat.avg ?? null, homeRuns: stat.homeRuns ?? null, stolenBases: stat.stolenBases ?? null, hits: stat.hits ?? null, atBats: stat.atBats ?? null, season: split.season };
+          player.statsSource = statsURL;
+          player.backyardStats = transformToBackyardStats({ id: player.id, stats: stat }).backyardStats;
+        }
+      } catch (_) { /* Names remain available when only the stats service fails. */ }
+      rosterCache = { characters, source: 'mlb', fetchedAt: new Date().toISOString() };
+      rosterExpires = Date.now() + 300_000;
+      return rosterCache;
+    } catch (_) {
+      rosterExpires = Date.now() + 30_000;
+      return rosterCache ? { ...rosterCache, source: 'cached-mlb' } : { characters: [], source: 'unavailable' };
+    } finally { rosterRequest = null; }
+  })();
+  return rosterRequest;
+}
 
 /**
  * Fetch schedule of Triple-A games (sportId=11)
@@ -54,8 +99,8 @@ export async function getBatsRecentGame() {
 export function transformToBackyardStats(player) {
   const stats = player.stats || {};
   const battingAvg = parseFloat(stats.avg || stats.battingAverage || '0.250');
-  const homeRuns = parseInt(stats.homeRuns || stats.hr || '5', 10);
-  const stolenBases = parseInt(stats.stolenBases || stats.sb || '3', 10);
+  const homeRuns = parseInt(stats.homeRuns ?? stats.hr ?? '5', 10);
+  const stolenBases = parseInt(stats.stolenBases ?? stats.sb ?? '3', 10);
   const fieldingPct = parseFloat(stats.fielding || stats.fieldingPercentage || '0.960');
   const era = parseFloat(stats.era || '4.20');
 

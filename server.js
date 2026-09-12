@@ -2,7 +2,9 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { getTripleASchedule, transformToBackyardStats, FALLBACK_BATS_ROSTER } from './src/mlbApi.js';
+import { getTripleASchedule } from './src/mlbApi.js';
+import { getBatsCharacters } from './src/mlbApi.js';
+import { getAdaptiveQuestion } from './src/questions.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -329,13 +331,13 @@ const server = http.createServer(async (req, res) => {
   // 3. Backyard Baseball Character Generator: Real Bats Stats -> 1-10 Kid Attributes
   if (pathname === '/api/bats/characters' && req.method === 'GET') {
     try {
-      const characters = FALLBACK_BATS_ROSTER.map(transformToBackyardStats);
+      const { characters, source, fetchedAt } = await getBatsCharacters();
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
         team: 'Louisville Bats',
         league: 'Triple-A (sportId=11)',
         style: 'Batyard Slugger Roster',
-        characters
+        characters, source, fetchedAt
       }));
     } catch (err) {
       res.writeHead(500, { 'Content-Type': 'application/json' });
@@ -351,55 +353,7 @@ const server = http.createServer(async (req, res) => {
     req.on('data', chunk => { body += chunk; });
     req.on('end', async () => {
       try {
-        const { currentTier = 3, streak = 0, lastResult = null, excludeId = '' } = JSON.parse(body || '{}');
-        
-        // JCPS Adaptive Logic:
-        // Correct answer + streak >= 2 -> bump tier up (max 5)
-        // Incorrect answer -> step tier down (min 1) to scaffold understanding
-        let nextTier = parseInt(currentTier, 10);
-        if (lastResult === true && streak >= 1) {
-          nextTier = Math.min(5, nextTier + 1);
-        } else if (lastResult === false) {
-          nextTier = Math.max(1, nextTier - 1);
-        }
-
-        const bank = ADAPTIVE_BANKS[nextTier] || ADAPTIVE_BANKS[3];
-        const eligible = bank.filter(q => q.id !== excludeId);
-        const selected = eligible.length > 0
-          ? eligible[Math.floor(Math.random() * eligible.length)]
-          : bank[Math.floor(Math.random() * bank.length)];
-
-        // Optional Gemini generation for endless variety at current adaptive tier
-        if (GEMINI_API_KEY && GEMINI_API_KEY !== 'your_gemini_api_key_here' && Math.random() > 0.5) {
-          const systemPrompt = `You are the adaptive educational testing engine for "Batyard Slugger" (in the style of Jefferson County Public Schools / JCPS MAP testing).
-Target Adaptive Tier: ${nextTier}/5 (${selected.tierTitle}).
-Generate ONE adaptive multiple-choice question teaching baseball statistics and love for the sport through Kentucky Academic Standards (Math, Science, or Louisville Bats history).
-Return ONLY valid JSON matching this exact structure:
-{
-  "id": "gemini-${Date.now()}",
-  "difficulty": ${nextTier},
-  "tierTitle": "${selected.tierTitle}",
-  "q": "question text",
-  "options": ["A", "B", "C", "D"],
-  "ans": 0,
-  "explanation": "pedagogical explanation",
-  "standard": "Kentucky Academic Standard"
-}`;
-          const userPrompt = `Create an engaging Tier ${nextTier} question themed around the Louisville Bats or baseball math.`;
-          const geminiRes = await callGemini(userPrompt, systemPrompt);
-          if (geminiRes.text) {
-            try {
-              const clean = geminiRes.text.replace(/```json/g, '').replace(/```/g, '').trim();
-              const parsed = JSON.parse(clean);
-              if (parsed.q && Array.isArray(parsed.options) && parsed.options.length === 4) {
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify(parsed));
-                return;
-              }
-            } catch (_) {}
-          }
-        }
-
+        const selected = await getAdaptiveQuestion(JSON.parse(body || '{}'));
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(selected));
       } catch (err) {

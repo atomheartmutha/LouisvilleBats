@@ -58,6 +58,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (targetId === 'screen-derby') {
         renderDerbyField();
+        ensureBatter();
+        if (attemptPhase === 'question') openAdaptiveTimeout();
       } else if (targetId === 'screen-coloring') {
         redrawColoringTemplate();
       } else if (targetId === 'screen-roster') {
@@ -246,6 +248,12 @@ document.addEventListener('DOMContentLoaded', () => {
   let catLastResult = null;
   let catLastQId = '';
   let activeAdaptiveQuestion = null;
+  let attemptPhase = 'question';
+  let questionPending = false;
+  let answerLocked = false;
+  let derbyPaused = false;
+  const recentQuestionIds = [];
+  const recentQuestions = [];
 
   const catTierBadge = document.getElementById('cat-tier-badge');
   const catStreakBadge = document.getElementById('cat-streak-badge');
@@ -258,9 +266,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const powerActiveTag = document.getElementById('power-active-tag');
 
   async function loadAdaptiveQuestion() {
+    if (questionPending) return;
+    questionPending = true;
+    answerLocked = true;
+    activeAdaptiveQuestion = null;
     catFbBox.className = 'chalk-feedback-box hidden';
     catOptsGrid.innerHTML = '';
-    catQText.textContent = 'JCPS Adaptive Engine is selecting your challenge...';
+    catQText.textContent = 'Buddy is picking your next question…';
 
     try {
       const res = await fetch('/api/quiz/adaptive', {
@@ -270,18 +282,41 @@ document.addEventListener('DOMContentLoaded', () => {
           currentTier: catTier,
           streak: catStreak,
           lastResult: catLastResult,
-          excludeId: catLastQId
+          excludeId: catLastQId,
+          recentIds: recentQuestionIds,
+          recentQuestions
         })
       });
 
+      if (!res.ok) throw new Error('Question request failed');
       activeAdaptiveQuestion = await res.json();
+      if (!activeAdaptiveQuestion.q || !Array.isArray(activeAdaptiveQuestion.options) ||
+          !Number.isInteger(activeAdaptiveQuestion.ans)) throw new Error('Invalid question');
       catLastQId = activeAdaptiveQuestion.id || '';
       catTier = activeAdaptiveQuestion.difficulty || catTier;
 
-      if (catTierBadge) catTierBadge.textContent = `${activeAdaptiveQuestion.tierTitle || 'TIER ' + catTier}`;
+      if (catTierBadge) catTierBadge.textContent = ['Rookie', 'Rising Star', 'Slugger', 'All-Star', 'Legend'][catTier - 1];
       if (catStreakBadge) catStreakBadge.textContent = `🔥 STREAK: ${catStreak}`;
       catQText.textContent = activeAdaptiveQuestion.q;
 
+    } catch (_) {
+      // Keep the required question playable even without a network connection.
+      const fallbackQuestions = [
+        { id: 'offline-count', q: 'Buddy has 2 baseballs and finds 3 more. How many now?', options: ['4', '5', '6'], ans: 1, explanation: '2 + 3 = 5 baseballs.' },
+        { id: 'offline-plate', q: 'How many sides does home plate have?', options: ['3', '4', '5'], ans: 2, explanation: 'Home plate is a pentagon with 5 sides.' }
+      ];
+      activeAdaptiveQuestion = fallbackQuestions.find(q => q.id !== catLastQId);
+      catLastQId = activeAdaptiveQuestion.id;
+      catQText.textContent = activeAdaptiveQuestion.q;
+      catTierBadge.textContent = 'OFFLINE PRACTICE';
+    } finally {
+      questionPending = false;
+      answerLocked = false;
+    }
+      recentQuestionIds.push(catLastQId);
+      recentQuestions.push(activeAdaptiveQuestion.q);
+      if (recentQuestionIds.length > 30) recentQuestionIds.shift();
+      if (recentQuestions.length > 12) recentQuestions.shift();
       activeAdaptiveQuestion.options.forEach((opt, idx) => {
         const btn = document.createElement('button');
         btn.className = 'cat-opt-btn';
@@ -291,12 +326,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         catOptsGrid.appendChild(btn);
       });
-    } catch (_) {
-      catQText.textContent = 'A Louisville Bats hitter gets 3 hits in 10 at-bats. Express as a decimal (.300):';
-    }
   }
 
   function handleAdaptiveAnswer(selectedIdx) {
+    if (attemptPhase !== 'question' || questionPending || answerLocked || !activeAdaptiveQuestion) return;
+    answerLocked = true;
+    catOptsGrid.querySelectorAll('button').forEach(btn => { btn.disabled = true; });
     catFbBox.classList.remove('hidden');
     const isCorrect = selectedIdx === activeAdaptiveQuestion.ans;
     catLastResult = isCorrect;
@@ -309,33 +344,49 @@ document.addEventListener('DOMContentLoaded', () => {
       addPoints(pts);
 
       catFbBox.className = 'chalk-feedback-box correct';
-      catFbBox.innerHTML = `⚡ <strong>CORRECT! (+${pts} Pts)</strong> ${activeAdaptiveQuestion.explanation}<br><strong>Adaptive Progress:</strong> Difficulty scaling UP for next at-bat! 3X Power Bat ignited!`;
+      catFbBox.textContent = `Correct! +${pts} points. ${activeAdaptiveQuestion.explanation} Your swing is ready!`;
       
-      speakAnnouncer(`Correct! 3X Aluminum Power Bat ignited! Leveling up to Tier ${Math.min(5, catTier + 1)}!`);
+      speakAnnouncer('Correct! Your power bat is ready. Batter up!');
       playBallparkOrganCharge();
 
       if (catStreakBadge) catStreakBadge.textContent = `🔥 STREAK: ${catStreak}`;
+      attemptPhase = 'ready';
+      adaptiveModal.classList.add('hidden');
+      arcadePitchBtn.disabled = false;
+      announcerEl.textContent = 'Correct! You earned one pitch. Choose a pitch, then throw and swing!';
     } else {
       catStreak = 0;
+      recordStrike('Incorrect answer');
       catFbBox.className = 'chalk-feedback-box incorrect';
-      catFbBox.innerHTML = `<strong>Scaffolding Support:</strong> ${activeAdaptiveQuestion.explanation}<br>Difficulty gently adjusting down to reinforce fundamentals.`;
-      speakAnnouncer("Nice effort! Let's scaffold that standard.");
+      catFbBox.textContent = `Strike! ${activeAdaptiveQuestion.explanation} Next question coming up…`;
       if (catStreakBadge) catStreakBadge.textContent = `🔥 STREAK: 0`;
+      setTimeout(loadAdaptiveQuestion, 1800);
     }
   }
 
   function openAdaptiveTimeout() {
+    if (attemptPhase !== 'question') return;
     if (adaptiveModal) adaptiveModal.classList.remove('hidden');
-    speakAnnouncer("Time out called! JCPS Adaptive Challenge active.");
-    loadAdaptiveQuestion();
+    arcadePitchBtn.disabled = true;
+    arcadeSwingBtn.disabled = true;
+    if (!activeAdaptiveQuestion && !questionPending) loadAdaptiveQuestion();
   }
 
   function closeAdaptiveTimeout() {
     if (adaptiveModal) adaptiveModal.classList.add('hidden');
+    switchScreen('screen-title');
   }
 
-  document.getElementById('game-timeout-btn')?.addEventListener('click', openAdaptiveTimeout);
-  document.getElementById('bb97-hud-timeout-btn')?.addEventListener('click', openAdaptiveTimeout);
+  function toggleDerbyPause() {
+    if (attemptPhase !== 'ready' && attemptPhase !== 'pitching') return;
+    derbyPaused = !derbyPaused;
+    arcadePitchBtn.disabled = derbyPaused || attemptPhase !== 'ready';
+    arcadeSwingBtn.disabled = derbyPaused || attemptPhase !== 'pitching';
+    document.getElementById('game-timeout-btn').textContent = derbyPaused ? '▶ RESUME' : '✋ TIME OUT';
+    document.getElementById('bb97-hud-timeout-btn').textContent = derbyPaused ? '▶ RESUME' : '✋ TIME OUT';
+  }
+  document.getElementById('game-timeout-btn')?.addEventListener('click', toggleDerbyPause);
+  document.getElementById('bb97-hud-timeout-btn')?.addEventListener('click', toggleDerbyPause);
   closeTimeoutBtn?.addEventListener('click', closeAdaptiveTimeout);
   returnToAtBatBtn?.addEventListener('click', closeAdaptiveTimeout);
 
@@ -375,7 +426,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const arcadeSwingBtn = document.getElementById('arcade-swing-btn');
   const announcerEl = document.getElementById('announcer-text');
 
-  let outs = 0, hits = 0, hr = 0, longestDist = 0;
+  let strikes = 0, outs = 0, hits = 0, hr = 0, longestDist = 0;
   let isDerbyPitching = false;
   let hasPowerBat = false;
   let currentPitchType = 'fastball';
@@ -716,6 +767,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function updateDerbyLoop() {
+    if (activeScreen !== 'screen-derby' || derbyPaused || !adaptiveModal.classList.contains('hidden')) {
+      requestAnimationFrame(updateDerbyLoop);
+      return;
+    }
     if (ball.state === 'pitching') {
       ball.y += ball.vy;
       ball.x += ball.vx;
@@ -741,7 +796,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Throw Pitch
   arcadePitchBtn?.addEventListener('click', () => {
-    if (isDerbyPitching) return;
+    if (attemptPhase !== 'ready' || isDerbyPitching || derbyPaused || activeScreen !== 'screen-derby') return;
+    attemptPhase = 'pitching';
     isDerbyPitching = true;
     arcadePitchBtn.disabled = true;
     arcadeSwingBtn.disabled = false;
@@ -768,7 +824,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   function performSwing() {
-    if (!isDerbyPitching || ball.state !== 'pitching') return;
+    if (attemptPhase !== 'pitching' || derbyPaused || !isDerbyPitching || ball.state !== 'pitching') return;
     arcadeSwingBtn.disabled = true;
     batter.state = 'swinging';
 
@@ -792,12 +848,14 @@ document.addEventListener('DOMContentLoaded', () => {
         arcadePitchBtn.click();
       } else if (e.code === 'KeyT') {
         e.preventDefault();
-        openAdaptiveTimeout();
+        toggleDerbyPause();
       }
     }
   });
 
   function handleDerbyHit(delta) {
+    attemptPhase = 'resolving';
+    strikes = 0;
     playBatCrack();
     let dist = 240;
     let hitTitle = 'Single';
@@ -830,31 +888,55 @@ document.addEventListener('DOMContentLoaded', () => {
     if (powerActiveTag) powerActiveTag.classList.add('hidden');
     updateDerbyScore();
 
-    setTimeout(() => {
-      isDerbyPitching = false;
-      arcadePitchBtn.disabled = false;
-    }, 1600);
+    setTimeout(finishAttempt, 1600);
   }
 
   function handleDerbyMiss() {
-    outs++;
-    announcerEl.textContent = `Swing and a miss! Strike! (Outs: ${outs}/3)`;
+    if (attemptPhase !== 'pitching') return;
+    attemptPhase = 'resolving';
+    ball.state = 'missed';
+    isDerbyPitching = false;
+    arcadeSwingBtn.disabled = true;
+    recordStrike('Missed pitch');
+    setTimeout(finishAttempt, 1200);
+  }
+
+  function recordStrike(reason) {
+    strikes++;
+    announcerEl.textContent = `${reason}. Strike ${strikes}!`;
     speakAnnouncer("Strike!");
+    if (strikes >= 3) {
+      strikes = 0;
+      outs++;
+      announcerEl.textContent = `Strike three! ${outs} out${outs === 1 ? '' : 's'}.`;
+    }
     if (outs >= 3) {
-      announcerEl.textContent = `Three outs! Side retired! Inning complete. Click Throw Pitch for next inning!`;
+      announcerEl.textContent = 'Three outs! Side retired. Answer the next question to start a new inning.';
       speakAnnouncer("Three outs, side retired!");
       outs = 0;
     }
     updateDerbyScore();
 
-    setTimeout(() => {
-      isDerbyPitching = false;
-      arcadePitchBtn.disabled = false;
-      arcadeSwingBtn.disabled = true;
-    }, 1200);
+  }
+
+  function finishAttempt() {
+    isDerbyPitching = false;
+    ball.state = 'ready';
+    batter.state = 'idle';
+    attemptPhase = 'question';
+    activeAdaptiveQuestion = null;
+    hasPowerBat = false;
+    powerActiveTag.classList.add('hidden');
+    arcadePitchBtn.disabled = true;
+    arcadeSwingBtn.disabled = true;
+    if (activeScreen === 'screen-derby') openAdaptiveTimeout();
   }
 
   function updateDerbyScore() {
+    document.querySelectorAll('#hud-strikes-dots .hud-dot').forEach((dot, index) => {
+      dot.classList.toggle('on', index < strikes);
+      dot.classList.toggle('off', index >= strikes);
+    });
     const batsRuns = document.getElementById('hud-bats-runs');
     if (batsRuns) batsRuns.textContent = hr;
 
@@ -872,15 +954,35 @@ document.addEventListener('DOMContentLoaded', () => {
   // ============================================================
   let selectedKid = null;
   const rosterGrid = document.getElementById('dugout-roster-grid');
+  let rosterLoading = null;
+
+  function displayBatter() {
+    if (!selectedKid) return;
+    document.getElementById('current-batter-name').textContent = `${selectedKid.fullName} #${selectedKid.jerseyNumber}`;
+    document.getElementById('hud-batter-display').textContent = `${selectedKid.fullName} — ${selectedKid.primaryPosition}`;
+    document.getElementById('hud-avg').textContent = selectedKid.rawStats.battingAvg == null ? 'READY TO PLAY' : `${selectedKid.rawStats.battingAvg} AVG`;
+  }
+
+  async function ensureBatter() {
+    if (!selectedKid) {
+      if (!rosterLoading) rosterLoading = loadDugoutRoster().finally(() => { rosterLoading = null; });
+      await rosterLoading;
+    }
+    displayBatter();
+  }
+
+  const escapeHTML = value => String(value ?? '—').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   async function loadDugoutRoster() {
     if (!rosterGrid) return;
-    rosterGrid.innerHTML = '<p style="color:var(--text-muted);">Loading Louisville Bats Triple-A Roster from MLB Stats API...</p>';
+    rosterGrid.innerHTML = '<p>Calling the dugout…</p>';
 
     try {
       const res = await fetch('/api/bats/characters');
+      if (!res.ok) throw new Error('Roster unavailable');
       const data = await res.json();
       const chars = data.characters || [];
+      if (!chars.length) throw new Error('Empty roster');
       rosterGrid.innerHTML = '';
 
       chars.forEach((c, i) => {
@@ -888,11 +990,11 @@ document.addEventListener('DOMContentLoaded', () => {
         card.className = `kid-select-card ${i === 0 ? 'selected' : ''}`;
         card.innerHTML = `
           <div class="kid-select-header">
-            <span class="kid-select-name">#${c.jerseyNumber} ${c.fullName}</span>
-            <span class="kid-select-pos">${c.primaryPosition}</span>
+            <span class="kid-select-name">#${escapeHTML(c.jerseyNumber)} ${escapeHTML(c.fullName)}</span>
+            <span class="kid-select-pos">${escapeHTML(c.primaryPosition)}</span>
           </div>
           <div class="kid-quirk-box">
-            Real MiLB Stats: <strong>${c.rawStats.battingAvg} AVG</strong> &bull; <strong>${c.rawStats.homeRuns} HR</strong> &bull; <strong>${c.rawStats.stolenBases} SB</strong>
+            ${data.source === 'cached-mlb' ? 'Saved roster' : 'Louisville roster'} · Sandlot game ratings
           </div>
           <div class="stat-bars-grid">
             <span>Batting: <strong>${c.backyardStats.batting}/10</strong></span>
@@ -912,8 +1014,9 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       selectedKid = chars[0];
+      displayBatter();
     } catch (_) {
-      rosterGrid.innerHTML = '<p>Loaded default sandlot slugger.</p>';
+      rosterGrid.innerHTML = '<p>The dugout is offline. Play as yourself for now; visit again to load the Bats.</p>';
     }
   }
 
@@ -921,7 +1024,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (selectedKid) {
       document.getElementById('current-batter-name').textContent = `${selectedKid.fullName.toUpperCase()} #${selectedKid.jerseyNumber}`;
       document.getElementById('hud-batter-display').textContent = `${selectedKid.fullName.toUpperCase()} - ${selectedKid.primaryPosition}`;
-      document.getElementById('hud-avg').textContent = `${selectedKid.rawStats.battingAvg} AVG`;
+      displayBatter();
       speakAnnouncer(`Now batting for the Louisville Bats: ${selectedKid.fullName}!`);
     }
     switchScreen('screen-derby');

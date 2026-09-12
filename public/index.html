@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Batyard Slugger — Louisville Bats Video Game</title>
-  <meta name="description" content="Batyard Slugger: A 90s Backyard Baseball inspired video game for the Louisville Bats featuring JCPS computer-adaptive math & science challenges.">
+  <meta name="description" content="Step up for Louisville Bats baseball, hometown trivia, and big sandlot swings with Buddy Bat.">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="louisville.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦇</text></svg>">
@@ -112,12 +112,12 @@
         <!-- In-Game Top Navigation -->
         <div class="derby-top-bar">
           <div class="batter-now-batting">
-            NOW BATTING: <strong id="current-batter-name">PABLO SANCHEZ #16</strong>
+            NOW BATTING: <strong id="current-batter-name">YOU — HOMETOWN SLUGGER</strong>
             <span class="power-active-tag hidden" id="power-active-tag">⚡ 3X POWER BAT ACTIVE!</span>
           </div>
           <div class="derby-nav-buttons">
-            <button id="game-timeout-btn" class="derby-nav-btn warning" title="Call Time Out for JCPS Math/Science Challenge">
-              ✋ POWER-UP CHALLENGE
+            <button id="game-timeout-btn" class="derby-nav-btn warning" title="Pause or resume the pitch">
+              ✋ TIME OUT
             </button>
             <button class="derby-nav-btn" data-target="screen-title">TITLE</button>
           </div>
@@ -143,7 +143,7 @@
             </div>
 
             <div class="gamepad-action-buttons">
-              <button id="arcade-pitch-btn" class="gamepad-btn blue">⚾ THROW PITCH</button>
+              <button id="arcade-pitch-btn" class="gamepad-btn blue" disabled>⚾ THROW PITCH</button>
               <button id="arcade-swing-btn" class="gamepad-btn gold" disabled>💥 SWING! (<kbd>SPACE</kbd>)</button>
             </div>
           </div>
@@ -165,8 +165,8 @@
               <div class="hud-batter-card">
                 <div class="hud-batter-avatar">🧢</div>
                 <div class="hud-batter-details">
-                  <div class="hud-batter-name">AT BAT: <strong id="hud-batter-display">PABLO SANCHEZ - LF</strong></div>
-                  <div class="hud-batter-stat"><span id="hud-avg">.300 AVG</span> &bull; <span id="hud-today">0 FOR 0</span></div>
+                  <div class="hud-batter-name">AT BAT: <strong id="hud-batter-display">YOU — HOMETOWN SLUGGER</strong></div>
+                  <div class="hud-batter-stat"><span id="hud-avg">READY TO PLAY</span> &bull; <span id="hud-today">0 FOR 0</span></div>
                 </div>
               </div>
               <div class="hud-count-row">
@@ -186,7 +186,7 @@
             </div>
 
             <div class="hud-action-col">
-              <button id="bb97-hud-timeout-btn" class="hud-timeout-btn" title="Call Time Out for a Math/Science Power-Up!">
+              <button id="bb97-hud-timeout-btn" class="hud-timeout-btn" title="Pause or resume the pitch">
                 <span class="timeout-hand">✋</span>
                 <span class="timeout-txt">TIME<br>OUT</span>
               </button>
@@ -202,15 +202,15 @@
         <div class="chalkboard-modal">
           <div class="chalkboard-header">
             <div class="jcps-cat-meter">
-              <span class="cat-pill">⚡ BUDDY’S BRAIN BREAK</span>
-              <span class="tier-indicator" id="cat-tier-badge">TIER 3: PROFICIENT</span>
+              <span class="cat-pill">⚾ ANSWER TO EARN YOUR SWING</span>
+              <span class="tier-indicator" id="cat-tier-badge">SLUGGER</span>
               <span class="streak-indicator" id="cat-streak-badge">🔥 STREAK: 0</span>
             </div>
-            <button id="close-timeout-btn" class="chalkboard-close-btn" title="Resume Game">✕ RESUME</button>
+            <button id="close-timeout-btn" class="chalkboard-close-btn" title="Back to title">✕ TITLE</button>
           </div>
 
           <div class="chalkboard-body">
-            <h3 class="chalk-q-prompt" id="cat-question-text">Loading computer-adaptive challenge...</h3>
+            <h3 class="chalk-q-prompt" id="cat-question-text">Buddy is picking your next question…</h3>
             
             <div class="cat-options-grid" id="cat-options-grid">
               <!-- Rendered dynamically -->
@@ -219,7 +219,7 @@
             <div id="cat-feedback-box" class="chalk-feedback-box hidden"></div>
 
             <!-- Interactive Action Widget: Batting Average Dial -->
-            <div class="tactile-widget-box">
+            <div class="tactile-widget-box hidden">
               <span class="widget-title">🎯 TACTILE GAUGE PUZZLE: DIAL IN THE BATTING AVERAGE</span>
               <div class="gauge-flex">
                 <input type="range" id="adaptive-gauge" min="100" max="500" value="200" step="25" class="cat-slider">
@@ -231,8 +231,8 @@
           </div>
 
           <div class="chalkboard-footer">
-            <span class="cat-hint">Build a correct-answer streak to earn your power bat. Buddy’s got your back!</span>
-            <button id="return-to-atbat-btn" class="cat-resume-btn">⚾ RETURN TO AT-BAT WITH POWER BAT</button>
+            <span class="cat-hint">Correct answer = one pitch. Incorrect answer = one strike. Three strikes = one out.</span>
+            <button id="return-to-atbat-btn" class="cat-resume-btn hidden" disabled>⚾ RETURN TO AT-BAT</button>
           </div>
         </div>
       </div>
