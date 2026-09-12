@@ -51,12 +51,19 @@ test('the drafted batter keeps one identity while batting and running', () => {
   assert.match(appSource, /drawAnimatedKid\(x, y, 0\.88, pose, appearance\)/);
 });
 
-test('derby backdrop combines Louisville riverfront landmarks with sandlot texture', () => {
-  assert.match(appSource, /function drawLouisvilleSkyline\(\)/);
-  assert.match(appSource, /function drawOhioRiverBridges\(\)/);
-  assert.match(appSource, /function drawSandlotTexture\(\)/);
-  assert.match(appSource, /drawLouisvilleSkyline\(\);/);
-  assert.match(appSource, /drawOhioRiverBridges\(\);/);
-  assert.match(appSource, /DOWNTOWN LOUISVILLE/);
-  assert.match(appSource, /I-65\/Kennedy bridge sightline/);
+test('derby uses the supplied Louisville stadium artwork as its field background', () => {
+  const sourceArtwork = fs.readFileSync(new URL('Assets/Setting.png', root));
+  const publicArtwork = fs.readFileSync(new URL('public/assets/images/setting.png', root));
+  assert.deepEqual(publicArtwork, sourceArtwork);
+  assert.match(appSource, /derbyBackgroundImage\.src = 'assets\/images\/setting\.png'/);
+  assert.match(appSource, /function drawDerbyBackground\(\)/);
+  assert.match(appSource, /dctx\.drawImage\(/);
+
+  const renderSource = appSource.slice(
+    appSource.indexOf('function renderDerbyField()'),
+    appSource.indexOf('function drawDerbyBackground()')
+  );
+  assert.match(renderSource, /drawDerbyBackground\(\);/);
+  assert.doesNotMatch(renderSource, /createLinearGradient|drawLouisvilleSkyline|drawOhioRiverBridges|drawSandlotTexture/);
+  assert.match(html, /aria-label="Louisville Slugger Field viewed from behind home plate/);
 });

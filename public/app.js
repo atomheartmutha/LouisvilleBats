@@ -578,6 +578,13 @@ document.addEventListener('DOMContentLoaded', () => {
   let pitcherAnimationFrame = null;
   let runnerAnimation = null;
   let activePitcherKey = 'Slugger_Pitcher';
+  const derbyBackgroundImage = typeof Image === 'function' ? new Image() : null;
+  if (derbyBackgroundImage) {
+    derbyBackgroundImage.src = 'assets/images/setting.png';
+    derbyBackgroundImage.addEventListener('load', () => {
+      if (activeScreen === 'screen-derby') renderDerbyField();
+    }, { once: true });
+  }
 
   // Pitch selector pills
   document.querySelectorAll('.pitch-pill').forEach(pill => {
@@ -590,133 +597,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderDerbyField() {
     dctx.clearRect(0, 0, derbyCanvas.width, derbyCanvas.height);
+    drawDerbyBackground();
 
-    // 1. A storybook version of the real Slugger Field riverfront sightline.
-    const sky = dctx.createLinearGradient(0, 0, 0, 95);
-    sky.addColorStop(0, '#E8B875');
-    sky.addColorStop(0.58, '#F4D49D');
-    sky.addColorStop(1, '#F9E8BE');
-    dctx.fillStyle = sky;
-    dctx.fillRect(0, 0, derbyCanvas.width, 95);
-    drawBackyardCloud(68, 25, 0.72);
-    drawBackyardCloud(575, 20, 0.58);
-    drawLouisvilleSkyline();
-    drawOhioRiverBridges();
-
-    // A thin Ohio River ribbon keeps downtown visually separate from the fence.
-    const river = dctx.createLinearGradient(0, 66, 0, 82);
-    river.addColorStop(0, '#A9CDD0');
-    river.addColorStop(1, '#6F9FA9');
-    dctx.fillStyle = river;
-    dctx.fillRect(0, 66, derbyCanvas.width, 16);
-    dctx.strokeStyle = 'rgba(255,255,255,.55)';
-    dctx.lineWidth = 1.5;
-    dctx.beginPath();
-    dctx.moveTo(18, 71);
-    dctx.bezierCurveTo(135, 67, 226, 76, 350, 71);
-    dctx.bezierCurveTo(470, 67, 555, 76, 704, 70);
-    dctx.stroke();
-
-    // Wooden Blue Outfield Fence
-    dctx.fillStyle = '#1D3557';
-    dctx.fillRect(0, 80, derbyCanvas.width, 24);
-    dctx.fillStyle = '#457B9D';
-    dctx.fillRect(0, 78, derbyCanvas.width, 4);
-
-    // Scoreboard
-    dctx.fillStyle = '#0C2340';
-    dctx.fillRect(295, 66, 130, 24);
-    dctx.strokeStyle = '#FFFFFF';
-    dctx.lineWidth = 1.5;
-    dctx.strokeRect(295, 66, 130, 24);
-    dctx.fillStyle = '#FFC72C';
-    dctx.font = 'bold 9px monospace';
-    dctx.textAlign = 'center';
-    dctx.fillText('LOUISVILLE BATS', 360, 81);
-    dctx.fillStyle = '#f5e9cd';
-    dctx.font = 'bold 8px monospace';
-    dctx.fillText('RIVER CITY SANDLOT', 135, 95);
-    dctx.fillText('DOWNTOWN LOUISVILLE', 580, 95);
-
-    // 2. Outfield & Infield Grass
-    dctx.fillStyle = '#386641';
-    dctx.fillRect(0, 100, derbyCanvas.width, 320);
-
-    dctx.fillStyle = '#407B4A';
-    dctx.fillRect(0, 125, derbyCanvas.width, 20);
-    dctx.fillRect(0, 165, derbyCanvas.width, 25);
-    drawSandlotTexture();
-
-    // 3. Dirt Diamond
-    dctx.fillStyle = '#DDA15E';
-    dctx.beginPath();
-    dctx.moveTo(360, 130);
-    dctx.lineTo(590, 260);
-    dctx.lineTo(360, 410);
-    dctx.lineTo(130, 260);
-    dctx.closePath();
-    dctx.fill();
-
-    // Grass cutout
-    dctx.fillStyle = '#386641';
-    dctx.beginPath();
-    dctx.moveTo(360, 165);
-    dctx.lineTo(520, 260);
-    dctx.lineTo(360, 355);
-    dctx.lineTo(200, 260);
-    dctx.closePath();
-    dctx.fill();
-
-    // 4. Chalk Lines & Batter Box
-    dctx.strokeStyle = '#FFFFFF';
-    dctx.lineWidth = 3.5;
-    dctx.beginPath();
-    dctx.moveTo(360, 380);
-    dctx.lineTo(80, 220);
-    dctx.stroke();
-
-    dctx.beginPath();
-    dctx.moveTo(360, 380);
-    dctx.lineTo(640, 220);
-    dctx.stroke();
-
-    // Home Plate
-    dctx.fillStyle = '#FFFFFF';
-    dctx.beginPath();
-    dctx.moveTo(360, 370);
-    dctx.lineTo(375, 385);
-    dctx.lineTo(375, 400);
-    dctx.lineTo(345, 400);
-    dctx.lineTo(345, 385);
-    dctx.closePath();
-    dctx.fill();
-
-    // Chalk Batter's Boxes
-    dctx.strokeStyle = '#FFFFFF';
-    dctx.lineWidth = 2.5;
-    dctx.strokeRect(280, 355, 52, 58);
-    dctx.strokeRect(385, 355, 52, 58);
-
-    // 5. Mound & Rubber
-    dctx.fillStyle = '#BC6C25';
-    dctx.beginPath();
-    dctx.ellipse(360, 225, 42, 20, 0, 0, Math.PI * 2);
-    dctx.fill();
-    dctx.fillStyle = '#FFFFFF';
-    dctx.fillRect(350, 222, 20, 4);
-
-    // 6. Bases & Fielders
-    drawBase(360, 140);
-    drawBase(540, 250);
-    drawBase(180, 250);
-
-    drawFielder(240, 175, '#BA0C2F');
-    drawFielder(480, 175, '#BA0C2F');
-    drawFielder(190, 235, '#0C2340');
-    drawFielder(530, 235, '#0C2340');
+    // Keep only active game pieces over the localized Slugger Field artwork.
+    drawFielder(220, 205, '#BA0C2F');
+    drawFielder(500, 205, '#BA0C2F');
+    drawFielder(130, 260, '#0C2340');
+    drawFielder(590, 260, '#0C2340');
 
     // Pitcher — animated from the Slugger_Pitcher pose asset when available.
-    drawPitcher(360, 210);
+    drawPitcher(360, 250);
 
     // Batter (Pablo Sanchez / Kid Slugger)
     if (!runnerAnimation) drawBatter(batter.x, batter.y);
@@ -742,6 +632,38 @@ document.addEventListener('DOMContentLoaded', () => {
       dctx.stroke();
       dctx.restore();
     }
+  }
+
+  function drawDerbyBackground() {
+    if (derbyBackgroundImage?.complete && derbyBackgroundImage.naturalWidth > 0) {
+      const imageRatio = derbyBackgroundImage.naturalWidth / derbyBackgroundImage.naturalHeight;
+      const canvasRatio = derbyCanvas.width / derbyCanvas.height;
+      let sx = 0;
+      let sy = 0;
+      let sourceWidth = derbyBackgroundImage.naturalWidth;
+      let sourceHeight = derbyBackgroundImage.naturalHeight;
+
+      if (imageRatio < canvasRatio) {
+        sourceHeight = sourceWidth / canvasRatio;
+        sy = (derbyBackgroundImage.naturalHeight - sourceHeight) * 0.35;
+      } else if (imageRatio > canvasRatio) {
+        sourceWidth = sourceHeight * canvasRatio;
+        sx = (derbyBackgroundImage.naturalWidth - sourceWidth) / 2;
+      }
+
+      dctx.imageSmoothingEnabled = true;
+      dctx.imageSmoothingQuality = 'high';
+      dctx.drawImage(
+        derbyBackgroundImage,
+        sx, sy, sourceWidth, sourceHeight,
+        0, 0, derbyCanvas.width, derbyCanvas.height
+      );
+      return;
+    }
+
+    // Fast paint while the image decodes; the load handler redraws immediately.
+    dctx.fillStyle = '#4F8F45';
+    dctx.fillRect(0, 0, derbyCanvas.width, derbyCanvas.height);
   }
 
   function drawBackyardCloud(x, y, scale) {
