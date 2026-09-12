@@ -620,7 +620,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let batter = { x: 300, y: 365, state: 'idle' };
   const characterAnimations = window.BatyardCharacterAnimations || {};
   const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || false;
+  const batterSwingDuration = prefersReducedMotion ? 1 : 16;
   let characterIdleFrame = 0;
+  let batterSwingFrame = null;
   let pitcherAnimationFrame = null;
   let runnerAnimation = null;
   let activePitcherKey = 'Slugger_Pitcher';
@@ -655,8 +657,9 @@ document.addEventListener('DOMContentLoaded', () => {
     drawPitcher(360, 250);
 
     // Batter (Pablo Sanchez / Kid Slugger)
-    if (!runnerAnimation) drawBatter(batter.x, batter.y);
-    drawHotRodsRunner();
+    // Finish the visible bat arc before the same character leaves home plate.
+    if (!runnerAnimation || batterSwingFrame !== null) drawBatter(batter.x, batter.y);
+    if (batterSwingFrame === null) drawHotRodsRunner();
 
     // Mini-radar and mound HUD
     drawMiniRadar(18, 12);
@@ -1046,7 +1049,15 @@ document.addEventListener('DOMContentLoaded', () => {
         pitcherAnimationFrame = null;
       }
     }
-    if (runnerAnimation && !prefersReducedMotion) runnerAnimation.frame++;
+    if (batterSwingFrame !== null) {
+      batterSwingFrame++;
+      if (batterSwingFrame > batterSwingDuration) {
+        batterSwingFrame = null;
+        batter.state = 'idle';
+      }
+    } else if (runnerAnimation && !prefersReducedMotion) {
+      runnerAnimation.frame++;
+    }
   }
 
   function startHotRodsRun(hitTitle) {
@@ -1059,12 +1070,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function drawBatter(x, y) {
     const appearance = getSelectedBatterAppearance();
+    const swingProgress = batterSwingFrame === null ? 0 : Math.min(1, batterSwingFrame / batterSwingDuration);
+    const swingEase = swingProgress * swingProgress * (3 - 2 * swingProgress);
     const battingPose = {
-      armLeft: -0.72,
-      armRight: -1.06,
-      legLeft: 0.18,
-      legRight: -0.18,
-      lean: batter.state === 'swinging' ? -0.14 : 0.05,
+      armLeft: -0.72 + swingEase * 1.45,
+      armRight: -1.06 + swingEase * 1.85,
+      legLeft: 0.18 - swingEase * 0.28,
+      legRight: -0.18 + swingEase * 0.3,
+      lean: batter.state === 'swinging' ? -0.2 * Math.sin(swingProgress * Math.PI) : 0.05,
       bob: !prefersReducedMotion && batter.state === 'idle' ? Math.sin(characterIdleFrame / 18) : 0
     };
     drawAnimatedKid(x, y, 0.88, battingPose, appearance);
@@ -1073,7 +1086,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dctx.save();
     dctx.translate(x + 2, y + 4);
     if (batter.state === 'swinging') {
-      dctx.rotate(Math.PI / 2.8);
+      dctx.rotate(0.55 - swingEase * 2.6);
     } else {
       dctx.rotate(0.3);
     }
@@ -1229,6 +1242,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (attemptPhase !== 'pitching' || derbyPaused || !isDerbyPitching || ball.state !== 'pitching') return;
     arcadeSwingBtn.disabled = true;
     batter.state = 'swinging';
+    batterSwingFrame = 0;
 
     const timingDelta = Math.abs(ball.y - 375);
     if (timingDelta < 32) {
@@ -1326,6 +1340,7 @@ document.addEventListener('DOMContentLoaded', () => {
     isDerbyPitching = false;
     ball.state = 'ready';
     batter.state = 'idle';
+    batterSwingFrame = null;
     runnerAnimation = null;
     activePitcherKey = activePitcherKey === 'Slugger_Pitcher' && characterAnimations.HotRods_Pitcher
       ? 'HotRods_Pitcher'

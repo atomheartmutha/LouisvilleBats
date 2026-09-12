@@ -41,6 +41,19 @@ test('gameplay loads and triggers both character animation roles', () => {
   assert.match(appSource, /runnerAnimation = null/);
 });
 
+test('a hit completes a visible bat arc before switching to the runner', () => {
+  const swingHandler = appSource.slice(
+    appSource.indexOf('function performSwing()'),
+    appSource.indexOf("arcadeSwingBtn?.addEventListener('click', performSwing)")
+  );
+  assert.match(appSource, /batterSwingFrame = 0/);
+  assert.match(appSource, /swingProgress \* swingProgress \* \(3 - 2 \* swingProgress\)/);
+  assert.match(appSource, /0\.55 - swingEase \* 2\.6/);
+  assert.match(appSource, /if \(!runnerAnimation \|\| batterSwingFrame !== null\) drawBatter/);
+  assert.match(appSource, /if \(batterSwingFrame === null\) drawHotRodsRunner/);
+  assert.ok(swingHandler.indexOf('batterSwingFrame = 0') < swingHandler.indexOf('handleDerbyHit(timingDelta)'));
+});
+
 test('the drafted batter keeps one identity while batting and running', () => {
   assert.match(appSource, /function getSelectedBatterAppearance\(\)/);
   assert.match(appSource, /function getSelectedBatterTag\(\)/);
