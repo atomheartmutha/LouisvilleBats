@@ -38,6 +38,7 @@ requiring checks are separate settings and have not been changed.
 | Gemini receives grounded facts; malformed answers fall back safely | questions.test.js |
 | Question exclusions, distinct choices, valid answer index and no school jargon | questions.test.js |
 | A failing suite blocks a real fixture commit; a passing suite permits it | pre-commit.test.js |
+| Vercel entry point stays import-safe and routes API/static requests | vercel.test.js |
 
 Add tests alongside future specifications, especially additional inning rules,
 roster outage/cache behavior and adaptive difficulty boundaries.

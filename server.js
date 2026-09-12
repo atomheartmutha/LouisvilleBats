@@ -1,7 +1,7 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { getTripleASchedule } from './src/mlbApi.js';
 import { getBatsCharacters } from './src/mlbApi.js';
 import { getAdaptiveQuestion } from './src/questions.js';
@@ -286,7 +286,7 @@ const MIME_TYPES = {
   '.ico': 'image/x-icon'
 };
 
-const server = http.createServer(async (req, res) => {
+export async function requestHandler(req, res) {
   const urlObj = new URL(req.url, `http://${req.headers.host}`);
   const pathname = urlObj.pathname;
 
@@ -407,10 +407,15 @@ Include:
     res.writeHead(404, { 'Content-Type': 'text/plain' });
     res.end('Not Found');
   }
-});
+}
 
-server.listen(PORT, HOST, () => {
-  console.log(`⚾ Batyard Slugger: Arcade & Adaptive Edition`);
-  console.log(`⚾ Running at: http://${HOST}:${PORT}`);
-  console.log(`⚾ JCPS-Style Adaptive Engine Active (Tiers 1-5)`);
-});
+export const server = http.createServer(requestHandler);
+
+const isDirectRun = process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href;
+if (isDirectRun) {
+  server.listen(PORT, HOST, () => {
+    console.log('⚾ Batyard Slugger: Arcade & Adaptive Edition');
+    console.log(`⚾ Running at: http://${HOST}:${PORT}`);
+    console.log('⚾ Adaptive question engine active');
+  });
+}
