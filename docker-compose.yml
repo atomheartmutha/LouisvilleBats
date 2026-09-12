@@ -5,6 +5,7 @@ services:
     container_name: road_to_the_bats
     restart: unless-stopped
     ports:
+      - "80:3000"
       - "3000:3000"
     environment:
       - PORT=3000
