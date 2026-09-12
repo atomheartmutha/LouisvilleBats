@@ -216,8 +216,26 @@ document.addEventListener('DOMContentLoaded', () => {
     noise.start();
   }
 
-  function speakAnnouncer(text) {
-    if (!soundEnabled || !('speechSynthesis' in window)) return;
+  let announcerRequest = null;
+  let announcerAudio = null;
+  let announcerAudioUrl = null;
+
+  function clearAnnouncerAudio() {
+    if (announcerAudio) announcerAudio.pause();
+    announcerAudio = null;
+    if (announcerAudioUrl) URL.revokeObjectURL(announcerAudioUrl);
+    announcerAudioUrl = null;
+  }
+
+  function stopAnnouncer() {
+    if (announcerRequest) announcerRequest.abort();
+    announcerRequest = null;
+    clearAnnouncerAudio();
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  }
+
+  function speakWithBrowserVoice(text) {
+    if (!('speechSynthesis' in window)) return;
     try {
       window.speechSynthesis.cancel();
       const utter = new SpeechSynthesisUtterance(text);
@@ -227,9 +245,51 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (_) {}
   }
 
+  async function speakAnnouncer(text) {
+    if (!soundEnabled) return;
+    stopAnnouncer();
+    const request = new AbortController();
+    announcerRequest = request;
+
+    try {
+      const response = await fetch('/api/voice/announcer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+        signal: request.signal
+      });
+      if (!response.ok) throw new Error('Voice unavailable');
+
+      const objectUrl = URL.createObjectURL(await response.blob());
+      if (announcerRequest !== request || !soundEnabled) {
+        URL.revokeObjectURL(objectUrl);
+        return;
+      }
+
+      const audio = new Audio(objectUrl);
+      announcerAudio = audio;
+      announcerAudioUrl = objectUrl;
+      const cleanup = () => {
+        if (announcerAudio === audio) clearAnnouncerAudio();
+        else URL.revokeObjectURL(objectUrl);
+      };
+      audio.addEventListener('ended', cleanup, { once: true });
+      audio.addEventListener('error', cleanup, { once: true });
+      await audio.play();
+    } catch (error) {
+      if (error.name !== 'AbortError' && announcerRequest === request && soundEnabled) {
+        clearAnnouncerAudio();
+        speakWithBrowserVoice(text);
+      }
+    } finally {
+      if (announcerRequest === request) announcerRequest = null;
+    }
+  }
+
   if (soundBtn) {
     soundBtn.addEventListener('click', () => {
       soundEnabled = !soundEnabled;
+      if (!soundEnabled) stopAnnouncer();
       localStorage.setItem('batyard_sound', soundEnabled.toString());
       soundBtn.innerHTML = soundEnabled ? '🔊 <span>ON</span>' : '🔇 <span>OFF</span>';
     });

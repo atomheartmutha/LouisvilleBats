@@ -38,7 +38,21 @@ requiring checks are separate settings and have not been changed.
 | Gemini receives grounded facts; malformed answers fall back safely | questions.test.js |
 | Question exclusions, distinct choices, valid answer index and no school jargon | questions.test.js |
 | A failing suite blocks a real fixture commit; a passing suite permits it | pre-commit.test.js |
-| Vercel entry point stays import-safe and routes API/static requests | vercel.test.js |
+| Vultr deploy waits for passing main tests, pins the exact commit and verifies health | deploy.test.js |
+| ElevenLabs keys remain server-side; approved lines are cached and safely fall back | announcer.test.js |
+
+## Continuous deployment
+
+After **Unit tests** succeeds for a push to `main`, **Deploy to Vultr** checks out
+the exact tested commit, packages it without `.env`, deploys it through a dedicated
+SSH key, rebuilds the Docker service, and requires internal and public health checks.
+Pull requests and manual test runs never deploy. Production `.env` remains only on
+the Vultr host at `/opt/road-to-the-bats/.env`.
+
+Deployment remains dormant until the repository variable `VULTR_DEPLOY_ENABLED`
+is explicitly set to `true`. Enable it only after the dedicated public key is in
+the server's `authorized_keys` and `VULTR_SSH_PRIVATE_KEY` is stored as a GitHub
+Actions secret.
 
 Add tests alongside future specifications, especially additional inning rules,
 roster outage/cache behavior and adaptive difficulty boundaries.

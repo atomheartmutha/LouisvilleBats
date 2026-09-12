@@ -1,10 +1,11 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { getTripleASchedule } from './src/mlbApi.js';
 import { getBatsCharacters } from './src/mlbApi.js';
 import { getAdaptiveQuestion } from './src/questions.js';
+import { createAnnouncerVoiceHandler } from './src/announcer.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -30,6 +31,8 @@ loadEnv();
 const PORT = parseInt(process.env.PORT || '3000', 10);
 const HOST = process.env.HOST || '0.0.0.0';
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
+const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY || '';
+const serveAnnouncerVoice = createAnnouncerVoiceHandler({ apiKey: ELEVENLABS_API_KEY });
 
 // Generic Gemini API Helper
 async function callGemini(prompt, systemInstruction = '') {
@@ -286,7 +289,7 @@ const MIME_TYPES = {
   '.ico': 'image/x-icon'
 };
 
-export async function requestHandler(req, res) {
+const server = http.createServer(async (req, res) => {
   const urlObj = new URL(req.url, `http://${req.headers.host}`);
   const pathname = urlObj.pathname;
 
@@ -308,10 +311,17 @@ export async function requestHandler(req, res) {
       gameTitle: 'Batyard Slugger — Arcade Edition',
       adaptiveEngine: 'JCPS-Style Computer Adaptive Testing (Tiers 1-5)',
       geminiConfigured: Boolean(GEMINI_API_KEY && GEMINI_API_KEY !== 'your_gemini_api_key_here'),
+      elevenLabsConfigured: Boolean(ELEVENLABS_API_KEY && ELEVENLABS_API_KEY !== 'your_elevenlabs_api_key_here'),
       mlbStatsApiUrl: 'https://statsapi.mlb.com/api/v1/schedule/games/?sportId=11',
       vultrReady: true,
       timestamp: new Date().toISOString()
     }));
+    return;
+  }
+
+  // ElevenLabs PA announcer proxy. The API key never reaches the browser.
+  if (pathname === '/api/voice/announcer' && req.method === 'POST') {
+    await serveAnnouncerVoice(req, res);
     return;
   }
 
@@ -407,15 +417,10 @@ Include:
     res.writeHead(404, { 'Content-Type': 'text/plain' });
     res.end('Not Found');
   }
-}
+});
 
-export const server = http.createServer(requestHandler);
-
-const isDirectRun = process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href;
-if (isDirectRun) {
-  server.listen(PORT, HOST, () => {
-    console.log('⚾ Batyard Slugger: Arcade & Adaptive Edition');
-    console.log(`⚾ Running at: http://${HOST}:${PORT}`);
-    console.log('⚾ Adaptive question engine active');
-  });
-}
+server.listen(PORT, HOST, () => {
+  console.log(`⚾ Batyard Slugger: Arcade & Adaptive Edition`);
+  console.log(`⚾ Running at: http://${HOST}:${PORT}`);
+  console.log(`⚾ JCPS-Style Adaptive Engine Active (Tiers 1-5)`);
+});
