@@ -115,10 +115,28 @@ test('early swing and successful contact each consume exactly one earned pitch',
   assert.equal(g.timers.length, 1);
   await g.nextTimer(); g.answer(0); g.el('arcade-pitch-btn').click();
   g.frames(29); g.el('arcade-swing-btn').click();
+  g.frames(6);
   assert.match(g.el('announcer-text').textContent, /CRACK|Solid contact/);
-  await g.nextTimer();
+  assert.equal(g.timers.length, 0);
+  g.frames(220); await g.flush();
   assert.equal(g.el('arcade-pitch-btn').disabled, true);
   assert.equal(g.requests.length, 3);
+});
+
+test('contact cue starts at bat contact, expires, and is absent on a miss', async () => {
+  const g = game(); await g.start(); g.answer(0);
+  g.el('bat-contact-cue').classList.add('hidden');
+  g.el('arcade-pitch-btn').click(); g.frames(29); g.el('arcade-swing-btn').click();
+  g.frames(5);
+  assert.equal(g.el('bat-contact-cue').classList.contains('hidden'), true);
+  g.frames(1);
+  assert.equal(g.el('bat-contact-cue').classList.contains('hidden'), false);
+  assert.match(g.el('announcer-text').textContent, /CRACK/);
+  g.frames(27);
+  assert.equal(g.el('bat-contact-cue').classList.contains('hidden'), true);
+  g.frames(220); await g.flush(); g.answer(0);
+  g.el('arcade-pitch-btn').click(); g.el('arcade-swing-btn').click(); g.frames(10);
+  assert.equal(g.el('bat-contact-cue').classList.contains('hidden'), true);
 });
 
 test('timeout pauses the ball without loading a question or spending the earned attempt', async () => {

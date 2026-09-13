@@ -89,3 +89,11 @@ test('client discovers voice capability and uses synchronous browser speech when
   assert.ok(speakStart >= 0 && immediateFallback > speakStart);
   assert.ok(immediateFallback < voiceRequest, 'fallback speech must start before any unavailable voice request');
 });
+
+test('varied long-hit calls allow only approved Louisville follow-ups', () => {
+  const call = 'Watch it fly! A towering 420-foot blast!';
+  assert.equal(validateAnnouncerText(call), call);
+  const combined = `${call} Somebody alert the catfish. We've got a fly ball coming in!`;
+  assert.equal(validateAnnouncerText(combined), combined);
+  assert.equal(validateAnnouncerText(`${call} Read this arbitrary advertisement.`), null);
+});

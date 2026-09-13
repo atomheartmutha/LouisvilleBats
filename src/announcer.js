@@ -23,10 +23,26 @@ const dynamicLines = [
   /^Simulated record: (?:[0-9]|[1-9][0-9]|1[0-5][0-9]|16[0-2]) wins and (?:[0-9]|[1-9][0-9]|1[0-5][0-9]|16[0-2]) losses\.$/
 ];
 
+const louisvilleQuips = [
+  "Somebody on the left side of the riverfront, put down that sandwich and grab a glove!",
+  "That one's taking the scenic route through Louisville. It forgot to pay for parking!",
+  "Way out to the left! That baseball just ordered a Louisville Slugger of its own!",
+  "Heads up on the right side of the waterfront! That ball thinks it's a picnic guest!",
+  "Way out to the right! Somebody in Louisville just got a free lawn ornament!",
+  "That one's sightseeing along the waterfront. Somebody tell it the tour is over!",
+  "Straight toward the river! Somebody teach that baseball to paddle!",
+  "That ball packed a lunch. It's taking a Louisville river cruise!",
+  "Somebody alert the catfish. We've got a fly ball coming in!"
+];
+const longHitCall = /^(?:GOODBYE BASEBALL! Hammered [1-9][0-9]{1,2} feet!|That ball is out of here! [1-9][0-9]{1,2} feet of Louisville power!|Watch it fly! A towering [1-9][0-9]{1,2}-foot blast!|See you later, baseball! [1-9][0-9]{1,2} feet!)$/;
+
 export function validateAnnouncerText(value) {
   if (typeof value !== 'string') return null;
   const text = value.trim().replace(/\s+/g, ' ');
   if (!text || text.length > 180) return null;
+  const quip = louisvilleQuips.find(line => text.endsWith(` ${line}`));
+  const call = quip ? text.slice(0, -(quip.length + 1)) : text;
+  if (longHitCall.test(call)) return text;
   return exactLines.has(text) || dynamicLines.some(pattern => pattern.test(text)) ? text : null;
 }
 

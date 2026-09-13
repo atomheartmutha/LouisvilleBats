@@ -56,19 +56,40 @@ async function initializeCharacterLayer() {
 
   const loader = new FBXLoader();
   const [pitcher, batter, runner] = await Promise.all([
-    loadCharacter(loader, './models/HotRods_Pitcher.fbx', 61, 0),
-    loadCharacter(loader, './models/Sluggers_Strike.fbx', 88, Math.PI),
-    loadCharacter(loader, './models/Slugger_Run.fbx', 76, Math.PI)
+    loadCharacter(loader, './models/HotRods_Pitcher.fbx', 61 * 0.88 * 1.06, 0),
+    loadCharacter(loader, './models/Sluggers_Strike.fbx', 88 * 0.88 * 1.06, Math.PI),
+    loadCharacter(loader, './models/Slugger_Run.fbx', 88 * 0.88 * 1.06, Math.PI, true)
   ]);
 
   scene.add(pitcher.group, batter.group, runner.group);
+  const batBone = batter.group.getObjectByName('Bone');
+  if (!batBone || batBone.parent?.name !== 'mixamorigRightHand') {
+    throw new Error('Missing right-hand bat bone');
+  }
+  // The merged mesh's bat spans local Y=4..640 on Bone. This is its barrel.
+  const barrelPoint = new THREE.Vector3(0, 520, 0);
+  const contactProgress = 6 / 16;
+  const contactTime = 1.5;
+  function poseBatter(progress) {
+    batter.action.paused = true;
+    batter.action.time = progress <= contactProgress
+      ? contactTime * progress / contactProgress
+      : contactTime + (batter.clip.duration - contactTime) *
+        (progress - contactProgress) / (1 - contactProgress);
+    batter.mixer.update(0);
+    scene.updateMatrixWorld(true);
+  }
+  placeAtCanvasPoint(batter.group, 306, 347, 20);
+  poseBatter(contactProgress);
+  const contact = batBone.localToWorld(barrelPoint.clone());
+  bridge.contactPoint = { x: contact.x + VIEW_WIDTH / 2, y: VIEW_HEIGHT / 2 - contact.y };
+  poseBatter(0);
   pitcher.group.renderOrder = 1;
   batter.group.renderOrder = 2;
   runner.group.renderOrder = 2;
 
   let lastFrameTime = performance.now();
   let previousPitching = false;
-  let previousSwinging = false;
   let previousRunning = false;
 
   bridge.render = state => {
@@ -77,7 +98,6 @@ async function initializeCharacterLayer() {
     lastFrameTime = now;
 
     const pitching = Boolean(state.pitcher?.throwing);
-    const swinging = Boolean(state.batter?.swinging);
     const running = Boolean(state.runner?.visible);
     const frozen = Boolean(state.paused || state.reducedMotion);
 
@@ -85,26 +105,39 @@ async function initializeCharacterLayer() {
     batter.group.visible = Boolean(state.visible && state.batter?.visible);
     runner.group.visible = Boolean(state.visible && running);
 
-    placeAtCanvasPoint(pitcher.group, state.pitcher?.x ?? 360, state.pitcher?.y ?? 250, -20);
-    placeAtCanvasPoint(batter.group, state.batter?.x ?? 300, state.batter?.y ?? 365, 20);
-    if (state.runner) placeAtCanvasPoint(runner.group, state.runner.x, state.runner.y, 20);
+    placeAtCanvasPoint(pitcher.group, state.pitcher?.x ?? 349, state.pitcher?.y ?? 268, -20);
+    placeAtCanvasPoint(batter.group, state.batter?.x ?? 306, state.batter?.y ?? 347, 20);
+    if (state.runner) {
+      placeAtCanvasPoint(runner.group, state.runner.x, state.runner.y, 20);
+      runner.group.scale.setScalar(runner.baseScale * state.runner.scale);
+      runner.group.rotation.y = state.runner.heading;
+    }
 
-    if (pitching && !previousPitching) playOnce(pitcher, 0.85);
+    if (pitching) {
+      pitcher.action.paused = true;
+      pitcher.action.time = Math.min(1, (state.pitcher.frame || 0) / 48) * pitcher.clip.duration;
+      pitcher.mixer.update(0);
+    }
     if (!pitching && previousPitching) resetToFirstFrame(pitcher);
-    if (swinging && !previousSwinging) playOnce(batter, 0.32);
-    if (!swinging && previousSwinging) resetToFirstFrame(batter);
+    // The bat, body, and ball share one swing clock instead of separate timers.
+    const swingProgress = state.batter?.swingProgress || 0;
+    poseBatter(swingProgress);
     if (running && !previousRunning) playLoop(runner);
     if (!running && previousRunning) resetToFirstFrame(runner);
 
     if (!frozen) {
-      pitcher.mixer.update(elapsed);
-      batter.mixer.update(elapsed);
+
       runner.mixer.update(elapsed);
     }
 
+    scene.updateMatrixWorld(true);
+    const throwingHand = pitcher.group.getObjectByName('mixamorigRightHand');
+    if (throwingHand) {
+      const hand = throwingHand.getWorldPosition(new THREE.Vector3());
+      bridge.pitchHand = { x: hand.x + VIEW_WIDTH / 2, y: VIEW_HEIGHT / 2 - hand.y };
+    }
     renderer.render(scene, camera);
     previousPitching = pitching;
-    previousSwinging = swinging;
     previousRunning = running;
   };
 
@@ -117,7 +150,7 @@ async function initializeCharacterLayer() {
   window.dispatchEvent(new CustomEvent('batyard-three-ready'));
 }
 
-async function loadCharacter(loader, relativeUrl, targetHeight, rotationY) {
+async function loadCharacter(loader, relativeUrl, targetHeight, rotationY, inPlace = false) {
   const object = await loader.loadAsync(new URL(relativeUrl, import.meta.url).href);
   object.traverse(child => {
     if (!child.isMesh) return;
@@ -145,12 +178,13 @@ async function loadCharacter(loader, relativeUrl, targetHeight, rotationY) {
   group.add(object);
 
   const mixer = new THREE.AnimationMixer(object);
-  const clip = object.animations[0];
+  const sourceClip = object.animations[0];
+  const clip = sourceClip && (inPlace ? makeRunInPlace(sourceClip) : sourceClip);
   if (!clip) throw new Error(`Missing animation clip in ${relativeUrl}`);
   const action = mixer.clipAction(clip);
   action.play();
   action.paused = true;
-  return { group, mixer, action, clip };
+  return { group, mixer, action, clip, baseScale: targetHeight / size.y };
 }
 
 function placeAtCanvasPoint(group, x, y, z) {
@@ -183,4 +217,20 @@ function resetToFirstFrame(character) {
   character.action.play();
   character.action.paused = true;
   character.mixer.setTime(0);
+}
+
+// The base path owns travel. Keep the stride's vertical bounce, but prevent
+// the FBX hip translation from moving away and snapping back every cycle.
+function makeRunInPlace(sourceClip) {
+  const clip = sourceClip.clone();
+  for (const track of clip.tracks) {
+    if (track.name !== 'mixamorigHips.position') continue;
+    const x = track.values[0];
+    const z = track.values[2];
+    for (let i = 0; i < track.values.length; i += 3) {
+      track.values[i] = x;
+      track.values[i + 2] = z;
+    }
+  }
+  return clip;
 }

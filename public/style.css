@@ -1312,3 +1312,20 @@ body.arcade-body {
 }
 
 .hidden { display: none !important; }
+
+/* Above both canvases, exactly at the bat's contact point (342, 360). */
+.bat-contact-cue {
+  position: absolute;
+  left: 47.5%;
+  top: 85.714%;
+  z-index: 3;
+  transform: translate(-50%, -140%) rotate(-12deg);
+  pointer-events: none;
+  padding: 14px 18px;
+  background: #fff39b;
+  color: #751e13;
+  font-size: clamp(12px, 2.5vw, 20px);
+  font-weight: 1000;
+  font-style: italic;
+  clip-path: polygon(50% 0,60% 20%,85% 5%,80% 30%,100% 40%,83% 55%,100% 80%,70% 75%,65% 100%,48% 82%,25% 100%,28% 75%,0 80%,17% 55%,0 35%,25% 30%,20% 5%,40% 20%);
+}

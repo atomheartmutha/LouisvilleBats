@@ -46,12 +46,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (rankIconEl) rankIconEl.textContent = icon;
   }
 
-  function addPoints(pts) {
+  function addPoints(pts, celebrate = true) {
     globalPoints += pts;
     localStorage.setItem('batyard_points', globalPoints.toString());
     if (gamePointsEl) gamePointsEl.textContent = globalPoints;
     updateRank();
-    playCelebrationChime();
+    if (celebrate) playCelebrationChime();
   }
 
   if (gamePointsEl) gamePointsEl.textContent = globalPoints;
@@ -243,7 +243,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function playBatCrack() {
     if (!soundEnabled) return;
-    playGeneratedSfx('batCrack', synthesizeBatCrack);
+    // A synchronous attack makes contact audible even while media starts up.
+    synthesizeBatCrack();
+    playGeneratedSfx('batCrack', () => {});
   }
 
   function synthesizeCelebrationChime() {
@@ -664,12 +666,16 @@ document.addEventListener('DOMContentLoaded', () => {
   let hasPowerBat = false;
   let currentPitchType = 'fastball';
   let ball = { x: 360, y: 160, r: 7, vx: 0, vy: 0, state: 'ready' };
-  let batter = { x: 300, y: 365, state: 'idle' };
+  let batter = { x: 306, y: 347, state: 'idle' };
   const characterAnimations = window.BatyardCharacterAnimations || {};
   const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || false;
   const batterSwingDuration = prefersReducedMotion ? 1 : 16;
   let characterIdleFrame = 0;
   let batterSwingFrame = null;
+  let pendingContact = null;
+  let contactFrames = 0;
+  let contactHoldFrames = 0;
+  const contactCue = document.getElementById('bat-contact-cue');
   let pitcherAnimationFrame = null;
   let runnerAnimation = null;
   let activePitcherKey = 'Slugger_Pitcher';
@@ -706,7 +712,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Three.js owns these character pixels once its FBX models are ready.
     // Until then, the existing Canvas characters remain a zero-delay fallback.
     const usingThreeCharacters = renderThreeCharacters();
-    if (!usingThreeCharacters) drawPitcher(360, 250);
+    if (!usingThreeCharacters) drawPitcher(349, 268);
 
     // Batter (Pablo Sanchez / Kid Slugger)
     // Finish the visible bat arc before the same character leaves home plate.
@@ -714,7 +720,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!runnerAnimation || batterSwingFrame !== null) drawBatter(batter.x, batter.y);
       if (batterSwingFrame === null) drawHotRodsRunner();
     } else {
-      drawCharacterTag('HOT ROD', 360, 272, '#0C2340');
+      drawCharacterTag('HOT ROD', 349, 285, '#0C2340');
       if (!runnerAnimation || batterSwingFrame !== null) {
         drawCharacterTag(getSelectedBatterTag(), batter.x, batter.y + 24, getSelectedBatterAppearance().cap);
       } else {
@@ -728,6 +734,9 @@ document.addEventListener('DOMContentLoaded', () => {
     drawMoundHUD(535, 10);
 
     // Ball
+    if (ball.windupFrames > 0 && window.BatyardThreeCharacters?.pitchHand) {
+      Object.assign(ball, window.BatyardThreeCharacters.pitchHand);
+    }
     if (ball.state !== 'ready') {
       dctx.save();
       if (hasPowerBat && ball.state === 'hit') {
@@ -756,15 +765,17 @@ document.addEventListener('DOMContentLoaded', () => {
         paused: derbyPaused || !adaptiveModal.classList.contains('hidden'),
         reducedMotion: prefersReducedMotion,
         pitcher: {
-          x: 360,
-          y: 250,
+          x: 349,
+          y: 268,
+          frame: pitcherAnimationFrame || 0,
           throwing: pitcherAnimationFrame !== null
         },
         batter: {
           x: batter.x,
           y: batter.y,
           visible: !runnerAnimation || batterSwingFrame !== null,
-          swinging: batterSwingFrame !== null
+          swinging: batterSwingFrame !== null,
+          swingProgress: batterSwingFrame === null ? 0 : (prefersReducedMotion ? 6 / 16 : Math.min(1, batterSwingFrame / batterSwingDuration))
         },
         runner: runnerPosition ? { ...runnerPosition, visible: true } : null
       });
@@ -979,7 +990,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const colors = isHotRod
         ? { cap: '#0C2340', jersey: '#BA0C2F', sleeves: '#F8FAFC', shorts: '#0C2340', skin: '#8D5524', shoes: '#FFC72C' }
         : { cap: '#BA0C2F', jersey: '#F8FAFC', sleeves: '#BA0C2F', shorts: '#0C2340', skin: '#C97C5D', shoes: '#FFC72C' };
-      drawAnimatedKid(x, y + idleBob, 0.78, pose, colors, true);
+      drawAnimatedKid(x, y + idleBob, 0.78 * 0.88 * 1.06, pose, colors, true);
       drawCharacterTag(isHotRod ? 'HOT ROD' : 'SLUGGER', x, y + 22, isHotRod ? '#0C2340' : '#BA0C2F');
       return;
     }
@@ -1118,30 +1129,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const runnerPosition = getRunnerPosition();
     if (!runnerPosition) return;
-    const { x, y } = runnerPosition;
+    const { x, y, scale, heading } = runnerPosition;
     const pose = getCharacterPose(animation, runnerAnimation.frame);
     const appearance = getSelectedBatterAppearance();
-    drawAnimatedKid(x, y, 0.88, pose, appearance);
+    dctx.save();
+    dctx.translate(x, y);
+    dctx.scale((Math.sin(heading) < 0 ? -1 : 1) * scale, scale);
+    drawAnimatedKid(0, -22, 0.88 * 0.88 * 1.06, pose, appearance);
+    dctx.restore();
     drawCharacterTag(getSelectedBatterTag(), x, y + 24, appearance.cap);
   }
 
   function getRunnerPosition() {
     if (!runnerAnimation) return null;
     const progress = prefersReducedMotion ? 1 : Math.min(1, runnerAnimation.frame / runnerAnimation.totalFrames);
-    let x, y;
-    if (runnerAnimation.bases > 1 && progress > 0.58) {
-      const secondLeg = (progress - 0.58) / 0.42;
-      x = 535 + (360 - 535) * secondLeg;
-      y = 250 + (145 - 250) * secondLeg - Math.sin(secondLeg * Math.PI) * 12;
-    } else {
-      const firstLeg = Math.min(1, progress / 0.58);
-      x = 315 + (535 - 315) * firstLeg;
-      y = 363 + (250 - 363) * firstLeg - Math.sin(firstLeg * Math.PI) * 18;
-    }
-    return { x, y, progress };
+    return { ...sampleBasePath(runnerAnimation.bases, progress), progress };
+  }
+
+  function sampleBasePath(bases, progress) {
+    // Base centers in the supplied 1538 x 1023 artwork. Apply the same
+    // centered crop as drawDerbyBackground so feet stay on the base paths.
+    const sourceWidth = 1538, sourceHeight = 1023;
+    const cropHeight = sourceWidth * 420 / 720;
+    const cropTop = (sourceHeight - cropHeight) * 0.35;
+    const points = [[750, 784], [1314, 606], [745, 520], [193, 602], [750, 784]];
+    const steps = Math.max(1, Math.min(4, bases));
+    const distance = Math.max(0, Math.min(1, progress)) * steps;
+    const leg = Math.min(steps - 1, Math.floor(distance));
+    const amount = distance - leg;
+    const from = points[leg], to = points[leg + 1];
+    const sourceY = from[1] + (to[1] - from[1]) * amount;
+    return {
+      x: (from[0] + (to[0] - from[0]) * amount) * 720 / sourceWidth,
+      y: (sourceY - cropTop) * 420 / cropHeight,
+      scale: 0.6 + 0.4 * (sourceY - 520) / (784 - 520),
+      heading: Math.atan2(to[0] - from[0], to[1] - from[1])
+    };
   }
 
   function updateCharacterAnimations() {
+    if (contactHoldFrames > 0) { contactHoldFrames--; return; }
+    if (contactFrames > 0 && --contactFrames === 0) contactCue?.classList.add('hidden');
     characterIdleFrame++;
     if (pitcherAnimationFrame !== null) {
       pitcherAnimationFrame++;
@@ -1151,6 +1179,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (batterSwingFrame !== null) {
       batterSwingFrame++;
+      if (pendingContact !== null) {
+        const target = getBatContactPoint();
+        const remaining = Math.max(1, Math.min(6, batterSwingDuration) - batterSwingFrame + 1);
+        ball.x += (target.x - ball.x) / remaining;
+        ball.y += (target.y - ball.y) / remaining;
+      }
+      if (pendingContact !== null && batterSwingFrame >= Math.min(6, batterSwingDuration)) {
+        const delta = pendingContact;
+        pendingContact = null;
+        ball.state = 'hit';
+        const contact = getBatContactPoint();
+        ball.x = contact.x;
+        ball.y = contact.y;
+        contactHoldFrames = prefersReducedMotion ? 0 : 5;
+        contactFrames = 22;
+        contactCue?.setAttribute('style', `left:${contact.x / 720 * 100}%;top:${contact.y / 420 * 100}%;`);
+        contactCue?.classList.remove('hidden');
+        handleDerbyHit(delta);
+      }
       if (batterSwingFrame > batterSwingDuration) {
         batterSwingFrame = null;
         batter.state = 'idle';
@@ -1158,13 +1205,20 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (runnerAnimation && !prefersReducedMotion) {
       runnerAnimation.frame++;
     }
+    if (runnerAnimation && batterSwingFrame === null &&
+        (prefersReducedMotion || runnerAnimation.frame >= runnerAnimation.totalFrames)) {
+      // Paint the final base before returning to the question on the next frame.
+      if (runnerAnimation.arrived) finishAttempt();
+      else runnerAnimation.arrived = true;
+    }
   }
 
   function startHotRodsRun(hitTitle) {
+    const bases = hitTitle === 'Single' ? 1 : hitTitle === 'Double' ? 2 : 4;
     runnerAnimation = {
       frame: 0,
-      totalFrames: 92,
-      bases: hitTitle === 'Single' ? 1 : 2
+      totalFrames: 48 * bases,
+      bases
     };
   }
 
@@ -1180,15 +1234,16 @@ document.addEventListener('DOMContentLoaded', () => {
       lean: batter.state === 'swinging' ? -0.2 * Math.sin(swingProgress * Math.PI) : 0.05,
       bob: !prefersReducedMotion && batter.state === 'idle' ? Math.sin(characterIdleFrame / 18) : 0
     };
-    drawAnimatedKid(x, y, 0.88, battingPose, appearance);
+    drawAnimatedKid(x, y, 0.88 * 0.88 * 1.06, battingPose, appearance);
 
     // The bat remains a prop; the player's body is the same renderer used on the base path.
     dctx.save();
-    dctx.translate(x + 2, y + 4);
+    dctx.translate(x + 2, y - 5);
     if (batter.state === 'swinging') {
-      dctx.rotate(0.55 - swingEase * 2.6);
+      const contactProgress = 6 / 16;
+      dctx.rotate(swingProgress <= contactProgress ? -1.2 * (1 - swingProgress / contactProgress) : 1.2 * (swingProgress - contactProgress) / (1 - contactProgress));
     } else {
-      dctx.rotate(0.3);
+      dctx.rotate(-1.2);
     }
     dctx.fillStyle = hasPowerBat ? '#FFC72C' : '#DEB887';
     dctx.fillRect(0, -5, 42, 9);
@@ -1279,19 +1334,32 @@ document.addEventListener('DOMContentLoaded', () => {
     dctx.restore();
   }
 
+  function getBatContactPoint() {
+    const layer = window.BatyardThreeCharacters;
+    return layer?.ready && layer.contactPoint ? layer.contactPoint : { x: batter.x + 36, y: batter.y - 5 };
+  }
+
   function updateDerbyLoop() {
     if (activeScreen !== 'screen-derby' || derbyPaused || !adaptiveModal.classList.contains('hidden')) {
       requestAnimationFrame(updateDerbyLoop);
       return;
     }
-    if (ball.state === 'pitching') {
-      ball.y += ball.vy;
-      ball.x += ball.vx;
+    if (ball.state === 'pitching' && ball.windupFrames > 0) {
+      ball.windupFrames--;
+      const hand = window.BatyardThreeCharacters?.pitchHand;
+      ball.releaseX = hand?.x ?? 349;
+      ball.releaseY = hand?.y ?? 238;
+    } else if (ball.state === 'pitching') {
+      ball.pitchDistance += ball.vy;
+      const target = getBatContactPoint();
+      const approach = ball.pitchDistance / 140;
+      ball.y = ball.releaseY + (target.y - ball.releaseY) * approach;
+      ball.x = ball.releaseX + (target.x - ball.releaseX) * approach + Math.sin(Math.min(1, approach) * Math.PI) * ball.vx * 30;
       ball.r += 0.07;
-      if (ball.y > 400) {
+      if (ball.pitchDistance > 165) {
         handleDerbyMiss();
       }
-    } else if (ball.state === 'hit') {
+    } else if (ball.state === 'hit' && contactHoldFrames === 0) {
       ball.x += ball.vx;
       ball.y += ball.vy;
       ball.r = Math.max(3, ball.r - 0.05);
@@ -1329,25 +1397,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     ball = {
       x: 360,
-      y: 235,
+      y: 238,
       r: 4,
       vx: pitchVx,
       vy: pitchVy,
-      state: 'pitching'
+      state: 'pitching',
+      releaseX: 349,
+      releaseY: 238,
+      windupFrames: window.BatyardThreeCharacters?.ready ? 18 : 0,
+      pitchDistance: 0
     };
     announcerEl.textContent = `Here comes the ${currentPitchType}! Time your swing or press SPACE!`;
   });
 
   function performSwing() {
-    if (attemptPhase !== 'pitching' || derbyPaused || !isDerbyPitching || ball.state !== 'pitching') return;
+    if (attemptPhase !== 'pitching' || derbyPaused || !isDerbyPitching || ball.state !== 'pitching' || ball.windupFrames > 0) return;
     arcadeSwingBtn.disabled = true;
     batter.state = 'swinging';
     batterSwingFrame = 0;
 
-    const timingDelta = Math.abs(ball.y - 375);
+    const timingDelta = Math.abs(ball.pitchDistance - 140);
     if (timingDelta < 32) {
-      ball.state = 'hit';
-      handleDerbyHit(timingDelta);
+      attemptPhase = 'resolving';
+      ball.state = 'contact';
+      pendingContact = timingDelta;
     } else {
       handleDerbyMiss();
     }
@@ -1369,6 +1442,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  let lastLouisvilleQuip = '';
+  function louisvilleHitQuip(distance, direction, random = Math.random) {
+    if (distance < 395 || random() >= 0.4) return '';
+    const lines = direction < -0.3 ? [
+      "Somebody on the left side of the riverfront, put down that sandwich and grab a glove!",
+      "That one's taking the scenic route through Louisville. It forgot to pay for parking!",
+      "Way out to the left! That baseball just ordered a Louisville Slugger of its own!"
+    ] : direction > 0.3 ? [
+      "Heads up on the right side of the waterfront! That ball thinks it's a picnic guest!",
+      "Way out to the right! Somebody in Louisville just got a free lawn ornament!",
+      "That one's sightseeing along the waterfront. Somebody tell it the tour is over!"
+    ] : [
+      "Straight toward the river! Somebody teach that baseball to paddle!",
+      "That ball packed a lunch. It's taking a Louisville river cruise!",
+      "Somebody alert the catfish. We've got a fly ball coming in!"
+    ];
+    const choices = lines.filter(line => line !== lastLouisvilleQuip);
+    lastLouisvilleQuip = choices[Math.floor(random() * choices.length)];
+    return lastLouisvilleQuip;
+  }
+
   function handleDerbyHit(delta) {
     attemptPhase = 'resolving';
     strikes = 0;
@@ -1376,6 +1470,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let dist = 240;
     let hitTitle = 'Single';
     let pts = 50;
+    let call = '';
 
     if (hasPowerBat || delta < 10) {
       dist = Math.floor(395 + Math.random() * 60);
@@ -1386,7 +1481,13 @@ document.addEventListener('DOMContentLoaded', () => {
       ball.vx = (Math.random() - 0.5) * 2;
       announcerEl.textContent = `CRACK! A towering ${dist} FT ${hitTitle} splashing right into the Ohio River!`;
       playCrowdCheer();
-      speakAnnouncer(`GOODBYE BASEBALL! Hammered ${dist} feet into the Ohio River!`);
+      const calls = [
+        `GOODBYE BASEBALL! Hammered ${dist} feet!`,
+        `That ball is out of here! ${dist} feet of Louisville power!`,
+        `Watch it fly! A towering ${dist}-foot blast!`,
+        `See you later, baseball! ${dist} feet!`
+      ];
+      call = calls[Math.floor(Math.random() * calls.length)];
     } else {
       dist = Math.floor(250 + Math.random() * 50);
       hitTitle = delta < 20 ? 'Double' : 'Single';
@@ -1394,18 +1495,22 @@ document.addEventListener('DOMContentLoaded', () => {
       ball.vy = -4.5;
       ball.vx = (Math.random() > 0.5 ? 3 : -3);
       announcerEl.textContent = `Solid contact! Struck cleanly into the gap for a ${dist} FT ${hitTitle}!`;
-      speakAnnouncer(`Hit into the gap for a ${hitTitle}!`);
+      call = `Hit into the gap for a ${hitTitle}!`;
     }
 
+    const quip = louisvilleHitQuip(dist, ball.vx);
+    if (quip) announcerEl.textContent += ` ${quip}`;
+    // One utterance preserves the order and avoids interrupting the main call.
+    speakAnnouncer(quip ? `${call} ${quip}` : call);
     startHotRodsRun(hitTitle);
     hits++;
     if (dist > longestDist) longestDist = dist;
-    addPoints(pts);
+    addPoints(pts, false);
     hasPowerBat = false;
     if (powerActiveTag) powerActiveTag.classList.add('hidden');
     updateDerbyScore();
 
-    setTimeout(finishAttempt, 1600);
+    // Successful hits finish when the runner reaches the earned base.
   }
 
   function handleDerbyMiss() {
@@ -1441,6 +1546,10 @@ document.addEventListener('DOMContentLoaded', () => {
     ball.state = 'ready';
     batter.state = 'idle';
     batterSwingFrame = null;
+    pendingContact = null;
+    contactFrames = 0;
+    contactHoldFrames = 0;
+    contactCue?.classList.add('hidden');
     runnerAnimation = null;
     activePitcherKey = activePitcherKey === 'Slugger_Pitcher' && characterAnimations.HotRods_Pitcher
       ? 'HotRods_Pitcher'

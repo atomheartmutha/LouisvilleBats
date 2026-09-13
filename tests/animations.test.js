@@ -92,10 +92,10 @@ test('a hit completes a visible bat arc before switching to the runner', () => {
   );
   assert.match(appSource, /batterSwingFrame = 0/);
   assert.match(appSource, /swingProgress \* swingProgress \* \(3 - 2 \* swingProgress\)/);
-  assert.match(appSource, /0\.55 - swingEase \* 2\.6/);
+  assert.match(appSource, /swingProgress \/ contactProgress/);
   assert.match(appSource, /if \(!runnerAnimation \|\| batterSwingFrame !== null\) drawBatter/);
   assert.match(appSource, /if \(batterSwingFrame === null\) drawHotRodsRunner/);
-  assert.ok(swingHandler.indexOf('batterSwingFrame = 0') < swingHandler.indexOf('handleDerbyHit(timingDelta)'));
+  assert.ok(swingHandler.indexOf('batterSwingFrame = 0') < swingHandler.indexOf('pendingContact = timingDelta'));
 });
 
 test('the drafted batter keeps one identity while batting and running', () => {
@@ -104,8 +104,8 @@ test('the drafted batter keeps one identity while batting and running', () => {
   const appearanceUses = appSource.match(/const appearance = getSelectedBatterAppearance\(\);/g) || [];
   assert.equal(appearanceUses.length, 2);
   assert.match(appSource, /skin: skinTones\[seed % skinTones\.length\]/);
-  assert.match(appSource, /drawAnimatedKid\(x, y, 0\.88, battingPose, appearance\)/);
-  assert.match(appSource, /drawAnimatedKid\(x, y, 0\.88, pose, appearance\)/);
+  assert.match(appSource, /drawAnimatedKid\(x, y, 0\.88 \* 0\.88 \* 1\.06, battingPose, appearance\)/);
+  assert.match(appSource, /drawAnimatedKid\(0, -22, 0\.88 \* 0\.88 \* 1\.06, pose, appearance\)/);
 });
 
 test('derby uses the supplied Louisville stadium artwork as its field background', () => {
@@ -123,4 +123,36 @@ test('derby uses the supplied Louisville stadium artwork as its field background
   assert.match(renderSource, /drawDerbyBackground\(\);/);
   assert.doesNotMatch(renderSource, /createLinearGradient|drawLouisvilleSkyline|drawOhioRiverBridges|drawSandlotTexture/);
   assert.match(html, /aria-label="Louisville Slugger Field viewed from behind home plate/);
+});
+
+test('the original bat bone reaches its contact pose on the shared impact frame', () => {
+  assert.match(threeSource, /getObjectByName\('Bone'\)/);
+  assert.doesNotMatch(threeSource, /CylinderGeometry/);
+  const start = threeSource.indexOf('  function poseBatter(progress)');
+  const end = threeSource.indexOf('  placeAtCanvasPoint(batter.group', start);
+  const batter = { action: {}, clip: { duration: 2.5 }, mixer: { update() {} } };
+  const context = { batter, contactProgress: 6 / 16, contactTime: 1.5,
+    scene: { updateMatrixWorld() {} } };
+  vm.runInNewContext(threeSource.slice(start, end) + '\nthis.pose = poseBatter;', context);
+  context.pose(0);
+  assert.equal(batter.action.time, 0);
+  context.pose(6 / 16);
+  assert.equal(batter.action.time, 1.5);
+  assert.equal(batter.action.paused, true);
+  context.pose(1);
+  assert.equal(batter.action.time, 2.5);
+});
+
+test('runner stride cannot add travel or snap back when its clip repeats', () => {
+  const positions = [6, 246, 8, -3, 250, 540, 6, 246, 1086];
+  const source = {
+    tracks: [{ name: 'mixamorigHips.position', values: positions }],
+    clone() { return { tracks: this.tracks.map(t => ({ ...t, values: [...t.values] })) }; }
+  };
+  const context = {};
+  vm.runInNewContext(threeSource.slice(threeSource.indexOf('function makeRunInPlace(')) + '\nthis.convert = makeRunInPlace;', context);
+  const clip = context.convert(source);
+  assert.deepEqual(clip.tracks[0].values, [6, 246, 8, 6, 250, 8, 6, 246, 8]);
+  assert.deepEqual(source.tracks[0].values, positions);
+  assert.match(threeSource, /Slugger_Run.fbx', 88 \* 0.88 \* 1.06, Math.PI, true/);
 });

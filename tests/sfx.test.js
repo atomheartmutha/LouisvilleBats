@@ -27,7 +27,9 @@ test('ElevenLabs game sound assets are committed as valid MP3 files', () => {
 
 test('each game sound uses generated audio with an offline synthesis fallback', () => {
   assert.match(appSource, /playGeneratedSfx\('organ', synthesizeBallparkOrganCharge\)/);
-  assert.match(appSource, /playGeneratedSfx\('batCrack', synthesizeBatCrack\)/);
+  const contactSound = appSource.slice(appSource.indexOf('function playBatCrack()'), appSource.indexOf('function synthesizeCelebrationChime()'));
+  assert.match(contactSound, /if \(!soundEnabled\) return/);
+  assert.ok(contactSound.indexOf('synthesizeBatCrack();') < contactSound.indexOf("playGeneratedSfx('batCrack'"));
   assert.match(appSource, /playGeneratedSfx\('crowd', synthesizeCrowdCheer\)/);
   assert.match(appSource, /playGeneratedSfx\('celebration', synthesizeCelebrationChime\)/);
   assert.match(appSource, /playback\?\.then/);
