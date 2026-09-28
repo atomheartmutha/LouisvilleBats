@@ -5,7 +5,7 @@ import vm from 'node:vm';
 
 // Run the actual frontend event handlers with deterministic frames, timers and requests.
 function game({ offline = false, sessionStore = new Map(), localStore = new Map() } = {}) {
-  const elements = new Map(), timers = [], requests = [];
+  const elements = new Map(), timers = [], requests = [], ballPositions = [];
   let frame, init;
   class Element {
     constructor() { this.className = ''; this.children = []; this.events = {}; this.attributes = {}; this.disabled = false; this.textContent = ''; }
@@ -26,6 +26,7 @@ function game({ offline = false, sessionStore = new Map(), localStore = new Map(
     getContext() {
       return new Proxy({}, { get: (_, key) => {
         if (key === 'createLinearGradient') return () => ({ addColorStop() {} });
+        if (key === 'arc') return (x, y, r) => { if (r > 4 && r < 10) ballPositions.push({ x, y, r }); };
         if (key === 'measureText') return text => ({ width: String(text).length * 6 });
         return () => {};
       } });
@@ -66,7 +67,7 @@ function game({ offline = false, sessionStore = new Map(), localStore = new Map(
   init();
   const flush = async () => { for (let i = 0; i < 6; i++) await Promise.resolve(); };
   return {
-    el, dots, timers, requests, flush,
+    el, dots, timers, requests, flush, ballPositions,
     start: async () => { el('start-game-btn').click(); await flush(); },
     chooseGrade: band => gradeButtons.find(button => button.getAttribute('data-grade-band') === band).click(),
     answer: index => el('cat-options-grid').children[index].click(),
@@ -182,4 +183,23 @@ test('selected grade band sets the first question level and persists for the nex
   await nextGame.start();
   assert.equal(nextGame.requests[0].currentTier, 1);
   assert.equal(nextGame.requests[0].gradeTier, 1);
+});
+
+
+test('missed pitch keeps traveling and opens the question before leaving the field', async () => {
+  const g = game(); await g.start(); g.answer(0);
+  g.el('arcade-pitch-btn').click();
+  g.frames(20);
+  g.el('arcade-swing-btn').click();
+  assert.match(g.el('announcer-text').textContent, /Missed pitch/);
+  const before = g.ballPositions.at(-1);
+  g.frames(1);
+  const after = g.ballPositions.at(-1);
+  assert.ok(after.y > before.y, 'missed ball must continue toward the camera');
+  g.frames(60); await g.flush();
+  assert.equal(g.el('modal-adaptive-timeout').classList.contains('hidden'), false);
+  assert.ok(g.ballPositions.at(-1).y < 350, 'question precedes foreground fencing');
+  const questions = g.requests.length;
+  await g.nextTimer();
+  assert.equal(g.requests.length, questions, 'old miss timer cannot open another question');
 });

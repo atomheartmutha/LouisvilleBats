@@ -1,0 +1,23 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+const source = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+const context = {};
+vm.runInNewContext(source.slice(source.indexOf('  function sampleBallFlight('), source.indexOf('  function updateDerbyLoop(')) + '\nthis.sample = sampleBallFlight;', context);
+test('hit follows a continuous arc to ground then settles instead of stopping at screen cutoff', () => {
+  const flight = { x: 350, y: 300, radius: 6, targetX: 420, targetY: 160, height: 125, duration: 100 };
+  const start = context.sample(flight, 0);
+  assert.equal(start.x, 350);
+  assert.equal(start.y, 300);
+  const apex = context.sample(flight, 50);
+  assert.ok(apex.y < 160);
+  assert.notEqual(context.sample(flight, 51).y, apex.y);
+  const landing = context.sample(flight, 100);
+  assert.equal(landing.y, 160);
+  assert.equal(landing.x, 420);
+  const settled = context.sample(flight, 124);
+  assert.equal(settled.y, settled.groundY);
+  assert.deepEqual(context.sample(flight, 200), settled);
+  assert.ok(settled.r < start.r);
+});

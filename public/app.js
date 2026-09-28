@@ -712,7 +712,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Three.js owns these character pixels once its FBX models are ready.
     // Until then, the existing Canvas characters remain a zero-delay fallback.
     const usingThreeCharacters = renderThreeCharacters();
-    if (!usingThreeCharacters) drawPitcher(349, 268);
+    if (!usingThreeCharacters) drawPitcher(349, 260);
 
     // Batter (Pablo Sanchez / Kid Slugger)
     // Finish the visible bat arc before the same character leaves home plate.
@@ -720,7 +720,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!runnerAnimation || batterSwingFrame !== null) drawBatter(batter.x, batter.y);
       if (batterSwingFrame === null) drawHotRodsRunner();
     } else {
-      drawCharacterTag('HOT ROD', 349, 285, '#0C2340');
+      drawCharacterTag('HOT ROD', 349, 277, '#0C2340');
       if (!runnerAnimation || batterSwingFrame !== null) {
         drawCharacterTag(getSelectedBatterTag(), batter.x, batter.y + 24, getSelectedBatterAppearance().cap);
       } else {
@@ -737,7 +737,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (ball.windupFrames > 0 && window.BatyardThreeCharacters?.pitchHand) {
       Object.assign(ball, window.BatyardThreeCharacters.pitchHand);
     }
-    if (ball.state !== 'ready') {
+    if (!usingThreeCharacters && ball.state !== 'ready') {
       dctx.save();
       if (hasPowerBat && ball.state === 'hit') {
         dctx.shadowColor = '#FFC72C';
@@ -764,9 +764,10 @@ document.addEventListener('DOMContentLoaded', () => {
         visible: activeScreen === 'screen-derby',
         paused: derbyPaused || !adaptiveModal.classList.contains('hidden'),
         reducedMotion: prefersReducedMotion,
+        ball: { ...ball, visible: ball.state !== 'ready', held: ball.windupFrames > 0, spinning: contactHoldFrames === 0 },
         pitcher: {
           x: 349,
-          y: 268,
+          y: 260,
           frame: pitcherAnimationFrame || 0,
           throwing: pitcherAnimationFrame !== null
         },
@@ -774,6 +775,7 @@ document.addEventListener('DOMContentLoaded', () => {
           x: batter.x,
           y: batter.y,
           visible: !runnerAnimation || batterSwingFrame !== null,
+          pitchActive: ball.state === 'pitching' || batterSwingFrame !== null,
           swinging: batterSwingFrame !== null,
           swingProgress: batterSwingFrame === null ? 0 : (prefersReducedMotion ? 6 / 16 : Math.min(1, batterSwingFrame / batterSwingDuration))
         },
@@ -1172,10 +1174,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (contactFrames > 0 && --contactFrames === 0) contactCue?.classList.add('hidden');
     characterIdleFrame++;
     if (pitcherAnimationFrame !== null) {
-      pitcherAnimationFrame++;
-      if (pitcherAnimationFrame >= (characterAnimations[activePitcherKey]?.durationFrames || 48)) {
-        pitcherAnimationFrame = null;
-      }
+      // Hold the completed toss until this attempt reaches the next question.
+      pitcherAnimationFrame = Math.min(48, pitcherAnimationFrame + 1);
     }
     if (batterSwingFrame !== null) {
       batterSwingFrame++;
@@ -1208,7 +1208,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (runnerAnimation && batterSwingFrame === null &&
         (prefersReducedMotion || runnerAnimation.frame >= runnerAnimation.totalFrames)) {
       // Paint the final base before returning to the question on the next frame.
-      if (runnerAnimation.arrived) finishAttempt();
+      if (runnerAnimation.arrived && ball.state !== 'hit') finishAttempt();
       else runnerAnimation.arrived = true;
     }
   }
@@ -1339,6 +1339,22 @@ document.addEventListener('DOMContentLoaded', () => {
     return layer?.ready && layer.contactPoint ? layer.contactPoint : { x: batter.x + 36, y: batter.y - 5 };
   }
 
+  function sampleBallFlight(flight, frame) {
+    const t = Math.max(0, Math.min(1, frame / flight.duration));
+    const roll = Math.max(0, Math.min(1, (frame - flight.duration) / 24));
+    // Project an arc onto today's flat field; the flight endpoint is ground.
+    const groundY = flight.y + (flight.targetY - flight.y) * t;
+    const height = 4 * flight.height * t * (1 - t);
+    const bounce = Math.sin(roll * Math.PI * 2) ** 2 * 8 * (1 - roll);
+    return {
+      x: flight.x + (flight.targetX - flight.x) * t + roll * (flight.targetX - flight.x) * 0.06,
+      y: groundY - height - bounce - roll * 5,
+      r: flight.radius * (1 - 0.65 * t),
+      depth: 60 - t * 220,
+      groundY: groundY - roll * 5
+    };
+  }
+
   function updateDerbyLoop() {
     if (activeScreen !== 'screen-derby' || derbyPaused || !adaptiveModal.classList.contains('hidden')) {
       requestAnimationFrame(updateDerbyLoop);
@@ -1359,13 +1375,17 @@ document.addEventListener('DOMContentLoaded', () => {
       if (ball.pitchDistance > 165) {
         handleDerbyMiss();
       }
+    } else if (ball.state === 'missed') {
+      // Follow the missed pitch past the plate toward the camera.
+      ball.x += ball.missVx;
+      ball.y += ball.missVy;
+      ball.r += 0.035;
+      if (ball.y >= 350 || ball.x <= 24 || ball.x >= 696) finishAttempt();
     } else if (ball.state === 'hit' && contactHoldFrames === 0) {
-      ball.x += ball.vx;
-      ball.y += ball.vy;
-      ball.r = Math.max(3, ball.r - 0.05);
-      if (ball.y < 100 || ball.x < 10 || ball.x > derbyCanvas.width - 10) {
-        ball.state = 'landed';
-      }
+      ball.flightFrame++;
+      const flight = sampleBallFlight(ball.flight, ball.flightFrame);
+      Object.assign(ball, flight);
+      if (ball.flightFrame >= ball.flight.duration + 24) ball.state = 'landed';
     }
 
     if (activeScreen === 'screen-derby') {
@@ -1498,6 +1518,13 @@ document.addEventListener('DOMContentLoaded', () => {
       call = `Hit into the gap for a ${hitTitle}!`;
     }
 
+    ball.flightFrame = 0;
+    ball.flight = {
+      x: ball.x, y: ball.y, radius: ball.r,
+      targetX: Math.max(65, Math.min(655, ball.x + ball.vx * 65)),
+      targetY: dist >= 395 ? 160 : 215,
+      height: dist >= 395 ? 125 : 65, duration: dist >= 395 ? 100 : 65
+    };
     const quip = louisvilleHitQuip(dist, ball.vx);
     if (quip) announcerEl.textContent += ` ${quip}`;
     // One utterance preserves the order and avoids interrupting the main call.
@@ -1517,10 +1544,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (attemptPhase !== 'pitching') return;
     attemptPhase = 'resolving';
     ball.state = 'missed';
+    const target = getBatContactPoint();
+    const travelY = target.y - ball.releaseY;
+    ball.missVy = Math.max(3.5, ball.vy);
+    ball.missVx = (target.x - ball.releaseX) / Math.max(1, travelY) * ball.missVy;
     isDerbyPitching = false;
     arcadeSwingBtn.disabled = true;
     recordStrike('Missed pitch');
-    setTimeout(finishAttempt, 1200);
+    const missedBall = ball;
+    setTimeout(() => {
+      if (ball === missedBall && ball.state === 'missed' && attemptPhase === 'resolving') finishAttempt();
+    }, 1200);
   }
 
   function recordStrike(reason) {
@@ -1542,6 +1576,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function finishAttempt() {
+    pitcherAnimationFrame = null;
     isDerbyPitching = false;
     ball.state = 'ready';
     batter.state = 'idle';

@@ -156,3 +156,54 @@ test('runner stride cannot add travel or snap back when its clip repeats', () =>
   assert.deepEqual(source.tracks[0].values, positions);
   assert.match(threeSource, /Slugger_Run.fbx', 88 \* 0.88 \* 1.06, Math.PI, true/);
 });
+
+test('idle blend finishes before contact without changing swing progress', () => {
+  const expression = threeSource.match(/const swingWeight = ([^;]+);/)[1];
+  const weight = (swinging, swingProgress) => vm.runInNewContext(expression, { swinging, swingProgress });
+  assert.equal(weight(false, 0), 0);
+  assert.equal(weight(true, 1 / 16), 1 / 3);
+  assert.equal(weight(true, 3 / 16), 1);
+  assert.equal(weight(true, 6 / 16), 1);
+  assert.match(threeSource, /SluggerBatter_Idle\.fbx/);
+});
+
+test('pitch-ready idle replaces regular idle and yields completely to the swing', () => {
+  const weights = [];
+  const idleAction = { setEffectiveWeight: w => weights[0] = w };
+  const strikeIdleAction = { setEffectiveWeight: w => weights[1] = w };
+  const start = threeSource.indexOf('    idleAction.setEffectiveWeight((1 - swingWeight)');
+  const end = threeSource.indexOf('    previousPitchActive = pitchActive;', start);
+  for (const [readyBlend, swingWeight, expected] of [[0, 0, [1, 0]], [1, 0, [0, 1]], [0.5, 0, [0.5, 0.5]], [1, 1, [0, 0]]]) {
+    vm.runInNewContext(threeSource.slice(start, end), { idleAction, strikeIdleAction, strikeIdleTime: 0, readyBlend, swingWeight });
+    assert.deepEqual(weights, expected);
+  }
+});
+
+test('pitcher idle yields before release and blends back after throwing', () => {
+  const expression = threeSource.match(/throwWeight = pitching \?([\s\S]*?);/)[0];
+  const context = { pitching: true, state: { pitcher: { frame: 6 } }, frozen: false, throwWeight: 0, elapsed: 0.06 };
+  vm.runInNewContext(expression, context);
+  assert.equal(context.throwWeight, 1);
+  context.state.pitcher.frame = 18;
+  vm.runInNewContext(expression, context);
+  assert.equal(context.throwWeight, 1);
+  context.pitching = false;
+  vm.runInNewContext(expression, context);
+  assert.equal(context.throwWeight, 0.5);
+  context.frozen = true;
+  vm.runInNewContext(expression, context);
+  assert.equal(context.throwWeight, 0.5);
+});
+
+test('idle facing matches toss yaw without altering the source clip', async () => {
+  const THREE = await import('../public/assets/vendor/three/three.module.js');
+  const axis = new THREE.Vector3(0, 1, 0);
+  const idle = new THREE.AnimationClip('idle', 1, [new THREE.QuaternionKeyframeTrack('mixamorigHips.quaternion', [0, 1], [0, 0, 0, 1, 0, 0, 0, 1])]);
+  const target = new THREE.Quaternion().setFromAxisAngle(axis, -1.34);
+  const toss = new THREE.AnimationClip('toss', 1, [new THREE.QuaternionKeyframeTrack('mixamorigHips.quaternion', [0], target.toArray())]);
+  const context = { THREE, idle, toss };
+  vm.runInNewContext(threeSource.slice(threeSource.indexOf('function alignIdleFacing(')) + '\nthis.result = alignIdleFacing(idle, toss);', context);
+  const actual = new THREE.Quaternion().fromArray(context.result.tracks[0].values).normalize();
+  assert.ok(actual.angleTo(target) < 0.001);
+  assert.equal(idle.tracks[0].values[1], 0);
+});
